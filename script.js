@@ -5,6 +5,10 @@ document.getElementById("searchButton").addEventListener("click", function() {
     // You can add your own script logic here
 });
 
+document.getElementById("getStartedButton").addEventListener("click", function() {
+    alert("Button clicked!");
+    // You can add your own script logic here
+});
 
 const wordRow = document.getElementById('wordRow');
 
