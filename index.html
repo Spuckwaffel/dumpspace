@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Dumpspace - Home</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="description"
+      content="Dumpspace provides game dumps for multiple games and game engines, created by the community for the community"
+    />
+    <meta name="keywords" content="DumpSpace, SDK" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Game Dumps Info" />
+    <meta
+      property="og:description"
+      content="Get the latest dumps of any supported game."
+    />
+    <meta property="og:url" content="https://spuckwaffel.com/dumpspace/" />
+    <meta property="og:site_name" content="spuckwaffel.com/dumpspace" />
+
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="Images/favicon-32x32.webp"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="Images/favicon-16x16.png"
+    />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <nav
+      class="bg-white fixed w-full z-30 border-b border-gray-200 bg-opacity-30 backdrop-filter backdrop-blur-md"
+    >
+      <div
+        class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-3"
+      >
+        <a href="/" class="flex items-center">
+          <span
+            class="self-center text-2xl font-semibold whitespace-nowrap text-black"
+            >Dumpspace</span
+          >
+        </a>
+        <div class="flex md:order-2">
+          <button
+            type="button"
+            class="bg-blue-700 hover:bg-blue-500 font-bold py-2 px-4 font-medium rounded-lg text-white px-4 py-2 text-center mr-3"
+          >
+            Upload Dump
+          </button>
+        </div>
+      </div>
+    </nav>
+    <div class="px-28 pt-40">
+      <p
+        class="text-slate-900 font-extrabold text-4xl sm:text-5xl lg:text-6xl tracking-tight text-center"
+      >
+        Your place for game dumps.<br />
+      </p>
+      <p
+        class="mt-6 text-lg text-slate-600 text-center max-w-3xl mx-auto dark:text-slate-400"
+      >
+        Explore and analyze game dumps created by the community for various game
+        engines using our user-friendly web interface. Effortlessly browse
+        through classes, structs, enums, and functions.
+      </p>
+      <div class="items-center flex justify-center pt-16">
+        <button
+          class="bg-blue-700 hover:bg-blue-500 font-bold py-2 px-4 font-medium rounded-lg text-white px-4 py-2 text-center mr-3"
+        >
+          Get started
+        </button>
+        <button
+          type="button"
+          id="searchButton"
+          class="hidden sm:flex items-center w-72 text-left space-x-1 px-2 h-10 bg-white ring-1 ring-slate-900/10 hover:ring-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm rounded-lg text-slate-400"
+        >
+          <svg
+            width="24"
+            height="24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="flex-none text-slate-300 dark:text-slate-400"
+            aria-hidden="true"
+          >
+            <path d="m19 19-3.5-3.5"></path>
+            <circle cx="11" cy="11" r="6"></circle>
+          </svg>
+          <span class="flex-auto">Search for game...</span>
+        </button>
+      </div>
+      <div class="pt-20" id="wordRow"></div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
