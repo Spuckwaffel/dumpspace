@@ -109,7 +109,7 @@
         <button
           type="button"
           id="searchButton"
-          class="hidden sm:flex items-center w-72 text-left space-x-1 px-2 h-10 bg-white ring-1 ring-slate-900/10 hover:ring-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm rounded-lg text-slate-400"
+          class="hidden sm:flex items-center w-72 text-left space-x-1 px-2 h-10 bg-white ring-1 ring-slate-900/10 hover:ring-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm rounded-lg text-slate-400 transition duration-300 ease-in-out hover:shadow-inner"
         >
           <svg
             width="24"
@@ -131,7 +131,7 @@
 
       <div class="relative mx-auto mx-0 max-w-none grid grid-cols-3 gap-12">
         <div
-          class="flex space-x-4 bg-slate-200/10 rounded-lg p-6 ring-1 ring-slate-500/10 shadow-sm"
+          class="flex space-x-4 bg-slate-200/10 rounded-lg p-6 ring-1 ring-slate-500/10 shadow-sm transition duration-300 ease-in-out hover:shadow-md"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -154,7 +154,7 @@
           </div>
         </div>
         <div
-          class="flex space-x-4 bg-slate-200/10 rounded-lg p-6 ring-1 ring-slate-500/10 shadow-sm"
+          class="flex space-x-4 bg-slate-200/10 rounded-lg p-6 ring-1 ring-slate-500/10 shadow-sm transition duration-300 ease-in-out hover:shadow-md"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -179,7 +179,7 @@
           </div>
         </div>
         <div
-          class="flex space-x-4 bg-slate-200/10 rounded-lg p-6 ring-1 ring-slate-500/10 shadow-sm"
+          class="flex space-x-4 bg-slate-200/10 rounded-lg p-6 ring-1 ring-slate-500/10 shadow-sm transition duration-300 ease-in-out hover:shadow-md"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -211,9 +211,30 @@
           </div>
         </div>
       </div>
-
-      <div class="pt-20" id="wordRow"></div>
     </div>
+    <div class="pt-20"></div>
+    <nav
+      id="game-categories"
+      aria-label="Jump links"
+      class="sticky top-0 z-40 bg-white text-sm font-medium text-gray-900 py-4 border-t border-gray-200"
+    >
+      <div class="flex mx-10 px20 space-x-10">
+        <a
+          href="#unreal-engine-4"
+          class="font-semibold text-lg hover:text-blue-500"
+          >Unreal Engine 4</a
+        >
+        <a
+          href="#unreal-engine-5"
+          class="font-semibold text-lg hover:text-blue-500"
+          >Unreal Engine 5</a
+        >
+        <a href="#unity" class="font-semibold text-lg hover:text-blue-500"
+          >Unity</a
+        >
+      </div>
+    </nav>
+    <div class="pt-20" id="wordRow"></div>
     <script src="script.js"></script>
   </body>
 </html>
