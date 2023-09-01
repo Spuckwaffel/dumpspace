@@ -61,10 +61,42 @@ fetch(currentPath + "GameList.json")
       descriptionDiv.appendChild(bottomLineDiv);
 
       const timeDiv = document.createElement("div");
+      timeDiv.classList.add("flex", "items-center", "space-x-1");
+
+      const svgElement = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "svg"
+      );
+
+      svgElement.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+      svgElement.classList.add("w-4", "h-4");
+      svgElement.setAttribute("viewBox", "0 0 24 24");
+      svgElement.setAttribute("fill", "none");
+
+      // Create a path element
+      const pathElement = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "path"
+      );
+
+      // Set the attributes for the path element
+      pathElement.setAttribute(
+        "d",
+        "M12 7V12H15M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
+      );
+      pathElement.setAttribute("stroke", "#000000");
+      pathElement.setAttribute("stroke-width", "2");
+      pathElement.setAttribute("stroke-linecap", "round");
+      pathElement.setAttribute("stroke-linejoin", "round");
+
+      // Append the path element to the SVG element
+      svgElement.appendChild(pathElement);
 
       let timePara = document.createElement("p");
+      timePara.classList.add("text-sm");
       timePara = formatElapsedTime(Date.now(), game.uploaded, timePara);
 
+      timeDiv.appendChild(svgElement);
       timeDiv.appendChild(timePara);
 
       bottomLineDiv.appendChild(timeDiv);
