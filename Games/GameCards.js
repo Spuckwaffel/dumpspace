@@ -25,9 +25,10 @@ fetch(currentPath + "GameList.json")
         "ease-in-out",
         "hover:shadow-md"
       );
-      box.href = currentPath + game.engine + "/" + game.location;
+      const dataPath = currentPath + game.engine + "/" + game.location;
+      box.href = currentPath + "?hash=" + game.hash;
       const img = document.createElement("img");
-      img.src = box.href + "/image.jpg";
+      img.src = dataPath + "/image.jpg";
       img.alt = "missing image.jpg";
       box.appendChild(img);
 
