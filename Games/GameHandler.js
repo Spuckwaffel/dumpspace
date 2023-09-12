@@ -49,7 +49,7 @@ async function getGameByHash(hash) {
   return data.games.find((game) => game.hash == hash);
 }
 
-async function checkHash() {
+async function displayGame() {
   if ((await getGameByHash(params["hash"])) == null) goBack();
 }
 
@@ -64,4 +64,4 @@ if (
   goBack();
 }
 
-checkHash();
+displayGame();
