@@ -93,6 +93,11 @@ async function displayGame() {
       return nameA.localeCompare(nameB);
     });
 
+    timeDiv = document.getElementById("updateLabel");
+    if (timeDiv != null) {
+      formatElapsedTime(Date.now(), data.updated_at, timeDiv);
+    }
+
     const classDiv = document.getElementById("class-list");
 
     if (classDiv == null) return;
@@ -136,6 +141,8 @@ async function displayGame() {
         classButton.classList.add("bg-gray-600/10");
       }
     }
+
+    document.getElementById("class-spinner").remove();
 
     if (targetClassItem != null) {
       // Calculate the scroll position to center the button within the container
