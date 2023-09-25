@@ -38,6 +38,14 @@
     <script src="shared.js"></script>
   </head>
   <body>
+    <div
+      id="modal"
+      class="fixed top-0 z-40 left-0 w-screen h-screen flex justify-center items-center"
+    >
+      <div class="fixed p-4 rounded-lg text-center bg-gray-200 px-20 py-20">
+        <p>UITestElement</p>
+      </div>
+    </div>
     <nav
       class="bg-white sticky top-0 w-full z-30 border-b border-gray-200 bg-opacity-30 backdrop-filter backdrop-blur-md"
     >
@@ -194,7 +202,7 @@
       </div>
     </nav>
 
-    <div class="grid grid-cols-4 gap-4 px-32">
+    <div class="grid grid-cols-4 gap-4 px-32 top-10">
       <div
         class="h-[70vh] my-16 px-4 py-4 border rounded-lg border-gray-200 relative flex flex-col min-w-0"
       >
@@ -252,14 +260,33 @@
         </div>
       </div>
       <div
-        class="h-[70vh] my-16 px-4 py-4 border rounded-lg border-gray-200 relative min-w-0 col-span-3"
+        class="h-[70vh] my-16 px-4 py-4 border rounded-lg border-gray-200 relative flex flex-col min-w-0 col-span-3"
       >
         <div class="flex flex-wrap items-center justify-between">
           <h1 id="class-desc-name" class="flex font-semibold text-xl mb-2">
-            NaNObject
+            <div
+              id="class-desc-spinner"
+              class="flex justify-center items-center"
+            >
+              <svg
+                aria-hidden="true"
+                class="w-10 h-10 mr-2 text-gray-200 animate-spin fill-blue-600"
+                viewBox="0 0 100 101"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                  fill="currentColor"
+                />
+                <path
+                  d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                  fill="currentFill"
+                />
+              </svg>
+            </div>
           </h1>
           <button
-            type="button"
             class="flex items-center bg-blue-700 hover:bg-blue-500 py-2 px-4 rounded-md text-white"
           >
             <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
@@ -276,43 +303,35 @@
           </button>
         </div>
 
-        <p id="class-desc-inherits" class="text-sm text-gray-500 truncate flex">
-          <button
-            onclick="getClassInfo('UObject')"
-            class="transition duration-200 ease-in-out hover:text-blue-500"
-          >
-            NaN
-          </button>
-          &nbsp;&gt;&nbsp;
-          <button
-            onclick="getClassInfo('uiuiu')"
-            class="transition duration-200 ease-in-out hover:text-blue-500"
-          >
-            NaN
-          </button>
-        </p>
+        <div
+          id="class-desc-inherits"
+          class="text-sm text-gray-500 truncate flex"
+        ></div>
         <nav
           class="mt-2 relative rounded-lg border border-gray-200 flex divide-x divide-gray-200"
           aria-label="selection-tabs"
         >
           <div
-            onclick="drawOverview()"
-            class="py-2 px-4 cursor-pointer rounded-l-lg group relative min-w-0 flex-1 overflow-hidden font-medium text-sm text-center transition duration-200 ease-in-out hover:text-blue-500 hover:bg-gray-50"
+            id="overview-click-div"
+            onclick="showOverview()"
+            class="py-2 px-4 cursor-pointer rounded-l-lg group relative min-w-0 flex-1 overflow-hidden font-medium text-sm text-center bg-gray-50 transition duration-200 ease-in-out hover:text-blue-500"
             aria-current="page"
           >
             Overview
           </div>
           <div
-            onclick="selectionCpp();"
-            class="py-2 px-4 cursor-pointer group relative min-w-0 flex-1 overflow-hidden font-medium text-sm text-center transition duration-200 ease-in-out hover:text-blue-500 hover:bg-gray-50"
+            id="struct-click-div"
+            onclick="showStruct();"
+            class="py-2 px-4 cursor-pointer group relative min-w-0 flex-1 overflow-hidden font-medium text-sm text-center transition duration-200 ease-in-out hover:text-blue-500"
           >
             Struct
           </div>
           <div
-            onclick="selectionCsharp();"
-            class="py-2 px-4 cursor-pointer rounded-r-lg group relative min-w-0 flex-1 overflow-hidden font-medium text-sm text-center transition duration-200 ease-in-out hover:text-blue-500 hover:bg-gray-50"
+            id="mdk-click-div"
+            onclick="showMDK();"
+            class="py-2 px-4 cursor-pointer rounded-r-lg group relative min-w-0 flex-1 overflow-hidden font-medium text-sm text-center transition duration-200 ease-in-out hover:text-blue-500"
           >
-            SDK
+            MDK
           </div>
         </nav>
         <div class="min-h-0 h-full w-full pt-4">
@@ -322,7 +341,7 @@
           >
             <div id="overview-items" class="">
               <div
-                class="bg-white sticky top-0 w-full z-30 grid grid-cols-8 font-medium text-sm px-6 text-gray-700 uppercase pt-2 pb-2 border-b border-gray-200 bg-opacity-30 backdrop-filter backdrop-blur-md"
+                class="bg-white sticky top-0 w-full z-5 grid grid-cols-8 font-medium text-sm px-6 text-gray-700 uppercase pt-2 pb-2 border-b border-gray-200 bg-opacity-30 backdrop-filter backdrop-blur-md"
               >
                 <p class="col-span-3">Type</p>
                 <p class="col-span-3">Member</p>
@@ -330,20 +349,25 @@
                 <p class="col-span-1 pl-8">Size</p>
               </div>
               <div
-                class="grid grid-cols-8 text-sm px-6 text-gray-600 pt-2 pb-2 border-b border-gray-200"
+                id="overview-items-spinner"
+                class="flex justify-center items-center pt-8"
               >
-                <p class="col-span-3">char</p>
-                <p class="col-span-3">bStartAILogicOnPossess : 1</p>
-                <p class="col-span-1 font-mono">0x358</p>
-                <p class="col-span-1 pl-8 font-mono">1&nbsp;&nbsp;&nbsp;</p>
-              </div>
-              <div
-                class="grid grid-cols-8 text-sm px-6 text-gray-600 pt-2 pb-2 border-b border-gray-200"
-              >
-                <p class="col-span-3">char</p>
-                <p class="col-span-3">bStopAILogicOnUnposses : 1</p>
-                <p class="col-span-1 font-mono">0x358</p>
-                <p class="col-span-1 pl-8 font-mono">1&nbsp;&nbsp;&nbsp;</p>
+                <svg
+                  aria-hidden="true"
+                  class="w-10 h-10 mr-2 text-gray-200 animate-spin fill-blue-600"
+                  viewBox="0 0 100 101"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                    fill="currentColor"
+                  />
+                  <path
+                    d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                    fill="currentFill"
+                  />
+                </svg>
               </div>
             </div>
             <div id="struct-items" class="px-2 py-2 hidden">
@@ -353,29 +377,22 @@
                   id="struct-items-textarea"
                   rows="19"
                   cols="100"
-                  id="selection-cpp-code"
-                  name="selection-cpp-code"
                   class="h-full w-full resize-none whitespace-pre text-gray-800 dark:text-white"
                 >
-// Inheritance: AController > AActor > UObject
-namespace AAIController
-{
-	constexpr auto bStartAILogicOnPossess = 0x358; // char : 1
-	constexpr auto bStopAILogicOnUnposses = 0x358; // char : 1
-	constexpr auto bLOSflag = 0x358; // char : 1
-	constexpr auto bSkipExtraLOSChecks = 0x358; // char : 1
-	constexpr auto bAllowStrafe = 0x358; // char : 1
-	constexpr auto bWantsPlayerState = 0x358; // char : 1
-	constexpr auto bSetControlRotationFromPawnOrientation = 0x358; // char : 1
-	constexpr auto PathFollowingComponent = 0x360; // UPathFollowingComponent*
-	constexpr auto BrainComponent = 0x368; // UBrainComponent*
-	constexpr auto PerceptionComponent = 0x370; // UAIPerceptionComponent*
-	constexpr auto ActionsComp = 0x378; // UPawnActionsComponent*
-	constexpr auto Blackboard = 0x380; // UBlackboardComponent*
-	constexpr auto CachedGameplayTasksComponent = 0x388; // UGameplayTasksComponent*
-	constexpr auto DefaultNavigationFilterClass = 0x390; // UNavigationQueryFilter*
-	constexpr auto ReceiveMoveCompleted = 0x398; // FMulticastInlineDelegate
-}</textarea
+Loading...</textarea
+                >
+              </code>
+            </div>
+            <div id="MDK-items" class="px-2 py-2 hidden">
+              <code>
+                <textarea
+                  readonly
+                  id="MDK-items-textarea"
+                  rows="50"
+                  cols="100"
+                  class="h-full w-full resize-none whitespace-pre text-gray-800 dark:text-white"
+                >
+Loading...</textarea
                 >
               </code>
             </div>
