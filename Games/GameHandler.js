@@ -77,13 +77,17 @@ const currentPath = "Games/";
 //cool function to defeat loading the page without a specified game
 const params = getUrlParams();
 
+const classDiv = document.getElementById("class-list");
+classDiv.style.height = classDiv.offsetHeight + "px";
+classDiv.style.width = "100%";
+
 async function displayGame() {
   const game = await getGameByHash(params["hash"]);
   if (game == null) goBack();
 
   const gameDir = game.engine + "/" + game.location + "/";
 
-  console.log(gameDir);
+  console.log("crinching latest data for: " + gameDir);
 
   if (params["type"] === "classes") {
     const response = await fetch(gameDir + "ClassesInfo.json");
@@ -100,13 +104,10 @@ async function displayGame() {
       formatElapsedTime(Date.now(), data.updated_at, timeDiv);
     }
 
-    const classDiv = document.getElementById("class-list");
-
     if (classDiv == null) return;
 
     //target class name for further actions
-    var targetClassName,
-      targetClassItem = null;
+    var targetClassName = null;
 
     //the target class with data (there should be always a target class, if not stuff aint right)
     var targetClassData = null;
@@ -120,44 +121,61 @@ async function displayGame() {
     } else if (Object.keys(data.classes).length > 0) {
       targetClassName = Object.keys(data.classes[0])[0];
     }
-    for (const gameClass of data.classes) {
-      const classButton = document.createElement("button");
-      classButton.addEventListener("click", function () {
-        getClassInfo(Object.keys(gameClass)[0]);
-      });
-      classButton.classList.add(
-        "px-3",
-        "py-2",
-        "border-b",
-        "border-gray-200",
-        "text-left",
-        "w-full",
-        "transition",
-        "duration-200",
-        "ease-in-out",
-        "hover:text-blue-500"
-      );
-      classButton.textContent = Object.keys(gameClass)[0];
-      classDiv.appendChild(classButton);
 
+    //iterate through all items, get their name and targetindex
+    var classData = [];
+    var targetClassIndex = 0;
+    var idx = 0;
+    for (const gameClass of data.classes) {
+      classData.push(Object.keys(gameClass)[0]);
       if (
         targetClassName != null &&
         Object.keys(gameClass)[0] === targetClassName
       ) {
         targetClassData = gameClass;
-        //for (const item of gameClass.Object.keys(gameClass)) console.log(item);
-        targetClassItem = classButton;
-        classButton.classList.add("bg-gray-600/10");
-      }
+        targetClassIndex = idx;
+      } else idx++;
     }
 
+    //create our wonderful recycler that manages all items
+    new VanillaRecyclerView(classDiv, {
+      data: classData,
+      renderer: class {
+        initialize(params) {
+          this.layout = document.createElement("button");
+          this.layout.innerHTML = `${params.data}`;
+          this.layout.classList.add(
+            "px-3",
+            "py-2",
+            "border-b",
+            "border-gray-200",
+            "text-left",
+            "w-full",
+            "transition",
+            "duration-200",
+            "ease-in-out",
+            "hover:text-blue-500"
+          );
+          if (targetClassName != null && params.data === targetClassName) {
+            this.layout.classList.add("bg-gray-600/10");
+          }
+          this.layout.addEventListener("click", function () {
+            getClassInfo(params.data);
+          });
+        }
+        getLayout() {
+          return this.layout;
+        }
+        onUnmount() {}
+      },
+    });
+
     //scroll to the targeted class
-    if (targetClassItem != null) {
-      // Calculate the scroll position to center the button within the container
+    if (targetClassIndex > 0) {
+      // calculating the box with a fixed size of 50px lol
       const containerHeight = classDiv.clientHeight;
-      const buttonTop = targetClassItem.offsetTop - classDiv.offsetTop;
-      const buttonHeight = targetClassItem.clientHeight;
-      const scrollTo = buttonTop - containerHeight / 2 + buttonHeight / 2;
+      const buttonTop = targetClassIndex * 50 - classDiv.offsetTop;
+      const scrollTo = buttonTop - containerHeight / 2 + 100;
 
       // Scroll the container to center the button
       classDiv.style.scrollBehavior = "smooth";

@@ -34,18 +34,13 @@
     />
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="GameHandler.js"></script>
-    <script src="shared.js"></script>
   </head>
   <body>
-    <div
-      id="modal"
-      class="fixed top-0 z-40 left-0 w-screen h-screen flex justify-center items-center"
-    >
-      <div class="fixed p-4 rounded-lg text-center bg-gray-200 px-20 py-20">
-        <p>UITestElement</p>
-      </div>
-    </div>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/vanilla-recycler-view@latest/dist/vanilla-recycler-view.min.css"
+    />
+    <script src="https://unpkg.com/vanilla-recycler-view@latest/dist/vanilla-recycler-view.min.js"></script>
     <nav
       class="bg-white sticky top-0 w-full z-30 border-b border-gray-200 bg-opacity-30 backdrop-filter backdrop-blur-md"
     >
@@ -204,7 +199,7 @@
 
     <div class="grid grid-cols-4 gap-4 px-32 top-10">
       <div
-        class="h-[70vh] my-16 px-4 py-4 border rounded-lg border-gray-200 relative flex flex-col min-w-0"
+        class="my-16 px-4 py-4 border rounded-lg border-gray-200 relative flex flex-col min-w-0"
       >
         <h1 class="font-semibold text-xl mb-2">Classes</h1>
         <button
@@ -416,5 +411,8 @@ Loading...</textarea
         </p>
       </div>
     </div>
+
+    <script src="GameHandler.js"></script>
+    <script src="shared.js"></script>
   </body>
 </html>
