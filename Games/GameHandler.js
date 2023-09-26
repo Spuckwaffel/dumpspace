@@ -16,25 +16,37 @@ function getGameInfo(info) {
   location.reload();
 }
 
-function getClassInfo(info) {
+function reloadWithNewInfo(info, newType) {
   const params = getUrlParams();
   if (Object.keys(params).length < 2) return;
 
   if (Object.keys(params)[0] != "hash") return;
-  if (Object.keys(params)[1] != "type" || params["type"] != "classes") return;
+  if (
+    Object.keys(params)[1] != "type" ||
+    (params["type"] != "classes" && params["type"] != "structs")
+  )
+    return;
 
+  var isStruct = false;
+  if (params["type"] == "structs") isStruct = true;
   var currentURLWithoutParams =
     window.location.origin + window.location.pathname + "?";
 
   // no matter what, reset the url params
   currentURLWithoutParams += "hash=" + params["hash"];
-  currentURLWithoutParams += "&type=" + params["type"];
+
   if (info.charAt(info.length - 1) === "*") {
     info = info.slice(0, -1);
   }
-  // Update the browser's URL without refreshing the page
-  history.pushState(null, null, currentURLWithoutParams + "&class=" + info);
 
+  if (newType == null) return;
+
+  console.log("received type " + newType);
+
+  if (newType === "C") currentURLWithoutParams += "&type=classes";
+  else if (newType === "S") currentURLWithoutParams += "&type=structs";
+
+  history.pushState(null, null, currentURLWithoutParams + "&idx=" + info);
   // Reload the page to apply the changes
   location.reload();
 }
@@ -87,288 +99,313 @@ async function displayGame() {
 
   const gameDir = game.engine + "/" + game.location + "/";
 
-  console.log("crinching latest data for: " + gameDir);
+  console.log("crunching latest data for: " + gameDir);
 
+  var data = null;
+  var realData = null;
+  var isStruct = false;
   if (params["type"] === "classes") {
     const response = await fetch(gameDir + "ClassesInfo.json");
-    const data = await response.json();
-    // Sort the "classes" array by the object's name
-    data.classes.sort((a, b) => {
-      const nameA = Object.keys(a)[0];
-      const nameB = Object.keys(b)[0];
-      return nameA.localeCompare(nameB);
-    });
+    data = await response.json();
+    realData = data.classes;
+  } else if (params["type"] === "structs") {
+    const response = await fetch(gameDir + "StructsInfo.json");
+    data = await response.json();
+    realData = data.structs;
+    isStruct = true;
+  }
 
-    timeDiv = document.getElementById("updateLabel");
-    if (timeDiv != null) {
-      formatElapsedTime(Date.now(), data.updated_at, timeDiv);
-    }
+  if (data == null) return;
+  // Sort the "classes" array by the object's name
+  realData.sort((a, b) => {
+    const nameA = Object.keys(a)[0];
+    const nameB = Object.keys(b)[0];
+    return nameA.localeCompare(nameB);
+  });
 
-    if (classDiv == null) return;
+  timeDiv = document.getElementById("updateLabel");
+  if (timeDiv != null) {
+    formatElapsedTime(Date.now(), data.updated_at, timeDiv);
+  }
 
-    //target class name for further actions
-    var targetClassName = null;
+  if (classDiv == null) return;
 
-    //the target class with data (there should be always a target class, if not stuff aint right)
-    var targetClassData = null;
-    //either get a current focussed class
+  //target class name for further actions
+  var targetClassName = null;
+
+  //the target class with data (there should be always a target class, if not stuff aint right)
+  var targetClassData = null;
+  //either get a current focussed class
+
+  if (Object.keys(params).length === 3 && Object.keys(params)[2] === "idx") {
+    targetClassName = params["idx"];
+    //or select the first one as default
+  } else if (Object.keys(realData).length > 0) {
+    targetClassName = Object.keys(realData[0])[0];
+  }
+
+  //iterate through all items, get their name and targetindex
+  var classData = [];
+  var targetClassIndex = 0;
+  var idx = 0;
+  for (const gameClass of realData) {
+    classData.push(Object.keys(gameClass)[0] + (isStruct ? "S" : "C"));
     if (
-      Object.keys(params).length === 3 &&
-      Object.keys(params)[2] === "class"
+      targetClassName != null &&
+      Object.keys(gameClass)[0] === targetClassName
     ) {
-      targetClassName = params["class"];
-      //or select the first one as default
-    } else if (Object.keys(data.classes).length > 0) {
-      targetClassName = Object.keys(data.classes[0])[0];
-    }
+      targetClassData = gameClass;
+      targetClassIndex = idx;
+    } else idx++;
+  }
 
-    //iterate through all items, get their name and targetindex
-    var classData = [];
-    var targetClassIndex = 0;
-    var idx = 0;
-    for (const gameClass of data.classes) {
-      classData.push(Object.keys(gameClass)[0]);
-      if (
-        targetClassName != null &&
-        Object.keys(gameClass)[0] === targetClassName
-      ) {
-        targetClassData = gameClass;
-        targetClassIndex = idx;
-      } else idx++;
-    }
+  //create our wonderful recycler that manages all items
+  new VanillaRecyclerView(classDiv, {
+    data: classData,
+    renderer: class {
+      initialize(params) {
+        this.layout = document.createElement("button");
+        this.layout.innerHTML = `${params.data.slice(0, -1)}`;
+        this.layout.classList.add(
+          "px-3",
+          "py-2",
+          "border-b",
+          "border-gray-200",
+          "text-left",
+          "w-full",
+          "transition",
+          "duration-200",
+          "ease-in-out",
+          "hover:text-blue-500"
+        );
+        if (
+          targetClassName != null &&
+          params.data.slice(0, -1) === targetClassName
+        ) {
+          this.layout.classList.add("bg-gray-600/10");
+        }
+        this.layout.addEventListener("click", function () {
+          reloadWithNewInfo(
+            params.data.slice(0, -1),
+            params.data.charAt(params.data.length - 1)
+          );
+        });
+      }
+      getLayout() {
+        return this.layout;
+      }
+      onUnmount() {}
+    },
+  });
 
-    //create our wonderful recycler that manages all items
-    new VanillaRecyclerView(classDiv, {
-      data: classData,
-      renderer: class {
-        initialize(params) {
-          this.layout = document.createElement("button");
-          this.layout.innerHTML = `${params.data}`;
-          this.layout.classList.add(
-            "px-3",
-            "py-2",
-            "border-b",
-            "border-gray-200",
-            "text-left",
-            "w-full",
+  //scroll to the targeted class
+  if (targetClassIndex > 0) {
+    // calculating the box with a fixed size of 50px lol
+    const containerHeight = classDiv.clientHeight;
+    const buttonTop = targetClassIndex * 50 - classDiv.offsetTop;
+    const scrollTo = buttonTop - containerHeight / 2 + 100;
+
+    // Scroll the container to center the button
+    classDiv.style.scrollBehavior = "smooth";
+    classDiv.scrollTop = scrollTo;
+  }
+
+  if (targetClassData != null) {
+    var members = targetClassData[Object.keys(targetClassData)[0]];
+    if (document.getElementById("class-desc-name") != null)
+      document.getElementById("class-desc-name").textContent = targetClassName;
+    var itemOverview = document.getElementById("overview-items");
+    var classInheritDiv = document.getElementById("class-desc-inherits");
+
+    var textAreaSDKRows = 0;
+    var textAreaMDKRows = 0;
+    var textAreaSDKText = "// Inheritance: ";
+    var textAreaMDKText = "";
+
+    //the inherit info shit
+    for (const member of members) {
+      //check if member is
+      const entryName = Object.keys(member)[0];
+      if (entryName === "__InheritInfo") {
+        //some var we increase used for the >
+        var l = 0;
+        //iterate though it
+        for (const superClass of member["__InheritInfo"]) {
+          const superButton = document.createElement("button");
+          superButton.addEventListener("click", function () {
+            reloadWithNewInfo(superClass, isStruct ? "S" : "C");
+          });
+          superButton.classList.add(
             "transition",
             "duration-200",
             "ease-in-out",
             "hover:text-blue-500"
           );
-          if (targetClassName != null && params.data === targetClassName) {
-            this.layout.classList.add("bg-gray-600/10");
-          }
-          this.layout.addEventListener("click", function () {
-            getClassInfo(params.data);
-          });
-        }
-        getLayout() {
-          return this.layout;
-        }
-        onUnmount() {}
-      },
-    });
+          superButton.textContent = superClass;
 
-    //scroll to the targeted class
-    if (targetClassIndex > 0) {
-      // calculating the box with a fixed size of 50px lol
-      const containerHeight = classDiv.clientHeight;
-      const buttonTop = targetClassIndex * 50 - classDiv.offsetTop;
-      const scrollTo = buttonTop - containerHeight / 2 + 100;
+          if (l == 0) {
+            textAreaMDKText =
+              "class " +
+              targetClassName +
+              " : public " +
+              superClass +
+              "\n{\n	friend MDKHandler;\n";
 
-      // Scroll the container to center the button
-      classDiv.style.scrollBehavior = "smooth";
-      classDiv.scrollTop = scrollTo;
-    }
-
-    if (targetClassData != null) {
-      var members = targetClassData[Object.keys(targetClassData)[0]];
-      if (document.getElementById("class-desc-name") != null)
-        document.getElementById("class-desc-name").textContent =
-          targetClassName;
-      var itemOverview = document.getElementById("overview-items");
-      var classInheritDiv = document.getElementById("class-desc-inherits");
-
-      var textAreaSDKRows = 0;
-      var textAreaMDKRows = 0;
-      var textAreaSDKText = "// Inheritance: ";
-      var textAreaMDKText = "";
-
-      //the inherit info shit
-      for (var member of members) {
-        //check if member is
-        const entryName = Object.keys(member)[0];
-        if (entryName === "__InheritInfo") {
-          //some var we increase used for the >
-          var l = 0;
-          //iterate though it
-          for (const superClass of member["__InheritInfo"]) {
-            const superButton = document.createElement("button");
-            superButton.addEventListener("click", function () {
-              getClassInfo(superClass);
-            });
-            superButton.classList.add(
-              "transition",
-              "duration-200",
-              "ease-in-out",
-              "hover:text-blue-500"
-            );
-            superButton.textContent = superClass;
-
-            if (l == 0) {
-              textAreaMDKText =
-                "class " +
-                targetClassName +
-                " : public " +
-                superClass +
-                "\n{\n	friend MDKHandler;\n";
-
-              textAreaMDKRows += 3;
+            if (isStruct) {
+              textAreaMDKText += "	friend MDKBase;\n";
+              textAreaMDKRows++;
             }
 
-            textAreaSDKText += superClass;
-
-            classInheritDiv.appendChild(superButton);
-            if (l < member["__InheritInfo"].length - 1) {
-              const textNode = document.createTextNode("\u00A0>\u00A0");
-              classInheritDiv.appendChild(textNode);
-              textAreaSDKText += " > ";
-            }
-
-            l++;
+            textAreaMDKRows += 3;
           }
-          textAreaSDKText += "\nnamespace " + targetClassName + " {\n";
-          textAreaSDKRows += 2;
-          continue;
+
+          textAreaSDKText += superClass;
+
+          classInheritDiv.appendChild(superButton);
+          if (l < member["__InheritInfo"].length - 1) {
+            const textNode = document.createTextNode("\u00A0>\u00A0");
+            classInheritDiv.appendChild(textNode);
+            textAreaSDKText += " > ";
+          }
+
+          l++;
         }
-        if (entryName === "__MDKClassSize") {
-          textAreaMDKText +=
-            "	static inline constexpr uint64_t __MDKClassSize = " +
-            member["__MDKClassSize"] +
-            ";\n\npublic:\n";
-          textAreaMDKRows += 3;
-          continue;
-        }
-
-        const overviewItemDiv = document.createElement("div");
-        overviewItemDiv.classList.add(
-          "grid",
-          "grid-cols-8",
-          "text-sm",
-          "px-6",
-          "text-gray-600",
-          "pt-2",
-          "pb-2",
-          "border-b",
-          "border-gray-200"
-        );
-
-        const entryP = document.createElement("button");
-        entryP.classList.add("col-span-3", "text-left");
-        entryP.textContent = member[Object.keys(member)[0]][0];
-        if (member[Object.keys(member)[0]][3] == "C") {
-          entryP.classList.add("underline");
-          entryP.addEventListener("click", function () {
-            getClassInfo(entryP.textContent);
-          });
-        } else {
-          entryP.classList.add("cursor-default");
-        }
-
-        overviewItemDiv.appendChild(entryP);
-
-        const nameP = document.createElement("p");
-        nameP.classList.add("col-span-3");
-        nameP.textContent = entryName;
-        overviewItemDiv.appendChild(nameP);
-
-        const offsetP = document.createElement("p");
-        offsetP.classList.add("col-span-1", "font-mono");
-        offsetP.textContent =
-          "0x" + member[Object.keys(member)[0]][1].toString(16);
-        overviewItemDiv.appendChild(offsetP);
-
-        const sizeP = document.createElement("p");
-        sizeP.classList.add("col-span-1", "pl-8", "font-mono");
-        const sizeVal = member[Object.keys(member)[0]][2];
-        sizeP.textContent = member[Object.keys(member)[0]][2];
-        if (sizeVal < 10) sizeP.textContent += "\u00A0";
-        if (sizeVal < 100) sizeP.textContent += "\u00A0";
-
-        overviewItemDiv.appendChild(sizeP);
-
-        itemOverview.appendChild(overviewItemDiv);
-
-        textAreaSDKText += "	constexpr auto ";
-        var _entryName = entryName;
-        var isBit = false;
-        if (
-          _entryName.length > 4 &&
-          _entryName.charAt(_entryName.length - 3) === ":"
-        ) {
-          isBit = true;
-          _entryName = _entryName.slice(0, -4);
-        }
-        textAreaSDKText += _entryName + " = ";
-        textAreaSDKText +=
-          "0x" + member[Object.keys(member)[0]][1].toString(16) + ";";
-
-        textAreaSDKText += " // " + member[Object.keys(member)[0]][0];
-        if (isBit) textAreaSDKText += " : 1";
-        textAreaSDKText += "\n";
-        textAreaSDKRows++;
-
-        _textAreaMDKText =
-          "	" +
-          member[Object.keys(member)[0]][3] +
-          "Member(" +
-          member[Object.keys(member)[0]][0] +
-          ")";
-        while (_textAreaMDKText.length < 54) {
-          _textAreaMDKText += " ";
-        }
-        _textAreaMDKText += _entryName;
-        while (_textAreaMDKText.length < 114) {
-          _textAreaMDKText += " ";
-        }
-        _textAreaMDKText += "OFFSET(get";
-        if (member[Object.keys(member)[0]][3] == "C") {
-          _textAreaMDKText += "<T>, ";
-        } else if (member[Object.keys(member)[0]][3] == "S") {
-          _textAreaMDKText += "Struct<T>, ";
-        } else if (member[Object.keys(member)[0]][3] == "D") {
-          _textAreaMDKText += "<" + member[Object.keys(member)[0]][0] + ">, ";
-        }
-        _textAreaMDKText +=
-          "{" + "0x" + member[Object.keys(member)[0]][1].toString(16) + ", ";
-        _textAreaMDKText += member[Object.keys(member)[0]][2] + ", ";
-        if (isBit)
-          _textAreaMDKText +=
-            "1, " + member[Object.keys(member)[0]][4] + "})\n";
-        else _textAreaMDKText += "0, 0})\n";
-
-        textAreaMDKText += _textAreaMDKText;
-        textAreaMDKRows++;
+        textAreaSDKText += "\nnamespace " + targetClassName + " {\n";
+        textAreaSDKRows += 2;
+        continue;
       }
-      textAreaSDKText += "}";
-      textAreaMDKText += "};";
+      if (entryName === "__MDKClassSize") {
+        textAreaMDKText +=
+          "	static inline constexpr uint64_t __MDKClassSize = " +
+          member["__MDKClassSize"] +
+          ";\n\npublic:\n";
+        textAreaMDKRows += 3;
+        continue;
+      }
+
+      const overviewItemDiv = document.createElement("div");
+      overviewItemDiv.classList.add(
+        "grid",
+        "grid-cols-8",
+        "text-sm",
+        "px-6",
+        "text-gray-600",
+        "pt-2",
+        "pb-2",
+        "border-b",
+        "border-gray-200"
+      );
+
+      const entryP = document.createElement("button");
+      entryP.classList.add("col-span-3", "text-left");
+      entryP.textContent = member[Object.keys(member)[0]][0];
+
+      if (
+        member[Object.keys(member)[0]][3] == "C" ||
+        member[Object.keys(member)[0]][3] == "S"
+      ) {
+        entryP.classList.add("underline");
+        entryP.addEventListener("click", function () {
+          reloadWithNewInfo(
+            entryP.textContent,
+            member[Object.keys(member)[0]][3]
+          );
+        });
+      } else {
+        entryP.classList.add("cursor-default");
+      }
+
+      overviewItemDiv.appendChild(entryP);
+
+      const nameP = document.createElement("p");
+      nameP.classList.add("col-span-3");
+      nameP.textContent = entryName;
+      overviewItemDiv.appendChild(nameP);
+
+      const offsetP = document.createElement("p");
+      offsetP.classList.add("col-span-1", "font-mono");
+      offsetP.textContent =
+        "0x" + member[Object.keys(member)[0]][1].toString(16);
+      overviewItemDiv.appendChild(offsetP);
+
+      const sizeP = document.createElement("p");
+      sizeP.classList.add("col-span-1", "pl-8", "font-mono");
+      const sizeVal = member[Object.keys(member)[0]][2];
+      sizeP.textContent = member[Object.keys(member)[0]][2];
+      if (sizeVal < 10) sizeP.textContent += "\u00A0";
+      if (sizeVal < 100) sizeP.textContent += "\u00A0";
+
+      overviewItemDiv.appendChild(sizeP);
+
+      itemOverview.appendChild(overviewItemDiv);
+
+      textAreaSDKText += "	constexpr auto ";
+      var _entryName = entryName;
+      var isBit = false;
+      if (
+        _entryName.length > 4 &&
+        _entryName.charAt(_entryName.length - 3) === ":"
+      ) {
+        isBit = true;
+        _entryName = _entryName.slice(0, -4);
+      }
+      textAreaSDKText += _entryName + " = ";
+      textAreaSDKText +=
+        "0x" + member[Object.keys(member)[0]][1].toString(16) + ";";
+
+      textAreaSDKText += " // " + member[Object.keys(member)[0]][0];
+      if (isBit) textAreaSDKText += " : 1";
+      textAreaSDKText += "\n";
       textAreaSDKRows++;
-      textAreaMDKRows += 2;
-      var SDKTextArea = document.getElementById("struct-items-textarea");
-      if (SDKTextArea != null) {
-        SDKTextArea.textContent = textAreaSDKText;
-        SDKTextArea.rows = textAreaSDKRows;
+
+      _textAreaMDKText =
+        "	" +
+        member[Object.keys(member)[0]][3] +
+        "Member(" +
+        member[Object.keys(member)[0]][0] +
+        ")";
+      while (_textAreaMDKText.length < 54) {
+        _textAreaMDKText += " ";
       }
-      var MDKTextArea = document.getElementById("MDK-items-textarea");
-      if (MDKTextArea != null) {
-        MDKTextArea.textContent = textAreaMDKText;
-        MDKTextArea.rows = textAreaMDKRows;
+      _textAreaMDKText += _entryName;
+      while (_textAreaMDKText.length < 114) {
+        _textAreaMDKText += " ";
       }
-      document.getElementById("overview-items-spinner")?.remove();
+      _textAreaMDKText += "OFFSET(get";
+      if (member[Object.keys(member)[0]][3] == "C") {
+        _textAreaMDKText += "<T>, ";
+      } else if (member[Object.keys(member)[0]][3] == "S") {
+        _textAreaMDKText += "Struct<T>, ";
+      } else if (member[Object.keys(member)[0]][3] == "D") {
+        _textAreaMDKText += "<" + member[Object.keys(member)[0]][0] + ">, ";
+      }
+      _textAreaMDKText +=
+        "{" + "0x" + member[Object.keys(member)[0]][1].toString(16) + ", ";
+      _textAreaMDKText += member[Object.keys(member)[0]][2] + ", ";
+      if (isBit)
+        _textAreaMDKText += "1, " + member[Object.keys(member)[0]][4] + "})\n";
+      else _textAreaMDKText += "0, 0})\n";
+
+      textAreaMDKText += _textAreaMDKText;
+      textAreaMDKRows++;
     }
-    //do something with the target class
+    textAreaSDKText += "}";
+    textAreaMDKText += "};";
+    textAreaSDKRows++;
+    textAreaMDKRows += 2;
+    var SDKTextArea = document.getElementById("struct-items-textarea");
+    if (SDKTextArea != null) {
+      SDKTextArea.textContent = textAreaSDKText;
+      SDKTextArea.rows = textAreaSDKRows;
+    }
+    var MDKTextArea = document.getElementById("MDK-items-textarea");
+    if (MDKTextArea != null) {
+      MDKTextArea.textContent = textAreaMDKText;
+      MDKTextArea.rows = textAreaMDKRows;
+    }
+    document.getElementById("overview-items-spinner")?.remove();
   }
+  //do something with the target class
 
   document.getElementById("class-spinner")?.remove();
 }
@@ -449,3 +486,7 @@ if (Object.keys(params).length === 1) {
 }
 
 displayGame();
+
+window.addEventListener("popstate", function () {
+  location.reload();
+});
