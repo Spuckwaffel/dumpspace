@@ -1,61 +1,13 @@
-function getGameInfo(info) {
-  const params = getUrlParams();
-  if (Object.keys(params).length == 0) return;
-
-  if (Object.keys(params)[0] != "hash") return;
-  var currentURLWithoutParams =
-    window.location.origin + window.location.pathname + "?";
-
-  // no matter what, reset the url params
-  currentURLWithoutParams += "hash=" + params["hash"];
-
-  // Update the browser's URL without refreshing the page
-  history.pushState(null, null, currentURLWithoutParams + "&type=" + info);
-
-  // Reload the page to apply the changes
-  location.reload();
-}
-
-function reloadWithNewInfo(info, newType) {
-  const params = getUrlParams();
-  if (Object.keys(params).length < 2) return;
-
-  if (Object.keys(params)[0] != "hash") return;
-  if (
-    Object.keys(params)[1] != "type" ||
-    (params["type"] != "classes" && params["type"] != "structs")
-  )
-    return;
-
-  var isStruct = false;
-  if (params["type"] == "structs") isStruct = true;
-  var currentURLWithoutParams =
-    window.location.origin + window.location.pathname + "?";
-
-  // no matter what, reset the url params
-  currentURLWithoutParams += "hash=" + params["hash"];
-
-  if (info.charAt(info.length - 1) === "*") {
-    info = info.slice(0, -1);
-  }
-
-  if (newType == null) return;
-
-  console.log("received type " + newType);
-
-  if (newType === "C") currentURLWithoutParams += "&type=classes";
-  else if (newType === "S") currentURLWithoutParams += "&type=structs";
-
-  history.pushState(null, null, currentURLWithoutParams + "&idx=" + info);
-  // Reload the page to apply the changes
-  location.reload();
-}
-
-function getUrlParams() {
+//gets the params of the url
+function getUrlParams(url) {
   var params = {}; // Create an empty object to store the parameters
 
   // Get the URL query string
-  var queryString = window.location.search.substring(1);
+  var queryString = null;
+
+  if (url == null) {
+    queryString = window.location.search.substring(1);
+  } else queryString = url.substring(1);
 
   // Split the query string into individual parameters
   var paramArray = queryString.split("&");
@@ -73,341 +25,536 @@ function getUrlParams() {
   return params;
 }
 
-function goBack() {
-  history.pushState(null, null, window.location.origin);
+//current URL params
+const UrlParams = getUrlParams();
+var currentURL = window.location.href;
+
+//sets a valid url with params for the target game
+function getGameInfo(info) {
+  if (Object.keys(UrlParams).length == 0) return;
+
+  if (Object.keys(UrlParams)[0] != "hash") return;
+  var currentURLWithoutParams =
+    window.location.origin + window.location.pathname + "?";
+
+  // no matter what, reset the url params
+  currentURLWithoutParams += "hash=" + UrlParams["hash"];
+
+  // Update the browser's URL without refreshing the page
+  history.pushState(null, null, currentURLWithoutParams + "&type=" + info);
+
+  // Reload the page to apply the changes
   location.reload();
 }
 
-async function getGameByHash(hash) {
-  const response = await fetch("GameList.json");
-  const data = await response.json();
-  return data.games.find((game) => game.hash == hash);
+//reloads the website with the CName and its type (C,S,F,E)
+//only call if the current type does not match the new type
+function reloadWithNewCName(CName, newType) {
+  //params always need hash and type
+  if (Object.keys(UrlParams).length < 2) return;
+
+  //no hash?
+  if (Object.keys(UrlParams)[0] != "hash") return;
+
+  //not supported type param?
+  if (
+    Object.keys(UrlParams)[1] != "type" ||
+    (UrlParams["type"] != "classes" && UrlParams["type"] != "structs")
+  )
+    return;
+
+  if (newType == null) return;
+
+  var currentURLWithoutParams =
+    window.location.origin + window.location.pathname + "?";
+
+  // no matter what, reset the url params
+  currentURLWithoutParams += "hash=" + UrlParams["hash"];
+
+  //remove pointers
+  if (CName.charAt(CName.length - 1) === "*") {
+    CName = CName.slice(0, -1);
+  }
+
+  console.log("received type " + newType);
+
+  if (newType === "C") currentURLWithoutParams += "&type=classes";
+  else if (newType === "S") currentURLWithoutParams += "&type=structs";
+
+  history.pushState(null, null, currentURLWithoutParams + "&idx=" + CName);
+  // Reload the page to apply the changes
+  location.reload();
 }
 
-const currentPath = "Games/";
+//error? go to home page
+function returnHome() {
+  history.pushState(null, null, window.location.origin);
+  console.log("returnHome called? Unexpected issue?");
+  throw e;
+  //location.reload();
+}
 
-//cool function to defeat loading the page without a specified game
-const params = getUrlParams();
-
+//make sure this is always valid
 const classDiv = document.getElementById("class-list");
+const classDivScroll = document.getElementById("class-list-scroll");
+
+if (classDivScroll.offsetHeight == 256)
+  classDivScroll.style.height = 500 + "px";
+
 classDiv.style.height = classDiv.offsetHeight + "px";
 classDiv.style.width = "100%";
 
-async function displayGame() {
-  const game = await getGameByHash(params["hash"]);
-  if (game == null) goBack();
+window.addEventListener("resize", function () {
+  //support downscaling, upscaling wont work and wont fix, stop resizing ur window
+  //we call this in the tech scene a bandaid fix :)
+  if (window.innerWidth < 1280) {
+    classDivScroll.style.height = 500 + "px";
+    classDiv.style.height = 484 + "px";
+  }
+});
 
-  const gameDir = game.engine + "/" + game.location + "/";
+var GameListJson = null;
 
-  console.log("crunching latest data for: " + gameDir);
+async function getGameByHash(hash) {
+  if (GameListJson === null) {
+    const response = await fetch("GameList.json");
+    GameListJson = await response.json();
+  }
+  return GameListJson.games.find((game) => game.hash == hash);
+}
 
-  var data = null;
-  var realData = null;
-  var isStruct = false;
-  if (params["type"] === "classes") {
-    const response = await fetch(gameDir + "ClassesInfo.json");
-    data = await response.json();
-    realData = data.classes;
-  } else if (params["type"] === "structs") {
-    const response = await fetch(gameDir + "StructsInfo.json");
-    data = await response.json();
-    realData = data.structs;
-    isStruct = true;
+var CurrentInfoJson = null;
+var currentType = null;
+
+//only should get called once per reload
+async function displayCurrentGame() {
+  //params always need hash and type
+  if (Object.keys(UrlParams).length < 2) returnHome();
+
+  //no hash?
+  if (Object.keys(UrlParams)[0] != "hash") returnHome();
+
+  //not supported type param?
+  if (
+    Object.keys(UrlParams)[1] != "type" ||
+    (UrlParams["type"] != "classes" && UrlParams["type"] != "structs")
+  )
+    returnHome();
+
+  const game = await getGameByHash(UrlParams["hash"]);
+  //no game found for hash? go back
+  if (game == null) returnHome();
+
+  const gameDirectory = game.engine + "/" + game.location + "/";
+
+  console.log("crunching latest data for: " + gameDirectory);
+
+  if (UrlParams["type"] === "classes") {
+    const response = await fetch(gameDirectory + "ClassesInfo.json");
+    CurrentInfoJson = await response.json();
+    currentType = "C";
+  } else if (UrlParams["type"] === "structs") {
+    const response = await fetch(gameDirectory + "StructsInfo.json");
+    CurrentInfoJson = await response.json();
+    currentType = "S";
   }
 
-  if (data == null) return;
-  // Sort the "classes" array by the object's name
-  realData.sort((a, b) => {
+  //no data?
+  if (CurrentInfoJson == null) returnHome();
+
+  // Sort the array by the object's name
+  CurrentInfoJson.data.sort((a, b) => {
     const nameA = Object.keys(a)[0];
     const nameB = Object.keys(b)[0];
     return nameA.localeCompare(nameB);
   });
 
-  timeDiv = document.getElementById("updateLabel");
+  var timeDiv = document.getElementById("updateLabel");
   if (timeDiv != null) {
-    formatElapsedTime(Date.now(), data.updated_at, timeDiv);
+    timeDiv = document.getElementById("updateLabel");
+    formatElapsedTime(Date.now(), CurrentInfoJson.updated_at, timeDiv);
   }
 
-  if (classDiv == null) return;
-
-  //target class name for further actions
-  var targetClassName = null;
-
-  //the target class with data (there should be always a target class, if not stuff aint right)
-  var targetClassData = null;
-  //either get a current focussed class
-
-  if (Object.keys(params).length === 3 && Object.keys(params)[2] === "idx") {
-    targetClassName = params["idx"];
+  //try getting a valid cname out of the params or get the first index of the json
+  if (
+    Object.keys(UrlParams).length === 3 &&
+    Object.keys(UrlParams)[2] === "idx"
+  ) {
+    targetClassName = UrlParams["idx"];
     //or select the first one as default
-  } else if (Object.keys(realData).length > 0) {
-    targetClassName = Object.keys(realData[0])[0];
+  } else if (Object.keys(CurrentInfoJson.data).length > 0) {
+    targetClassName = Object.keys(CurrentInfoJson.data[0])[0];
+  } else returnHome();
+
+  console.log("chose name " + targetClassName + " for displaying...");
+
+  displayCurrentStructOrClass(targetClassName);
+}
+
+var oldFocussedDataDiv = null;
+var formattedArrayDataValid = false;
+var formattedArrayData = [];
+//only works on current data, if different type than current, call reloadwithnewdata
+function displayCurrentStructOrClass(CName) {
+  //fixup cnames having pointers
+  if (CName.charAt(CName.length - 1) === "*") {
+    CName = CName.slice(0, -1);
   }
 
-  //iterate through all items, get their name and targetindex
-  var classData = [];
-  var targetClassIndex = 0;
+  //url specific stuff for history
+
+  var currentURLWithoutParams =
+    window.location.origin + window.location.pathname + "?";
+
+  // no matter what, reset the url params
+  currentURLWithoutParams += "hash=" + UrlParams["hash"];
+
+  if (currentType === "C") currentURLWithoutParams += "&type=classes";
+  else if (currentType === "S") currentURLWithoutParams += "&type=structs";
+
+  currentURLWithoutParams += "&idx=" + CName;
+
+  if (window.location.href !== currentURLWithoutParams) {
+    history.pushState(null, null, currentURLWithoutParams);
+  }
+
+  currentURL = currentURLWithoutParams;
+
+  //only needed on website refresh
+  var scrollToIdx = null;
+
+  var targetIndexData = null;
+
   var idx = 0;
-  for (const gameClass of realData) {
-    classData.push(Object.keys(gameClass)[0] + (isStruct ? "S" : "C"));
-    if (
-      targetClassName != null &&
-      Object.keys(gameClass)[0] === targetClassName
-    ) {
-      targetClassData = gameClass;
-      targetClassIndex = idx;
+  for (const gameClass of CurrentInfoJson.data) {
+    if (!formattedArrayDataValid)
+      formattedArrayData.push(Object.keys(gameClass)[0]);
+
+    if (CName !== null && Object.keys(gameClass)[0] === CName) {
+      scrollToIdx = idx;
+      targetIndexData = gameClass;
     } else idx++;
   }
 
-  //create our wonderful recycler that manages all items
-  new VanillaRecyclerView(classDiv, {
-    data: classData,
-    renderer: class {
-      initialize(params) {
-        this.layout = document.createElement("button");
-        this.layout.innerHTML = `${params.data.slice(0, -1)}`;
-        this.layout.classList.add(
-          "px-3",
-          "py-2",
-          "border-b",
-          "border-gray-200",
-          "text-left",
-          "w-full",
-          "transition",
-          "duration-200",
-          "ease-in-out",
-          "hover:text-blue-500"
-        );
-        if (
-          targetClassName != null &&
-          params.data.slice(0, -1) === targetClassName
-        ) {
-          this.layout.classList.add("bg-gray-600/10");
-        }
-        this.layout.addEventListener("click", function () {
-          reloadWithNewInfo(
-            params.data.slice(0, -1),
-            params.data.charAt(params.data.length - 1)
-          );
-        });
-      }
-      getLayout() {
-        return this.layout;
-      }
-      onUnmount() {}
-    },
-  });
-
-  //scroll to the targeted class
-  if (targetClassIndex > 0) {
-    // calculating the box with a fixed size of 50px lol
-    const containerHeight = classDiv.clientHeight;
-    const buttonTop = targetClassIndex * 50 - classDiv.offsetTop;
-    const scrollTo = buttonTop - containerHeight / 2 + 100;
-
-    // Scroll the container to center the button
-    classDiv.style.scrollBehavior = "smooth";
-    classDiv.scrollTop = scrollTo;
+  //
+  if (targetIndexData === null) {
+    if (CName !== Object.keys(CurrentInfoJson.data[0])[0]) {
+      showErrorToast("Could not find type " + CName + "!");
+      displayCurrentStructOrClass(Object.keys(CurrentInfoJson.data[0])[0]);
+      return;
+    }
   }
 
-  if (targetClassData != null) {
-    var members = targetClassData[Object.keys(targetClassData)[0]];
-    if (document.getElementById("class-desc-name") != null)
-      document.getElementById("class-desc-name").textContent = targetClassName;
-    var itemOverview = document.getElementById("overview-items");
-    var classInheritDiv = document.getElementById("class-desc-inherits");
-
-    var textAreaSDKRows = 0;
-    var textAreaMDKRows = 0;
-    var textAreaSDKText = "// Inheritance: ";
-    var textAreaMDKText = "";
-
-    //the inherit info shit
-    for (const member of members) {
-      //check if member is
-      const entryName = Object.keys(member)[0];
-      if (entryName === "__InheritInfo") {
-        //some var we increase used for the >
-        var l = 0;
-        //iterate though it
-        for (const superClass of member["__InheritInfo"]) {
-          const superButton = document.createElement("button");
-          superButton.addEventListener("click", function () {
-            reloadWithNewInfo(superClass, isStruct ? "S" : "C");
-          });
-          superButton.classList.add(
+  if (!formattedArrayDataValid) {
+    new VanillaRecyclerView(classDiv, {
+      data: formattedArrayData,
+      renderer: class {
+        initialize(params) {
+          this.layout = document.createElement("button");
+          this.layout.innerHTML = params.data;
+          this.layout.classList.add(
+            "px-3",
+            "py-2",
+            "border-b",
+            "border-gray-200",
+            "text-left",
+            "w-full",
             "transition",
             "duration-200",
             "ease-in-out",
             "hover:text-blue-500"
           );
-          superButton.textContent = superClass;
-
-          if (l == 0) {
-            textAreaMDKText =
-              "class " +
-              targetClassName +
-              " : public " +
-              superClass +
-              "\n{\n	friend MDKHandler;\n";
-
-            if (isStruct) {
-              textAreaMDKText += "	friend MDKBase;\n";
-              textAreaMDKRows++;
+          if (targetClassName != null && params.data === targetClassName) {
+            this.layout.classList.add("bg-gray-600/10");
+            oldFocussedDataDiv = this.layout;
+          }
+          this.layout.addEventListener("click", function (event) {
+            //remove the by of the old button
+            if (
+              oldFocussedDataDiv != null &&
+              oldFocussedDataDiv.classList.contains("bg-gray-600/10")
+            ) {
+              oldFocussedDataDiv.classList.remove("bg-gray-600/10");
             }
-
-            textAreaMDKRows += 3;
-          }
-
-          textAreaSDKText += superClass;
-
-          classInheritDiv.appendChild(superButton);
-          if (l < member["__InheritInfo"].length - 1) {
-            const textNode = document.createTextNode("\u00A0>\u00A0");
-            classInheritDiv.appendChild(textNode);
-            textAreaSDKText += " > ";
-          }
-
-          l++;
+            oldFocussedDataDiv = event.target;
+            event.target.classList.add("bg-gray-600/10");
+            displayCurrentStructOrClass(params.data);
+          });
         }
-        textAreaSDKText += "\nnamespace " + targetClassName + " {\n";
-        textAreaSDKRows += 2;
-        continue;
-      }
-      if (entryName === "__MDKClassSize") {
-        textAreaMDKText +=
-          "	static inline constexpr uint64_t __MDKClassSize = " +
-          member["__MDKClassSize"] +
-          ";\n\npublic:\n";
-        textAreaMDKRows += 3;
-        continue;
-      }
+        getLayout() {
+          return this.layout;
+        }
+        onUnmount() {}
+      },
+    });
 
-      const overviewItemDiv = document.createElement("div");
-      overviewItemDiv.classList.add(
-        "grid",
-        "grid-cols-8",
-        "text-sm",
-        "px-6",
-        "text-gray-600",
-        "pt-2",
-        "pb-2",
-        "border-b",
-        "border-gray-200"
-      );
+    if (scrollToIdx !== null) {
+      // calculating the box with a fixed size of 50px lol
+      const containerHeight = classDiv.clientHeight;
+      const buttonTop = scrollToIdx * 50 - classDiv.offsetTop;
+      const scrollTo = buttonTop - containerHeight / 2 + 100;
 
-      const entryP = document.createElement("button");
-      entryP.classList.add("col-span-3", "text-left");
-      entryP.textContent = member[Object.keys(member)[0]][0];
-
-      if (
-        member[Object.keys(member)[0]][3] == "C" ||
-        member[Object.keys(member)[0]][3] == "S"
-      ) {
-        entryP.classList.add("underline");
-        entryP.addEventListener("click", function () {
-          reloadWithNewInfo(
-            entryP.textContent,
-            member[Object.keys(member)[0]][3]
-          );
-        });
-      } else {
-        entryP.classList.add("cursor-default");
-      }
-
-      overviewItemDiv.appendChild(entryP);
-
-      const nameP = document.createElement("p");
-      nameP.classList.add("col-span-3");
-      nameP.textContent = entryName;
-      overviewItemDiv.appendChild(nameP);
-
-      const offsetP = document.createElement("p");
-      offsetP.classList.add("col-span-1", "font-mono");
-      offsetP.textContent =
-        "0x" + member[Object.keys(member)[0]][1].toString(16);
-      overviewItemDiv.appendChild(offsetP);
-
-      const sizeP = document.createElement("p");
-      sizeP.classList.add("col-span-1", "pl-8", "font-mono");
-      const sizeVal = member[Object.keys(member)[0]][2];
-      sizeP.textContent = member[Object.keys(member)[0]][2];
-      if (sizeVal < 10) sizeP.textContent += "\u00A0";
-      if (sizeVal < 100) sizeP.textContent += "\u00A0";
-
-      overviewItemDiv.appendChild(sizeP);
-
-      itemOverview.appendChild(overviewItemDiv);
-
-      textAreaSDKText += "	constexpr auto ";
-      var _entryName = entryName;
-      var isBit = false;
-      if (
-        _entryName.length > 4 &&
-        _entryName.charAt(_entryName.length - 3) === ":"
-      ) {
-        isBit = true;
-        _entryName = _entryName.slice(0, -4);
-      }
-      textAreaSDKText += _entryName + " = ";
-      textAreaSDKText +=
-        "0x" + member[Object.keys(member)[0]][1].toString(16) + ";";
-
-      textAreaSDKText += " // " + member[Object.keys(member)[0]][0];
-      if (isBit) textAreaSDKText += " : 1";
-      textAreaSDKText += "\n";
-      textAreaSDKRows++;
-
-      _textAreaMDKText =
-        "	" +
-        member[Object.keys(member)[0]][3] +
-        "Member(" +
-        member[Object.keys(member)[0]][0] +
-        ")";
-      while (_textAreaMDKText.length < 54) {
-        _textAreaMDKText += " ";
-      }
-      _textAreaMDKText += _entryName;
-      while (_textAreaMDKText.length < 114) {
-        _textAreaMDKText += " ";
-      }
-      _textAreaMDKText += "OFFSET(get";
-      if (member[Object.keys(member)[0]][3] == "C") {
-        _textAreaMDKText += "<T>, ";
-      } else if (member[Object.keys(member)[0]][3] == "S") {
-        _textAreaMDKText += "Struct<T>, ";
-      } else if (member[Object.keys(member)[0]][3] == "D") {
-        _textAreaMDKText += "<" + member[Object.keys(member)[0]][0] + ">, ";
-      }
-      _textAreaMDKText +=
-        "{" + "0x" + member[Object.keys(member)[0]][1].toString(16) + ", ";
-      _textAreaMDKText += member[Object.keys(member)[0]][2] + ", ";
-      if (isBit)
-        _textAreaMDKText += "1, " + member[Object.keys(member)[0]][4] + "})\n";
-      else _textAreaMDKText += "0, 0})\n";
-
-      textAreaMDKText += _textAreaMDKText;
-      textAreaMDKRows++;
+      // Scroll the container to center the button
+      //classDiv.style.scrollBehavior = "smooth";
+      classDiv.scrollTop = scrollTo;
     }
-    textAreaSDKText += "}";
-    textAreaMDKText += "};";
-    textAreaSDKRows++;
-    textAreaMDKRows += 2;
-    var SDKTextArea = document.getElementById("struct-items-textarea");
-    if (SDKTextArea != null) {
-      SDKTextArea.textContent = textAreaSDKText;
-      SDKTextArea.rows = textAreaSDKRows;
-    }
-    var MDKTextArea = document.getElementById("MDK-items-textarea");
-    if (MDKTextArea != null) {
-      MDKTextArea.textContent = textAreaMDKText;
-      MDKTextArea.rows = textAreaMDKRows;
-    }
-    document.getElementById("overview-items-spinner")?.remove();
+    formattedArrayDataValid = true;
   }
-  //do something with the target class
 
-  document.getElementById("class-spinner")?.remove();
+  displayMembers(CName, targetIndexData);
+}
+
+//save them, used by displayOverviewPage to restore the sticky bar
+const emtpyOverViewDivChildren = Array.from(
+  document.getElementById("overview-items").children
+);
+
+function displayOverviewPage(members) {
+  const itemsOverviewDiv = document.getElementById("overview-items");
+  //remove old children
+  while (itemsOverviewDiv.firstChild) {
+    itemsOverviewDiv.removeChild(itemsOverviewDiv.firstChild);
+  }
+  for (const child of emtpyOverViewDivChildren) {
+    itemsOverviewDiv.appendChild(child);
+  }
+  for (const member of members) {
+    const memberName = Object.keys(member)[0];
+    if (memberName === "__InheritInfo") continue;
+    if (memberName === "__MDKClassSize") continue;
+    const overviewMemberDiv = document.createElement("div");
+    overviewMemberDiv.classList.add(
+      "grid",
+      "grid-cols-8",
+      "text-sm",
+      "px-6",
+      "text-gray-600",
+      "pt-2",
+      "pb-2",
+      "border-b",
+      "border-gray-200"
+    );
+
+    const memberNameButton = document.createElement("button");
+    memberNameButton.classList.add("col-span-3", "text-left", "truncate");
+    memberNameButton.textContent = member[Object.keys(member)[0]][0];
+
+    const memberType = member[Object.keys(member)[0]][3];
+    if (memberType === "C" || memberType === "S") {
+      memberNameButton.classList.add("underline");
+      memberNameButton.addEventListener("click", function () {
+        if (currentType != memberType) {
+          reloadWithNewCName(memberNameButton.textContent, memberType);
+        } else displayCurrentStructOrClass(memberNameButton.textContent);
+      });
+    } else memberNameButton.classList.add("cursor-default");
+
+    overviewMemberDiv.appendChild(memberNameButton);
+
+    const memberNameP = document.createElement("p");
+    memberNameP.classList.add("col-span-3", "truncate");
+    memberNameP.textContent = memberName;
+    overviewMemberDiv.appendChild(memberNameP);
+
+    const memberOffsetP = document.createElement("p");
+    memberOffsetP.classList.add("col-span-1", "font-mono");
+    memberOffsetP.textContent =
+      "0x" + member[Object.keys(member)[0]][1].toString(16);
+    overviewMemberDiv.appendChild(memberOffsetP);
+
+    const memberSizeP = document.createElement("p");
+    memberSizeP.classList.add("col-span-1", "pl-8", "font-mono");
+    const memberSizeVal = member[Object.keys(member)[0]][2];
+    memberSizeP.textContent = memberSizeVal;
+    if (memberSizeVal < 10) memberSizeP.textContent += "\u00A0";
+    if (memberSizeVal < 100) memberSizeP.textContent += "\u00A0";
+
+    overviewMemberDiv.appendChild(memberSizeP);
+
+    itemsOverviewDiv.appendChild(overviewMemberDiv);
+  }
+}
+
+function displayStructAndMDKPage(CName, members) {
+  var textAreaSDKRows = 0;
+  var textAreaMDKRows = 0;
+  var textAreaSDKText = "// Inheritance: ";
+  var textAreaMDKText = "// Inheritance: ";
+  for (const member of members) {
+    const memberName = Object.keys(member)[0];
+    if (memberName === "__InheritInfo") {
+      var i = 0;
+
+      var _MDKText = "";
+      for (const superClass of member["__InheritInfo"]) {
+        textAreaSDKText += superClass;
+        textAreaMDKText += superClass;
+        if (i < member["__InheritInfo"].length - 1) {
+          textAreaSDKText += " > ";
+          textAreaMDKText += " > ";
+        }
+        if (i == 0) {
+          _MDKText =
+            "class " +
+            CName +
+            " : public " +
+            superClass +
+            "\n{\n	friend MDKHandler;\n";
+
+          if (currentType === "S") {
+            _MDKText += "	friend MDKBase;\n";
+            textAreaMDKRows++;
+          }
+          textAreaMDKRows += 3;
+        }
+
+        i++;
+      }
+
+      textAreaMDKText += _MDKText;
+      textAreaMDKRows++;
+      textAreaSDKText += "\nnamespace " + CName + " {\n";
+      textAreaSDKRows += 2;
+      continue;
+    }
+    if (memberName === "__MDKClassSize") {
+      textAreaMDKText +=
+        "	static inline constexpr uint64_t __MDKClassSize = " +
+        member["__MDKClassSize"] +
+        ";\n\npublic:\n";
+      textAreaMDKRows += 3;
+      continue;
+    }
+
+    textAreaSDKText += "	constexpr auto ";
+    //copy due to changes if its a bit
+    var _memberName = memberName;
+    //is it a bit?
+    var isBitMember = false;
+    if (
+      _memberName.length > 4 &&
+      _memberName.charAt(_memberName.length - 3) === ":"
+    ) {
+      isBitMember = true;
+      _memberName = _memberName.slice(0, -4);
+    }
+    //use the new name
+    textAreaSDKText += _memberName + " = ";
+    //we love hex
+    textAreaSDKText +=
+      "0x" + member[Object.keys(member)[0]][1].toString(16) + ";";
+
+    //type of the member
+    textAreaSDKText += " // " + member[Object.keys(member)[0]][0];
+    if (isBitMember) textAreaSDKText += " : 1";
+    textAreaSDKText += "\n";
+    textAreaSDKRows++;
+
+    //create a new one for shenanigans with the length
+    var _textAreaMDKText =
+      "	" +
+      member[Object.keys(member)[0]][3] +
+      "Member(" +
+      member[Object.keys(member)[0]][0] +
+      ")";
+    //format it good aligned
+    while (_textAreaMDKText.length < 54) {
+      _textAreaMDKText += " ";
+    }
+    _textAreaMDKText += _memberName;
+    while (_textAreaMDKText.length < 114) {
+      _textAreaMDKText += " ";
+    }
+    _textAreaMDKText += "OFFSET(get";
+    if (member[Object.keys(member)[0]][3] == "C") {
+      _textAreaMDKText += "<T>, ";
+    } else if (member[Object.keys(member)[0]][3] == "S") {
+      _textAreaMDKText += "Struct<T>, ";
+    } else if (member[Object.keys(member)[0]][3] == "D") {
+      _textAreaMDKText += "<" + member[Object.keys(member)[0]][0] + ">, ";
+    }
+    _textAreaMDKText +=
+      "{" + "0x" + member[Object.keys(member)[0]][1].toString(16) + ", ";
+    _textAreaMDKText += member[Object.keys(member)[0]][2] + ", ";
+    if (isBitMember)
+      _textAreaMDKText += "1, " + member[Object.keys(member)[0]][4] + "})\n";
+    else _textAreaMDKText += "0, 0})\n";
+
+    textAreaMDKText += _textAreaMDKText;
+    textAreaMDKRows++;
+  }
+
+  textAreaSDKText += "}";
+  textAreaMDKText += "};";
+  textAreaSDKRows++;
+  textAreaMDKRows += 2;
+
+  var SDKTextArea = document.getElementById("struct-items-textarea");
+  if (SDKTextArea != null) {
+    SDKTextArea.textContent = textAreaSDKText;
+    SDKTextArea.rows = textAreaSDKRows;
+  }
+  var MDKTextArea = document.getElementById("MDK-items-textarea");
+  if (MDKTextArea != null) {
+    MDKTextArea.textContent = textAreaMDKText;
+    MDKTextArea.rows = textAreaMDKRows;
+  }
+}
+
+function displayMembers(CName, data) {
+  const members = data[Object.keys(data)[0]];
+
+  if (document.getElementById("class-desc-name") !== null)
+    document.getElementById("class-desc-name").textContent = CName;
+
+  var classInheritDiv = document.getElementById("class-desc-inherits");
+  if (classInheritDiv == null) returnHome();
+
+  while (classInheritDiv.firstChild) {
+    classInheritDiv.removeChild(classInheritDiv.firstChild);
+  }
+
+  for (const member of members) {
+    const memberName = Object.keys(member)[0];
+    //super stuff
+    if (memberName === "__InheritInfo") {
+      var i = 0;
+
+      for (const superClass of member["__InheritInfo"]) {
+        const superButton = document.createElement("button");
+
+        superButton.addEventListener("click", function () {
+          displayCurrentStructOrClass(superClass);
+        });
+        superButton.classList.add(
+          "transition",
+          "duration-200",
+          "ease-in-out",
+          "hover:text-blue-500"
+        );
+        superButton.textContent = superClass;
+
+        classInheritDiv.appendChild(superButton);
+        if (i < member["__InheritInfo"].length - 1) {
+          const textNode = document.createTextNode("\u00A0>\u00A0");
+          classInheritDiv.appendChild(textNode);
+        }
+
+        i++;
+      }
+    }
+  }
+
+  displayOverviewPage(members);
+  displayStructAndMDKPage(CName, members);
+
+  if (document.getElementById("overview-items-skeleton") != null) {
+    document.getElementById("overview-items-skeleton").remove();
+  }
+
+  if (document.getElementById("class-skeleton") != null) {
+    document.getElementById("class-skeleton").remove();
+  }
 }
 
 function showOverview() {
@@ -474,19 +621,54 @@ function showMDK() {
 }
 
 if (
-  Object.keys(params).length === 0 ||
-  Object.keys(params)[0] !== "hash" ||
-  params["hash"].length !== 16
+  Object.keys(UrlParams).length === 0 ||
+  Object.keys(UrlParams)[0] !== "hash" ||
+  UrlParams["hash"].length !== 16
 ) {
-  goBack();
+  returnHome();
 }
 
-if (Object.keys(params).length === 1) {
+if (Object.keys(UrlParams).length === 1) {
   getGameInfo("classes");
 }
 
-displayGame();
-
+//add reload listener
 window.addEventListener("popstate", function () {
-  location.reload();
+  var oldParams = getUrlParams(currentURL);
+  var newParams = getUrlParams();
+  if (
+    newParams == null ||
+    newParams.length < 3 ||
+    Object.keys(newParams)[0] != "hash" ||
+    Object.keys(newParams)[1] != "type" ||
+    oldParams[Object.keys(oldParams)[0]] !==
+      newParams[Object.keys(newParams)[0]] ||
+    oldParams[Object.keys(oldParams)[1]] !==
+      newParams[Object.keys(newParams)[1]] ||
+    newParams[Object.keys(newParams)[2]] == null
+  )
+    location.reload();
+
+  displayCurrentStructOrClass(newParams[Object.keys(newParams)[2]]);
 });
+
+//display! yay!
+displayCurrentGame();
+
+const toastDiv = document.getElementById("toast-div");
+const toastDivText = document.getElementById("toast-div-text");
+
+toastDiv.addEventListener("click", function () {
+  // Show the floating div
+  toastDiv.classList.remove("opacity-100");
+  toastDiv.classList.add("opacity-0");
+});
+
+function showErrorToast(name) {
+  if (toastDiv != null) {
+    toastDiv.classList.remove("opacity-0");
+  }
+  toastDiv.classList.add("opacity-100");
+
+  if (toastDivText != null) toastDivText.textContent = name;
+}
