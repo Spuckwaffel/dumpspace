@@ -33,9 +33,11 @@
       href="Images/favicon-16x16.png"
     />
 
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!--<script src="https://cdn.tailwindcss.com"></script>-->
+
+    <link rel="stylesheet" type="text/css" href="../tailwind.css" />
   </head>
-  <body>
+  <body class="bg-white dark:bg-slate-900">
     <link
       rel="stylesheet"
       href="https://unpkg.com/vanilla-recycler-view@latest/dist/vanilla-recycler-view.min.css"
@@ -43,14 +45,14 @@
     <script src="https://unpkg.com/vanilla-recycler-view@latest/dist/vanilla-recycler-view.min.js"></script>
 
     <nav
-      class="bg-white sticky top-0 w-full z-30 border-b border-gray-200 bg-opacity-30 backdrop-filter backdrop-blur-md"
+      class="sticky top-0 w-full z-30 border-b border-gray-200 dark:border-gray-600 backdrop-blur transition-colors duration-500"
     >
       <div
-        class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-3 border-b border-gray-200"
+        class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-3"
       >
         <a href="/" class="flex items-center">
           <span
-            class="self-center text-2xl font-semibold whitespace-nowrap text-black"
+            class="self-center text-2xl font-semibold whitespace-nowrap text-black dark:text-slate-100"
             >Dumpspace</span
           >
         </a>
@@ -73,12 +75,14 @@
           </button>
         </div>
         <div class="md:flex hidden md:block items-center ml-auto">
-          <nav class="leading-6 font-semibold text-slate-700">
-            <ul class="flex space-x-8">
+          <nav
+            class="leading-6 font-semibold text-slate-700 dark:text-slate-100"
+          >
+            <ul class="flex space-x-8 items-center">
               <li>
                 <a
                   href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-                  class="font-semibold transition duration-200 ease-in-out hover:text-blue-500"
+                  class="transition duration-200 ease-in-out hover:text-blue-500"
                   target="_blank"
                   >Discord</a
                 >
@@ -86,16 +90,48 @@
               <li>
                 <a
                   href="/recent"
-                  class="font-semibold transition duration-200 ease-in-out hover:text-blue-500"
+                  class="transition duration-200 ease-in-out hover:text-blue-500"
                   >Recent</a
                 >
               </li>
               <li>
                 <a
                   href="/changelog"
-                  class="font-semibold transition duration-200 ease-in-out hover:text-blue-500"
+                  class="transition duration-200 ease-in-out hover:text-blue-500"
                   >Changelog</a
                 >
+              </li>
+              <li>
+                <button
+                  id="theme-toggle"
+                  type="button"
+                  class="rounded-lg text-sm p-2.5 transition duration-200 ease-in-out hover:text-blue-500"
+                >
+                  <svg
+                    id="theme-toggle-dark-icon"
+                    class="hidden w-5 h-5"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"
+                    ></path>
+                  </svg>
+                  <svg
+                    id="theme-toggle-light-icon"
+                    class="hidden w-5 h-5"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
+                      fill-rule="evenodd"
+                      clip-rule="evenodd"
+                    ></path>
+                  </svg>
+                </button>
               </li>
             </ul>
           </nav>
@@ -110,7 +146,7 @@
         </div>
       </div>
       <div
-        class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-3"
+        class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-3 text-slate-700 dark:text-slate-100"
       >
         <ul class="flex space-x-8 mr-4">
           <li>
@@ -157,13 +193,12 @@
         <div class="flex items-center space-x-1">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="w-4 h-4"
+            class="w-4 h-4 stroke-black dark:stroke-slate-100"
             viewBox="0 0 24 24"
             fill="none"
           >
             <path
               d="M12 7V12H15M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
-              stroke="#000000"
               stroke-width="2"
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -174,7 +209,9 @@
             onclick="getGameInfo('history')"
             class="font-semibold transition duration-200 ease-in-out hover:text-blue-500"
           >
-            <div class="h-2 bg-gray-200 rounded-full w-24 animate-pulse"></div>
+            <div
+              class="h-2 bg-gray-200 dark:bg-slate-700 rounded-full w-24 animate-pulse"
+            ></div>
           </button>
         </div>
       </div>
@@ -182,13 +219,17 @@
 
     <div class="xl:grid xl:grid-cols-4 xl:gap-4 xl:px-32 px-12 top-10">
       <div
-        class="my-16 px-4 py-4 border rounded-lg border-gray-200 relative flex flex-col min-w-0"
+        class="my-16 px-4 py-4 border rounded-lg border-gray-200 relative flex flex-col min-w-0 dark:border-gray-600"
       >
-        <h1 class="font-semibold text-xl mb-2">Classes</h1>
+        <h1
+          class="font-semibold text-xl mb-2 text-slate-700 dark:text-slate-100"
+        >
+          Classes
+        </h1>
         <button
           type="button"
           id="searchButton"
-          class="flex items-center justify-center w-full text-left space-x-1 px-2 h-10 bg-white ring-1 ring-slate-900/10 hover:ring-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm rounded-lg text-slate-400 transition duration-300 ease-in-out hover:shadow-inner"
+          class="flex items-center justify-center w-full text-left space-x-1 px-2 h-10 bg-white ring-1 ring-slate-900/10 hover:ring-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm rounded-lg text-slate-400 transition duration-300 ease-in-out hover:shadow-inner dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-slate-100"
         >
           <svg
             width="24"
@@ -213,38 +254,67 @@
         >
           <div
             id="class-list"
-            class="h-full w-full rounded-md border border-gray-200 overflow-y-auto px-2 py-2 overflow-x-hidden"
+            class="h-full w-full rounded-md border border-gray-200 dark:border-gray-600 overflow-y-auto px-2 py-2 overflow-x-hidden text-slate-700 dark:text-slate-100"
           >
             <div
               id="class-skeleton"
               class="max-w-sm animate-pulse mt-4 mx-2 overflow-x-hidden"
             >
-              <div class="h-4 bg-gray-200 rounded-full w-48 mb-8"></div>
-              <div class="h-4 bg-gray-200 rounded-full w-32 mb-7"></div>
-              <div class="h-4 bg-gray-200 rounded-full w-64 mb-7"></div>
-              <div class="h-4 bg-gray-200 rounded-full w-28 mb-8"></div>
-              <div class="h-4 bg-gray-200 rounded-full w-44 mb-7"></div>
-              <div class="h-4 bg-gray-200 rounded-full w-36 mb-7"></div>
-              <div class="h-4 bg-gray-200 rounded-full w-56 mb-8"></div>
-              <div class="h-4 bg-gray-200 rounded-full w-40 mb-7"></div>
-              <div class="h-4 bg-gray-200 rounded-full w-60 mb-7"></div>
-              <div class="h-4 bg-gray-200 rounded-full w-72 mb-8"></div>
-              <div class="h-4 bg-gray-200 rounded-full w-32"></div>
+              <div
+                class="h-4 bg-slate-200 dark:bg-slate-700 rounded-full w-48 mb-8"
+              ></div>
+              <div
+                class="h-4 bg-slate-200 dark:bg-slate-700 rounded-full w-32 mb-7"
+              ></div>
+              <div
+                class="h-4 bg-slate-200 dark:bg-slate-700 rounded-full w-64 mb-7"
+              ></div>
+              <div
+                class="h-4 bg-slate-200 dark:bg-slate-700 rounded-full w-28 mb-8"
+              ></div>
+              <div
+                class="h-4 bg-slate-200 dark:bg-slate-700 rounded-full w-44 mb-7"
+              ></div>
+              <div
+                class="h-4 bg-slate-200 dark:bg-slate-700 rounded-full w-36 mb-7"
+              ></div>
+              <div
+                class="h-4 bg-slate-200 dark:bg-slate-700 rounded-full w-56 mb-8"
+              ></div>
+              <div
+                class="h-4 bg-slate-200 dark:bg-slate-700 rounded-full w-40 mb-7"
+              ></div>
+              <div
+                class="h-4 bg-slate-200 dark:bg-slate-700 rounded-full w-60 mb-7"
+              ></div>
+              <div
+                class="h-4 bg-slate-200 dark:bg-slate-700 rounded-full w-72 mb-8"
+              ></div>
+              <div
+                class="h-4 bg-slate-200 dark:bg-slate-700 rounded-full w-32"
+              ></div>
             </div>
           </div>
         </div>
       </div>
       <div
-        class="h-[70vh] my-16 px-4 py-4 border rounded-lg border-gray-200 relative flex flex-col min-w-0 col-span-3"
+        class="h-[70vh] my-16 px-4 py-4 border rounded-lg border-gray-200 dark:border-gray-600 relative flex flex-col min-w-0 col-span-3"
       >
         <div class="flex flex-wrap items-center justify-between">
-          <h1 id="class-desc-name" class="flex font-semibold text-xl mb-2">
+          <h1
+            id="class-desc-name"
+            class="flex font-semibold text-xl mb-2 text-slate-700 dark:text-slate-100"
+          >
             <div
               id="class-desc-skeleton"
               class="max-w-sm animate-pulse mt-2 overflow-x-hidden"
             >
-              <div class="h-5 bg-gray-200 rounded-full w-48 mb-3"></div>
-              <div class="h-2.5 bg-gray-200 rounded-full w-32"></div>
+              <div
+                class="h-5 bg-gray-200 dark:bg-slate-700 rounded-full w-48 mb-3"
+              ></div>
+              <div
+                class="h-2.5 bg-gray-200 dark:bg-slate-700 rounded-full w-32"
+              ></div>
             </div>
           </h1>
           <button
@@ -266,16 +336,16 @@
 
         <div
           id="class-desc-inherits"
-          class="text-sm text-gray-500 truncate flex"
+          class="text-sm text-slate-600 truncate flex dark:text-slate-400"
         ></div>
         <nav
-          class="mt-2 relative rounded-lg border border-gray-200 flex divide-x divide-gray-200"
+          class="mt-2 relative rounded-lg border border-gray-200 dark:border-gray-600 flex divide-x divide-gray-200 dark:divide-gray-600 text-slate-700 dark:text-slate-100"
           aria-label="selection-tabs"
         >
           <div
             id="overview-click-div"
             onclick="showOverview()"
-            class="py-2 px-4 cursor-pointer rounded-l-lg group relative min-w-0 flex-1 overflow-hidden font-medium text-sm text-center bg-gray-50 transition duration-200 ease-in-out hover:text-blue-500"
+            class="py-2 px-4 cursor-pointer rounded-l-lg group relative min-w-0 flex-1 overflow-hidden font-medium text-sm text-center bg-gray-50 dark:bg-slate-800 transition duration-200 ease-in-out hover:text-blue-500"
             aria-current="page"
           >
             Overview
@@ -298,11 +368,11 @@
         <div class="min-h-0 h-full w-full pt-4">
           <div
             id="class-list"
-            class="h-full w-full rounded-md border border-gray-200 overflow-y-auto overflow-x-hidden"
+            class="h-full w-full rounded-md border border-gray-200 dark:border-gray-600 overflow-y-auto overflow-x-hidden"
           >
             <div id="overview-items" class="">
               <div
-                class="bg-white sticky top-0 w-full z-5 grid grid-cols-8 font-medium text-sm px-6 text-gray-700 uppercase pt-2 pb-2 border-b border-gray-200 bg-opacity-30 backdrop-filter backdrop-blur-md"
+                class="sticky top-0 w-full z-5 grid grid-cols-8 font-medium text-sm px-6 text-slate-700 dark:text-slate-100 uppercase pt-2 pb-2 border-b border-gray-200 dark:border-gray-600 bg-opacity-30 backdrop-filter backdrop-blur-md"
               >
                 <p class="col-span-3">Type</p>
                 <p class="col-span-3">Member</p>
@@ -314,148 +384,148 @@
                 class="animate-pulse mt-4 mx-6 grid grid-cols-8"
               >
                 <div
-                  class="col-span-3 h-3 bg-gray-200 rounded-full w-48 mb-6"
+                  class="col-span-3 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-48 mb-6"
                 ></div>
                 <div
-                  class="col-span-3 h-3 bg-gray-200 rounded-full w-32 mb-6"
+                  class="col-span-3 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-32 mb-6"
                 ></div>
                 <div
-                  class="col-span-1 h-3 bg-gray-200 rounded-full w-12 mb-6"
+                  class="col-span-1 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-12 mb-6"
                 ></div>
                 <div
-                  class="col-span-1 h-3 bg-gray-200 rounded-full w-12 mb-6 ml-8"
+                  class="col-span-1 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-12 mb-6 ml-8"
                 ></div>
                 <div
-                  class="col-span-3 h-3 bg-gray-200 rounded-full w-44 mb-6"
+                  class="col-span-3 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-44 mb-6"
                 ></div>
                 <div
-                  class="col-span-3 h-3 bg-gray-200 rounded-full w-28 mb-6"
+                  class="col-span-3 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-28 mb-6"
                 ></div>
                 <div
-                  class="col-span-1 h-3 bg-gray-200 rounded-full w-12 mb-6"
+                  class="col-span-1 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-12 mb-6"
                 ></div>
                 <div
-                  class="col-span-1 h-3 bg-gray-200 rounded-full w-10 mb-6 ml-8"
+                  class="col-span-1 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-10 mb-6 ml-8"
                 ></div>
                 <div
-                  class="col-span-3 h-3 bg-gray-200 rounded-full w-32 mb-6"
+                  class="col-span-3 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-32 mb-6"
                 ></div>
                 <div
-                  class="col-span-3 h-3 bg-gray-200 rounded-full w-36 mb-6"
+                  class="col-span-3 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-36 mb-6"
                 ></div>
                 <div
-                  class="col-span-1 h-3 bg-gray-200 rounded-full w-12 mb-6"
+                  class="col-span-1 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-12 mb-6"
                 ></div>
                 <div
-                  class="col-span-1 h-3 bg-gray-200 rounded-full w-12 mb-6 ml-8"
+                  class="col-span-1 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-12 mb-6 ml-8"
                 ></div>
                 <div
-                  class="col-span-3 h-3 bg-gray-200 rounded-full w-16 mb-6"
+                  class="col-span-3 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-16 mb-6"
                 ></div>
                 <div
-                  class="col-span-3 h-3 bg-gray-200 rounded-full w-20 mb-6"
+                  class="col-span-3 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-20 mb-6"
                 ></div>
                 <div
-                  class="col-span-1 h-3 bg-gray-200 rounded-full w-12 mb-6"
+                  class="col-span-1 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-12 mb-6"
                 ></div>
                 <div
-                  class="col-span-1 h-3 bg-gray-200 rounded-full w-8 mb-6 ml-8"
+                  class="col-span-1 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-8 mb-6 ml-8"
                 ></div>
                 <div
-                  class="col-span-3 h-3 bg-gray-200 rounded-full w-24 mb-6"
+                  class="col-span-3 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-24 mb-6"
                 ></div>
                 <div
-                  class="col-span-3 h-3 bg-gray-200 rounded-full w-32 mb-6"
+                  class="col-span-3 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-32 mb-6"
                 ></div>
                 <div
-                  class="col-span-1 h-3 bg-gray-200 rounded-full w-12 mb-6"
+                  class="col-span-1 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-12 mb-6"
                 ></div>
                 <div
-                  class="col-span-1 h-3 bg-gray-200 rounded-full w-16 mb-6 ml-8"
+                  class="col-span-1 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-16 mb-6 ml-8"
                 ></div>
                 <div
-                  class="col-span-3 h-3 bg-gray-200 rounded-full w-36 mb-6"
+                  class="col-span-3 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-36 mb-6"
                 ></div>
                 <div
-                  class="col-span-3 h-3 bg-gray-200 rounded-full w-40 mb-6"
+                  class="col-span-3 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-40 mb-6"
                 ></div>
                 <div
-                  class="col-span-1 h-3 bg-gray-200 rounded-full w-14 mb-6"
+                  class="col-span-1 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-14 mb-6"
                 ></div>
                 <div
-                  class="col-span-1 h-3 bg-gray-200 rounded-full w-12 mb-6 ml-8"
+                  class="col-span-1 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-12 mb-6 ml-8"
                 ></div>
                 <div
-                  class="col-span-3 h-3 bg-gray-200 rounded-full w-48 mb-6"
+                  class="col-span-3 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-48 mb-6"
                 ></div>
                 <div
-                  class="col-span-3 h-3 bg-gray-200 rounded-full w-32 mb-6"
+                  class="col-span-3 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-32 mb-6"
                 ></div>
                 <div
-                  class="col-span-1 h-3 bg-gray-200 rounded-full w-14 mb-6"
+                  class="col-span-1 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-14 mb-6"
                 ></div>
                 <div
-                  class="col-span-1 h-3 bg-gray-200 rounded-full w-12 mb-6 ml-8"
+                  class="col-span-1 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-12 mb-6 ml-8"
                 ></div>
                 <div
-                  class="col-span-3 h-3 bg-gray-200 rounded-full w-44 mb-6"
+                  class="col-span-3 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-44 mb-6"
                 ></div>
                 <div
-                  class="col-span-3 h-3 bg-gray-200 rounded-full w-28 mb-6"
+                  class="col-span-3 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-28 mb-6"
                 ></div>
                 <div
-                  class="col-span-1 h-3 bg-gray-200 rounded-full w-14 mb-6"
+                  class="col-span-1 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-14 mb-6"
                 ></div>
                 <div
-                  class="col-span-1 h-3 bg-gray-200 rounded-full w-10 mb-6 ml-8"
+                  class="col-span-1 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-10 mb-6 ml-8"
                 ></div>
                 <div
-                  class="col-span-3 h-3 bg-gray-200 rounded-full w-32 mb-6"
+                  class="col-span-3 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-32 mb-6"
                 ></div>
                 <div
-                  class="col-span-3 h-3 bg-gray-200 rounded-full w-36 mb-6"
+                  class="col-span-3 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-36 mb-6"
                 ></div>
                 <div
-                  class="col-span-1 h-3 bg-gray-200 rounded-full w-14 mb-6"
+                  class="col-span-1 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-14 mb-6"
                 ></div>
                 <div
-                  class="col-span-1 h-3 bg-gray-200 rounded-full w-12 mb-6 ml-8"
+                  class="col-span-1 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-12 mb-6 ml-8"
                 ></div>
                 <div
-                  class="col-span-3 h-3 bg-gray-200 rounded-full w-40 mb-6"
+                  class="col-span-3 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-40 mb-6"
                 ></div>
                 <div
-                  class="col-span-3 h-3 bg-gray-200 rounded-full w-20 mb-6"
+                  class="col-span-3 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-20 mb-6"
                 ></div>
                 <div
-                  class="col-span-1 h-3 bg-gray-200 rounded-full w-14 mb-6"
+                  class="col-span-1 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-14 mb-6"
                 ></div>
                 <div
-                  class="col-span-1 h-3 bg-gray-200 rounded-full w-8 mb-6 ml-8"
+                  class="col-span-1 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-8 mb-6 ml-8"
                 ></div>
                 <div
-                  class="col-span-3 h-3 bg-gray-200 rounded-full w-32 mb-6"
+                  class="col-span-3 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-32 mb-6"
                 ></div>
                 <div
-                  class="col-span-3 h-3 bg-gray-200 rounded-full w-32 mb-6"
+                  class="col-span-3 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-32 mb-6"
                 ></div>
                 <div
-                  class="col-span-1 h-3 bg-gray-200 rounded-full w-14 mb-6"
+                  class="col-span-1 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-14 mb-6"
                 ></div>
                 <div
-                  class="col-span-1 h-3 bg-gray-200 rounded-full w-16 mb-6 ml-8"
+                  class="col-span-1 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-16 mb-6 ml-8"
                 ></div>
                 <div
-                  class="col-span-3 h-3 bg-gray-200 rounded-full w-36 mb-6"
+                  class="col-span-3 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-36 mb-6"
                 ></div>
                 <div
-                  class="col-span-3 h-3 bg-gray-200 rounded-full w-40 mb-6"
+                  class="col-span-3 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-40 mb-6"
                 ></div>
                 <div
-                  class="col-span-1 h-3 bg-gray-200 rounded-full w-14 mb-6"
+                  class="col-span-1 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-14 mb-6"
                 ></div>
                 <div
-                  class="col-span-1 h-3 bg-gray-200 rounded-full w-12 mb-6 ml-8"
+                  class="col-span-1 h-3 bg-gray-200 dark:bg-slate-700 rounded-full w-12 mb-6 ml-8"
                 ></div>
               </div>
             </div>
@@ -466,7 +536,7 @@
                   id="struct-items-textarea"
                   rows="19"
                   cols="100"
-                  class="h-full w-full resize-none whitespace-pre text-gray-800 dark:text-white"
+                  class="h-full w-full resize-none whitespace-pre text-gray-800 dark:text-white dark:bg-slate-900"
                 >
 Loading...</textarea
                 >
@@ -479,7 +549,7 @@ Loading...</textarea
                   id="MDK-items-textarea"
                   rows="19"
                   cols="100"
-                  class="h-full w-full resize-none whitespace-pre text-gray-800 dark:text-white"
+                  class="h-full w-full resize-none whitespace-pre text-gray-800 dark:text-white dark:bg-slate-900"
                 >
 Loading...</textarea
                 >
@@ -555,7 +625,7 @@ Loading...</textarea
       </button>
     </div>
 
-    <script src="GameHandler.js"></script>
     <script src="shared.js"></script>
+    <script src="GameHandler.js"></script>
   </body>
 </html>

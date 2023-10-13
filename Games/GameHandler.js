@@ -150,12 +150,16 @@ async function displayCurrentGame() {
   console.log("crunching latest data for: " + gameDirectory);
 
   if (UrlParams["type"] === "classes") {
-    const response = await fetch(gameDirectory + "ClassesInfo.json");
-    CurrentInfoJson = await response.json();
+    const response = await decompressJSONByURL(
+      gameDirectory + "ClassesInfo.json.gz"
+    );
+    CurrentInfoJson = JSON.parse(response);
     currentType = "C";
   } else if (UrlParams["type"] === "structs") {
-    const response = await fetch(gameDirectory + "StructsInfo.json");
-    CurrentInfoJson = await response.json();
+    const response = await decompressJSONByURL(
+      gameDirectory + "StructsInfo.json.gz"
+    );
+    CurrentInfoJson = JSON.parse(response);
     currentType = "S";
   }
 
@@ -257,6 +261,7 @@ function displayCurrentStructOrClass(CName) {
             "py-2",
             "border-b",
             "border-gray-200",
+            "dark:border-gray-600",
             "text-left",
             "w-full",
             "transition",
@@ -328,11 +333,13 @@ function displayOverviewPage(members) {
       "grid-cols-8",
       "text-sm",
       "px-6",
-      "text-gray-600",
+      "text-slate-700",
+      "dark:text-slate-100",
       "pt-2",
       "pb-2",
       "border-b",
-      "border-gray-200"
+      "border-gray-200",
+      "dark:border-gray-600"
     );
 
     const memberNameButton = document.createElement("button");
@@ -341,7 +348,7 @@ function displayOverviewPage(members) {
 
     const memberType = member[Object.keys(member)[0]][3];
     if (memberType === "C" || memberType === "S") {
-      memberNameButton.classList.add("underline");
+      memberNameButton.classList.add("underline", "dark:decoration-gray-400");
       memberNameButton.addEventListener("click", function () {
         if (currentType != memberType) {
           reloadWithNewCName(memberNameButton.textContent, memberType);
@@ -567,15 +574,16 @@ function showOverview() {
 
   if (itemOverview != null && itemOverview.classList.contains("hidden"))
     itemOverview.classList.remove("hidden");
-  if (itemClickDiv != null) itemClickDiv.classList.add("bg-gray-50");
+  if (itemClickDiv != null)
+    itemClickDiv.classList.add("bg-gray-50", "dark:bg-slate-800");
 
   if (structOverview != null) structOverview.classList.add("hidden");
   if (structClickDiv != null && structClickDiv.classList.contains("bg-gray-50"))
-    structClickDiv.classList.remove("bg-gray-50");
+    structClickDiv.classList.remove("bg-gray-50", "dark:bg-slate-800");
 
   if (MDKOverview != null) MDKOverview.classList.add("hidden");
   if (MDKClickDiv != null && MDKClickDiv.classList.contains("bg-gray-50"))
-    MDKClickDiv.classList.remove("bg-gray-50");
+    MDKClickDiv.classList.remove("bg-gray-50", "dark:bg-slate-800");
 }
 
 function showStruct() {
@@ -588,15 +596,16 @@ function showStruct() {
 
   if (structOverview != null && structOverview.classList.contains("hidden"))
     structOverview.classList.remove("hidden");
-  if (structClickDiv != null) structClickDiv.classList.add("bg-gray-50");
+  if (structClickDiv != null)
+    structClickDiv.classList.add("bg-gray-50", "dark:bg-slate-800");
 
   if (itemOverview != null) itemOverview.classList.add("hidden");
   if (itemClickDiv != null && itemClickDiv.classList.contains("bg-gray-50"))
-    itemClickDiv.classList.remove("bg-gray-50");
+    itemClickDiv.classList.remove("bg-gray-50", "dark:bg-slate-800");
 
   if (MDKOverview != null) MDKOverview.classList.add("hidden");
   if (MDKClickDiv != null && MDKClickDiv.classList.contains("bg-gray-50"))
-    MDKClickDiv.classList.remove("bg-gray-50");
+    MDKClickDiv.classList.remove("bg-gray-50", "dark:bg-slate-800");
 }
 
 function showMDK() {
@@ -609,15 +618,16 @@ function showMDK() {
 
   if (MDKOverview != null && MDKOverview.classList.contains("hidden"))
     MDKOverview.classList.remove("hidden");
-  if (MDKClickDiv != null) MDKClickDiv.classList.add("bg-gray-50");
+  if (MDKClickDiv != null)
+    MDKClickDiv.classList.add("bg-gray-50", "dark:bg-slate-800");
 
   if (structOverview != null) structOverview.classList.add("hidden");
   if (structClickDiv != null && structClickDiv.classList.contains("bg-gray-50"))
-    structClickDiv.classList.remove("bg-gray-50");
+    structClickDiv.classList.remove("bg-gray-50", "dark:bg-slate-800");
 
   if (itemOverview != null) itemOverview.classList.add("hidden");
   if (itemClickDiv != null && itemClickDiv.classList.contains("bg-gray-50"))
-    itemClickDiv.classList.remove("bg-gray-50");
+    itemClickDiv.classList.remove("bg-gray-50", "dark:bg-slate-800");
 }
 
 if (
