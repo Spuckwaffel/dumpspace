@@ -70,6 +70,50 @@ async function decompressJSONByURL(URL) {
   return decompressedText;
 }
 
+function fetchAndConvertToBase64(url) {
+  return fetch(url)
+    .then(function (response) {
+      return response.blob();
+    })
+    .then(function (blob) {
+      return new Promise(function (resolve, reject) {
+        const reader = new FileReader();
+        reader.onerror = reject;
+        reader.onload = function () {
+          resolve(reader.result);
+        };
+        reader.readAsDataURL(blob);
+      });
+    });
+}
+
+async function decompressAndCheckCacheByURL(URL, updateTS) {
+  var cache = localStorage.getItem(URL);
+
+  if (cache) {
+    const gezipedData = atob(cache);
+    const gzipedDataArray = Uint8Array.from(gezipedData, (c) =>
+      c.charCodeAt(0)
+    );
+    const ungzipedData = pako.ungzip(gzipedDataArray);
+
+    const plaintext = new TextDecoder().decode(ungzipedData);
+    var JSONData = JSON.parse(plaintext);
+    var updatedAt = JSONData.updated_at;
+
+    if (updatedAt == updateTS) return plaintext;
+  }
+
+  const base64EncodedGZip = await fetchAndConvertToBase64(URL);
+
+  localStorage.setItem(
+    URL,
+    base64EncodedGZip.replace(/^data:application\/gzip;base64,/, "")
+  );
+
+  return decompressJSONByURL(URL);
+}
+
 var themeToggleDarkIcon = document.getElementById("theme-toggle-dark-icon");
 var themeToggleLightIcon = document.getElementById("theme-toggle-light-icon");
 

@@ -151,14 +151,16 @@ async function displayCurrentGame() {
   console.log("crunching latest data for: " + gameDirectory);
 
   if (UrlParams["type"] === "classes") {
-    const response = await decompressJSONByURL(
-      gameDirectory + "ClassesInfo.json.gz"
+    const response = await decompressAndCheckCacheByURL(
+      gameDirectory + "ClassesInfo.json.gz",
+      game.uploaded
     );
     CurrentInfoJson = JSON.parse(response);
     currentType = "C";
   } else if (UrlParams["type"] === "structs") {
-    const response = await decompressJSONByURL(
-      gameDirectory + "StructsInfo.json.gz"
+    const response = await decompressAndCheckCacheByURL(
+      gameDirectory + "StructsInfo.json.gz",
+      game.uploaded
     );
     CurrentInfoJson = JSON.parse(response);
     currentType = "S";
