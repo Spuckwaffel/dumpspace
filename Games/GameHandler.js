@@ -26,11 +26,11 @@ function getUrlParams(url) {
 }
 
 //current URL params
-const UrlParams = getUrlParams();
+var UrlParams = getUrlParams();
 var currentURL = window.location.href;
 
 //sets a valid url with params for the target game
-function getGameInfo(info) {
+function getGameInfo(info, reload = true) {
   if (Object.keys(UrlParams).length == 0) return;
 
   if (Object.keys(UrlParams)[0] != "hash") return;
@@ -40,11 +40,11 @@ function getGameInfo(info) {
   // no matter what, reset the url params
   currentURLWithoutParams += "hash=" + UrlParams["hash"];
 
-  // Update the browser's URL without refreshing the page
   history.pushState(null, null, currentURLWithoutParams + "&type=" + info);
 
-  // Reload the page to apply the changes
-  location.reload();
+  if (reload) location.reload();
+
+  UrlParams = getUrlParams();
 }
 
 //reloads the website with the CName and its type (C,S,F,E)
@@ -89,9 +89,9 @@ function reloadWithNewCName(CName, newType) {
 //error? go to home page
 function returnHome() {
   history.pushState(null, null, window.location.origin);
-  console.log("returnHome called? Unexpected issue?");
-  throw e;
-  //location.reload();
+  //console.log("returnHome called? Unexpected issue?");
+  //throw e;
+  location.reload();
 }
 
 //make sure this is always valid
@@ -103,6 +103,7 @@ if (classDivScroll.offsetHeight == 256)
 
 classDiv.style.height = classDiv.offsetHeight + "px";
 classDiv.style.width = "100%";
+console.log(classDiv.style.height);
 
 window.addEventListener("resize", function () {
   //support downscaling, upscaling wont work and wont fix, stop resizing ur window
@@ -198,6 +199,7 @@ async function displayCurrentGame() {
 var oldFocussedDataDiv = null;
 var formattedArrayDataValid = false;
 var formattedArrayData = [];
+var dVanillaRecyclerView = null;
 //only works on current data, if different type than current, call reloadwithnewdata
 function displayCurrentStructOrClass(CName) {
   //fixup cnames having pointers
@@ -225,24 +227,26 @@ function displayCurrentStructOrClass(CName) {
   currentURL = currentURLWithoutParams;
 
   //only needed on website refresh
-  var scrollToIdx = null;
+  var scrollToIdx = 0;
 
   var targetIndexData = null;
 
   var idx = 0;
   for (const gameClass of CurrentInfoJson.data) {
+    idx++;
     if (!formattedArrayDataValid)
       formattedArrayData.push(Object.keys(gameClass)[0]);
 
     if (CName !== null && Object.keys(gameClass)[0] === CName) {
       scrollToIdx = idx;
       targetIndexData = gameClass;
-    } else idx++;
+    }
   }
 
   //
-  if (targetIndexData === null) {
-    if (CName !== Object.keys(CurrentInfoJson.data[0])[0]) {
+  if (targetIndexData == null) {
+    if (CName != Object.keys(CurrentInfoJson.data[0])[0]) {
+      console.log("coould not find " + CName);
       showErrorToast("Could not find type " + CName + "!");
       displayCurrentStructOrClass(Object.keys(CurrentInfoJson.data[0])[0]);
       return;
@@ -250,7 +254,7 @@ function displayCurrentStructOrClass(CName) {
   }
 
   if (!formattedArrayDataValid) {
-    new VanillaRecyclerView(classDiv, {
+    dVanillaRecyclerView = new VanillaRecyclerView(classDiv, {
       data: formattedArrayData,
       renderer: class {
         initialize(params) {
@@ -293,11 +297,9 @@ function displayCurrentStructOrClass(CName) {
       },
     });
 
-    if (scrollToIdx !== null) {
+    if (scrollToIdx > 0) {
       // calculating the box with a fixed size of 50px lol
-      const containerHeight = classDiv.clientHeight;
-      const buttonTop = scrollToIdx * 50 - classDiv.offsetTop;
-      const scrollTo = buttonTop - containerHeight / 2 + 100;
+      const scrollTo = scrollToIdx * 50 + 200;
 
       // Scroll the container to center the button
       //classDiv.style.scrollBehavior = "smooth";
@@ -639,13 +641,18 @@ if (
 }
 
 if (Object.keys(UrlParams).length === 1) {
-  getGameInfo("classes");
+  getGameInfo("classes", false);
 }
 
 //add reload listener
 window.addEventListener("popstate", function () {
   var oldParams = getUrlParams(currentURL);
   var newParams = getUrlParams();
+  console.log(
+    oldParams[Object.keys(oldParams)[1]] +
+      ":" +
+      newParams[Object.keys(newParams)[1]]
+  );
   if (
     newParams == null ||
     newParams.length < 3 ||
@@ -656,8 +663,10 @@ window.addEventListener("popstate", function () {
     oldParams[Object.keys(oldParams)[1]] !==
       newParams[Object.keys(newParams)[1]] ||
     newParams[Object.keys(newParams)[2]] == null
-  )
+  ) {
     location.reload();
+    return;
+  }
 
   displayCurrentStructOrClass(newParams[Object.keys(newParams)[2]]);
 });
@@ -682,3 +691,29 @@ function showErrorToast(name) {
 
   if (toastDivText != null) toastDivText.textContent = name;
 }
+
+const searchInput = document.getElementById("class-search-input");
+const searchCancelButton = document.getElementById("search-cancel-button");
+
+function handleSearchInput() {
+  var filter = searchInput.value.toUpperCase();
+  var formattedArrayDataRef = [];
+  if (filter.length > 0) {
+    searchCancelButton.classList.remove("hidden");
+  } else searchCancelButton.classList.add("hidden");
+  if (filter === "") {
+    formattedArrayDataRef = formattedArrayData;
+  } else {
+    for (i = 0; i < formattedArrayData.length; i++) {
+      if (formattedArrayData[i].toUpperCase().includes(filter) === true) {
+        formattedArrayDataRef.push(formattedArrayData[i]);
+      }
+    }
+  }
+  dVanillaRecyclerView.setData(formattedArrayDataRef);
+  dVanillaRecyclerView.calculateSize();
+}
+searchCancelButton.addEventListener("click", function () {
+  searchInput.value = "";
+  handleSearchInput();
+});

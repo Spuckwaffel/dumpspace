@@ -1,0 +1,28 @@
+.recycler_view_root {
+  padding: 0;
+  margin: 0;
+}
+.recycler_view_root.vertical {
+  overflow-y: auto;
+}
+.recycler_view_root.vertical .recycler_view_container,
+.recycler_view_root.vertical .recycler_view_container .recycler_view_item {
+  width: 100%;
+}
+.recycler_view_root.horizontal {
+  overflow-x: auto;
+}
+.recycler_view_root.horizontal .recycler_view_container,
+.recycler_view_root.horizontal .recycler_view_container .recycler_view_item {
+  height: 100%;
+}
+.recycler_view_root .recycler_view_container {
+  position: relative;
+}
+.recycler_view_root .recycler_view_container .recycler_view_item {
+  position: absolute;
+  display: flex;
+}
+.recycler_view_root .recycler_view_container .recycler_view_item.hidden {
+  visibility: hidden;
+}

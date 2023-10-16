@@ -20,6 +20,7 @@
     <meta property="og:url" content="https://spuckwaffel.com/dumpspace/" />
     <meta property="og:site_name" content="spuckwaffel.com/dumpspace" />
 
+    <!--
     <link
       rel="icon"
       type="image/png"
@@ -33,16 +34,17 @@
       href="Images/favicon-16x16.png"
     />
 
-    <!--<script src="https://cdn.tailwindcss.com"></script>-->
+    <script src="https://cdn.tailwindcss.com"></script>
+    -->
 
     <link rel="stylesheet" type="text/css" href="../tailwind.css" />
   </head>
   <body class="bg-white dark:bg-slate-900">
     <link
       rel="stylesheet"
-      href="https://unpkg.com/vanilla-recycler-view@latest/dist/vanilla-recycler-view.min.css"
+      href="../VanillaRecyclerView/vanilla-recycler-view.min.css"
     />
-    <script src="https://unpkg.com/vanilla-recycler-view@latest/dist/vanilla-recycler-view.min.js"></script>
+    <script src="../VanillaRecyclerView/vanilla-recycler-view.min.js"></script>
 
     <nav
       class="sticky top-0 w-full z-30 border-b border-gray-200 dark:border-gray-600 backdrop-blur transition-colors duration-500"
@@ -226,9 +228,8 @@
         >
           Classes
         </h1>
-        <button
-          type="button"
-          id="searchButton"
+        <div
+          id="searchDiv"
           class="flex items-center justify-center w-full text-left space-x-1 px-2 h-10 bg-white ring-1 ring-slate-900/10 hover:ring-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm rounded-lg text-slate-400 transition duration-300 ease-in-out hover:shadow-inner dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-slate-100"
         >
           <svg
@@ -245,8 +246,30 @@
             <path d="m19 19-3.5-3.5"></path>
             <circle cx="11" cy="11" r="6"></circle>
           </svg>
-          <p class="flex-auto">Search...</p>
-        </button>
+          <input
+            id="class-search-input"
+            onkeyup="handleSearchInput()"
+            class="w-full !outline-none bg-white dark:bg-gray-700 text-slate-700 placeholder-gray-600 dark:placeholder-gray-400 dark:text-white transition duration-300 ease-in-out"
+            placeholder="Search Class..."
+            required
+          />
+          <button
+            id="search-cancel-button"
+            class="text-slate-300 dark:text-slate-400 hidden"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 30 30"
+              width="20px"
+              height="20px"
+              fill="currentColor"
+            >
+              <path
+                d="M15,3C8.373,3,3,8.373,3,15c0,6.627,5.373,12,12,12s12-5.373,12-12C27,8.373,21.627,3,15,3z M16.414,15 c0,0,3.139,3.139,3.293,3.293c0.391,0.391,0.391,1.024,0,1.414c-0.391,0.391-1.024,0.391-1.414,0C18.139,19.554,15,16.414,15,16.414 s-3.139,3.139-3.293,3.293c-0.391,0.391-1.024,0.391-1.414,0c-0.391-0.391-0.391-1.024,0-1.414C10.446,18.139,13.586,15,13.586,15 s-3.139-3.139-3.293-3.293c-0.391-0.391-0.391-1.024,0-1.414c0.391-0.391,1.024-0.391,1.414,0C11.861,10.446,15,13.586,15,13.586 s3.139-3.139,3.293-3.293c0.391-0.391,1.024-0.391,1.414,0c0.391,0.391,0.391,1.024,0,1.414C19.554,11.861,16.414,15,16.414,15z"
+              />
+            </svg>
+          </button>
+        </div>
 
         <div
           class="h-64 xl:min-h-0 xl:h-full w-full pt-4"
@@ -578,7 +601,7 @@ Loading...</textarea
 
     <div
       id="toast-div"
-      class="fixed flex items-center p-4 bg-white rounded-lg shadow z-40 bottom-0 right-0 mx-8 mb-8 opacity-0 transition-opacity duration-300"
+      class="fixed flex items-center p-4 bg-white rounded-lg shadow z-40 bottom-0 right-0 mx-8 mb-8 opacity-0"
       role="alert"
     >
       <div
