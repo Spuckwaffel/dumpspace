@@ -34,20 +34,21 @@ function getGameInfo(info, reload = true) {
   if (Object.keys(UrlParams).length == 0) return;
 
   if (Object.keys(UrlParams)[0] != "hash") return;
-  var currentURLWithoutParams =
-    window.location.origin + window.location.pathname + "?";
+  var newURL = window.location.origin + window.location.pathname + "?";
 
   // no matter what, reset the url params
-  currentURLWithoutParams += "hash=" + UrlParams["hash"];
+  newURL += "hash=" + UrlParams["hash"];
 
-  history.pushState(null, null, currentURLWithoutParams + "&type=" + info);
+  history.pushState(null, null, newURL + "&type=" + info);
+
+  console.log("[getGameInfo] pushing " + newURL + "&type=" + info);
 
   if (reload) location.reload();
 
   UrlParams = getUrlParams();
 }
 
-//reloads the website with the CName and its type (C,S,F,E)
+//reloads the website with the CName and its type (C,S,D,E)
 //only call if the current type does not match the new type
 function reloadWithNewCName(CName, newType) {
   //params always need hash and type
@@ -59,17 +60,18 @@ function reloadWithNewCName(CName, newType) {
   //not supported type param?
   if (
     Object.keys(UrlParams)[1] != "type" ||
-    (UrlParams["type"] != "classes" && UrlParams["type"] != "structs")
+    (UrlParams["type"] != "classes" &&
+      UrlParams["type"] != "structs" &&
+      UrlParams["type"] != "functions")
   )
     return;
 
   if (newType == null) return;
 
-  var currentURLWithoutParams =
-    window.location.origin + window.location.pathname + "?";
+  var newURL = window.location.origin + window.location.pathname + "?";
 
   // no matter what, reset the url params
-  currentURLWithoutParams += "hash=" + UrlParams["hash"];
+  newURL += "hash=" + UrlParams["hash"];
 
   //remove pointers
   if (CName.charAt(CName.length - 1) === "*") {
@@ -78,10 +80,12 @@ function reloadWithNewCName(CName, newType) {
 
   console.log("received type " + newType);
 
-  if (newType === "C") currentURLWithoutParams += "&type=classes";
-  else if (newType === "S") currentURLWithoutParams += "&type=structs";
+  if (newType === "C") newURL += "&type=classes";
+  else if (newType === "S") newURL += "&type=structs";
+  else if (newType === "F") newURL += "&type=functions";
 
-  history.pushState(null, null, currentURLWithoutParams + "&idx=" + CName);
+  console.log("[reloadWithNewCName] pushing " + newURL + "&idx=" + CName);
+  history.pushState(null, null, newURL + "&idx=" + CName);
   // Reload the page to apply the changes
   location.reload();
 }
@@ -138,7 +142,9 @@ async function displayCurrentGame() {
   //not supported type param?
   if (
     Object.keys(UrlParams)[1] != "type" ||
-    (UrlParams["type"] != "classes" && UrlParams["type"] != "structs")
+    (UrlParams["type"] != "classes" &&
+      UrlParams["type"] != "structs" &&
+      UrlParams["type"] != "functions")
   )
     returnHome();
 
@@ -148,7 +154,9 @@ async function displayCurrentGame() {
 
   const gameDirectory = game.engine + "/" + game.location + "/";
 
-  console.log("crunching latest data for: " + gameDirectory);
+  console.log(
+    "crunching latest data for: " + gameDirectory + " - " + UrlParams["type"]
+  );
 
   if (UrlParams["type"] === "classes") {
     const response = await decompressAndCheckCacheByURL(
@@ -164,8 +172,16 @@ async function displayCurrentGame() {
     );
     CurrentInfoJson = JSON.parse(response);
     currentType = "S";
+  } else if (UrlParams["type"] === "functions") {
+    const response = await decompressAndCheckCacheByURL(
+      gameDirectory + "FunctionsInfo.json.gz",
+      game.uploaded
+    );
+    CurrentInfoJson = JSON.parse(response);
+    currentType = "F";
   }
 
+  console.log(CurrentInfoJson);
   //no data?
   if (CurrentInfoJson == null) returnHome();
 
@@ -195,7 +211,7 @@ async function displayCurrentGame() {
 
   console.log("chose name " + targetClassName + " for displaying...");
 
-  displayCurrentStructOrClass(targetClassName);
+  displayCurrentType(targetClassName);
 }
 
 var oldFocussedDataDiv = null;
@@ -203,7 +219,8 @@ var formattedArrayDataValid = false;
 var formattedArrayData = [];
 var dVanillaRecyclerView = null;
 //only works on current data, if different type than current, call reloadwithnewdata
-function displayCurrentStructOrClass(CName) {
+function displayCurrentType(CName) {
+  console.log("trying to display " + CName);
   //fixup cnames having pointers
   if (CName.charAt(CName.length - 1) === "*") {
     CName = CName.slice(0, -1);
@@ -211,22 +228,18 @@ function displayCurrentStructOrClass(CName) {
 
   //url specific stuff for history
 
-  var currentURLWithoutParams =
-    window.location.origin + window.location.pathname + "?";
-
   // no matter what, reset the url params
-  currentURLWithoutParams += "hash=" + UrlParams["hash"];
+  var newURL = "?hash=" + UrlParams["hash"];
 
-  if (currentType === "C") currentURLWithoutParams += "&type=classes";
-  else if (currentType === "S") currentURLWithoutParams += "&type=structs";
+  if (currentType === "C") newURL += "&type=classes";
+  else if (currentType === "S") newURL += "&type=structs";
+  else if (currentType === "F") newURL += "&type=functions";
 
-  currentURLWithoutParams += "&idx=" + CName;
+  newURL += "&idx=" + CName;
 
-  if (window.location.href !== currentURLWithoutParams) {
-    history.pushState(null, null, currentURLWithoutParams);
-  }
-
-  currentURL = currentURLWithoutParams;
+  const oldURL = currentURL;
+  currentURL = window.location.origin + window.location.pathname + newURL;
+  UrlParams = getUrlParams(newURL);
 
   //only needed on website refresh
   var scrollToIdx = 0;
@@ -248,11 +261,22 @@ function displayCurrentStructOrClass(CName) {
   //
   if (targetIndexData == null) {
     if (CName != Object.keys(CurrentInfoJson.data[0])[0]) {
-      console.log("coould not find " + CName);
-      showErrorToast("Could not find type " + CName + "!");
-      displayCurrentStructOrClass(Object.keys(CurrentInfoJson.data[0])[0]);
+      console.log("could not find " + CName);
+      showToast("Could not find type " + CName + "!");
+      //go back to older one that worked
+      const paramsBefore = getUrlParams("." + oldURL.split("?")[1]);
+      //guaranteed to be valid
+      if (oldURL === currentURL)
+        displayCurrentType(Object.keys(CurrentInfoJson.data[0])[0]);
+      else displayCurrentType(paramsBefore[Object.keys(paramsBefore)[2]]);
       return;
     }
+  }
+
+  //now we can push, the entry is valid. we do this to not push invalid shit
+  if (window.location.href !== currentURL) {
+    console.log("pushed " + currentURL + " to history");
+    history.pushState(null, "", currentURL);
   }
 
   if (!formattedArrayDataValid) {
@@ -289,7 +313,7 @@ function displayCurrentStructOrClass(CName) {
             }
             oldFocussedDataDiv = event.target;
             event.target.classList.add("bg-gray-600/10");
-            displayCurrentStructOrClass(params.data);
+            displayCurrentType(params.data);
           });
         }
         getLayout() {
@@ -310,7 +334,9 @@ function displayCurrentStructOrClass(CName) {
     formattedArrayDataValid = true;
   }
 
-  displayMembers(CName, targetIndexData);
+  if (currentType === "C" || currentType === "S")
+    displayMembers(CName, targetIndexData);
+  if (currentType === "F") displayFunctions(CName, targetIndexData);
 }
 
 //save them, used by displayOverviewPage to restore the sticky bar
@@ -356,7 +382,7 @@ function displayOverviewPage(members) {
       memberNameButton.addEventListener("click", function () {
         if (currentType != memberType) {
           reloadWithNewCName(memberNameButton.textContent, memberType);
-        } else displayCurrentStructOrClass(memberNameButton.textContent);
+        } else displayCurrentType(memberNameButton.textContent);
       });
     } else memberNameButton.classList.add("cursor-default");
 
@@ -535,7 +561,7 @@ function displayMembers(CName, data) {
         const superButton = document.createElement("button");
 
         superButton.addEventListener("click", function () {
-          displayCurrentStructOrClass(superClass);
+          displayCurrentType(superClass);
         });
         superButton.classList.add(
           "transition",
@@ -563,8 +589,65 @@ function displayMembers(CName, data) {
     document.getElementById("overview-items-skeleton").remove();
   }
 
+  if (document.getElementById("class-list-name") != null) {
+    document.getElementById("class-list-name").textContent =
+      currentType === "C" ? "Classes" : "Structs";
+  }
+
   if (document.getElementById("class-skeleton") != null) {
     document.getElementById("class-skeleton").remove();
+  }
+}
+
+function displayFunctions(CName, data) {
+  const funcs = data[Object.keys(data)[0]];
+
+  for (const func of funcs) {
+    const memberName = Object.keys(func)[0];
+    console.log(memberName);
+    for (const item of func[memberName]) {
+      console.log(item);
+    }
+    const returnType = func[memberName][0];
+    console.log("type: " + returnType);
+    const clickableReturn = func[memberName][1];
+    console.log("clickableReturn: " + clickableReturn);
+    const params = func[memberName][2];
+    if (params.length > 0) {
+      console.log("params.length: " + params.length);
+      for (const param of params) {
+        console.log("paramType: " + param[0]);
+        console.log("paramName: " + param[1]);
+      }
+    }
+  }
+
+  if (document.getElementById("class-desc-name") !== null)
+    document.getElementById("class-desc-name").textContent = CName;
+
+  if (document.getElementById("class-list-name") != null) {
+    document.getElementById("class-list-name").textContent = "Functions";
+  }
+
+  //theres only one tab available
+  if (document.getElementById("selection-tabs") != null) {
+    document.getElementById("selection-tabs").remove();
+  }
+
+  if (document.getElementById("class-skeleton") != null) {
+    document.getElementById("class-skeleton").remove();
+  }
+
+  if (document.getElementById("overview-items-skeleton") != null) {
+    document.getElementById("overview-items-skeleton").remove();
+  }
+
+  //remove all children, in function viewer everything works different
+
+  return;
+  const itemsOverviewDiv = document.getElementById("overview-items");
+  while (itemsOverviewDiv.firstChild) {
+    itemsOverviewDiv.removeChild(itemsOverviewDiv.firstChild);
   }
 }
 
@@ -576,17 +659,16 @@ function showOverview() {
   var MDKOverview = document.getElementById("MDK-items");
   var MDKClickDiv = document.getElementById("mdk-click-div");
 
-  if (itemOverview != null && itemOverview.classList.contains("hidden"))
-    itemOverview.classList.remove("hidden");
+  if (itemOverview != null) itemOverview.classList.remove("hidden");
   if (itemClickDiv != null)
     itemClickDiv.classList.add("bg-gray-50", "dark:bg-slate-800");
 
   if (structOverview != null) structOverview.classList.add("hidden");
-  if (structClickDiv != null && structClickDiv.classList.contains("bg-gray-50"))
+  if (structClickDiv != null)
     structClickDiv.classList.remove("bg-gray-50", "dark:bg-slate-800");
 
   if (MDKOverview != null) MDKOverview.classList.add("hidden");
-  if (MDKClickDiv != null && MDKClickDiv.classList.contains("bg-gray-50"))
+  if (MDKClickDiv != null)
     MDKClickDiv.classList.remove("bg-gray-50", "dark:bg-slate-800");
 }
 
@@ -598,17 +680,16 @@ function showStruct() {
   var MDKOverview = document.getElementById("MDK-items");
   var MDKClickDiv = document.getElementById("mdk-click-div");
 
-  if (structOverview != null && structOverview.classList.contains("hidden"))
-    structOverview.classList.remove("hidden");
+  if (structOverview != null) structOverview.classList.remove("hidden");
   if (structClickDiv != null)
     structClickDiv.classList.add("bg-gray-50", "dark:bg-slate-800");
 
   if (itemOverview != null) itemOverview.classList.add("hidden");
-  if (itemClickDiv != null && itemClickDiv.classList.contains("bg-gray-50"))
+  if (itemClickDiv != null)
     itemClickDiv.classList.remove("bg-gray-50", "dark:bg-slate-800");
 
   if (MDKOverview != null) MDKOverview.classList.add("hidden");
-  if (MDKClickDiv != null && MDKClickDiv.classList.contains("bg-gray-50"))
+  if (MDKClickDiv != null)
     MDKClickDiv.classList.remove("bg-gray-50", "dark:bg-slate-800");
 }
 
@@ -620,17 +701,16 @@ function showMDK() {
   var MDKOverview = document.getElementById("MDK-items");
   var MDKClickDiv = document.getElementById("mdk-click-div");
 
-  if (MDKOverview != null && MDKOverview.classList.contains("hidden"))
-    MDKOverview.classList.remove("hidden");
+  if (MDKOverview != null) MDKOverview.classList.remove("hidden");
   if (MDKClickDiv != null)
     MDKClickDiv.classList.add("bg-gray-50", "dark:bg-slate-800");
 
   if (structOverview != null) structOverview.classList.add("hidden");
-  if (structClickDiv != null && structClickDiv.classList.contains("bg-gray-50"))
+  if (structClickDiv != null)
     structClickDiv.classList.remove("bg-gray-50", "dark:bg-slate-800");
 
   if (itemOverview != null) itemOverview.classList.add("hidden");
-  if (itemClickDiv != null && itemClickDiv.classList.contains("bg-gray-50"))
+  if (itemClickDiv != null)
     itemClickDiv.classList.remove("bg-gray-50", "dark:bg-slate-800");
 }
 
@@ -670,13 +750,15 @@ window.addEventListener("popstate", function () {
     return;
   }
 
-  displayCurrentStructOrClass(newParams[Object.keys(newParams)[2]]);
+  displayCurrentType(newParams[Object.keys(newParams)[2]]);
 });
 
 //display! yay!
 displayCurrentGame();
 
 const toastDiv = document.getElementById("toast-div");
+const toastCheck = document.getElementById("toast-check");
+const toastError = document.getElementById("toast-error");
 const toastDivText = document.getElementById("toast-div-text");
 
 toastDiv.addEventListener("click", function () {
@@ -685,13 +767,26 @@ toastDiv.addEventListener("click", function () {
   toastDiv.classList.add("opacity-0");
 });
 
-function showErrorToast(name) {
+document.getElementById("copy-url").addEventListener("click", function () {
+  navigator.clipboard.writeText(window.location.href);
+  showToast("Copied URL to clipboard!", false);
+});
+
+function showToast(name, error = true) {
   if (toastDiv != null) {
     toastDiv.classList.remove("opacity-0");
   }
   toastDiv.classList.add("opacity-100");
 
   if (toastDivText != null) toastDivText.textContent = name;
+
+  if (error) {
+    toastCheck.classList.add("hidden");
+    toastError.classList.remove("hidden");
+  } else {
+    toastError.classList.add("hidden");
+    toastCheck.classList.remove("hidden");
+  }
 }
 
 const searchInput = document.getElementById("class-search-input");
