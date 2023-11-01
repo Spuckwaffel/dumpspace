@@ -379,11 +379,14 @@ function displayOverviewPage(members) {
     const memberType = member[Object.keys(member)[0]][3];
     if (memberType === "C" || memberType === "S") {
       memberNameButton.classList.add("underline", "dark:decoration-gray-400");
-      memberNameButton.addEventListener("click", function () {
-        if (currentType != memberType) {
-          reloadWithNewCName(memberNameButton.textContent, memberType);
-        } else displayCurrentType(memberNameButton.textContent);
-      });
+      memberNameButton.addEventListener(
+        "click",
+        function (currentType, memberType) {
+          if (currentType != memberType) {
+            reloadWithNewCName(memberNameButton.textContent, memberType);
+          } else displayCurrentType(memberNameButton.textContent);
+        }.bind(null, currentType, memberType)
+      );
     } else memberNameButton.classList.add("cursor-default");
 
     overviewMemberDiv.appendChild(memberNameButton);
@@ -560,9 +563,12 @@ function displayMembers(CName, data) {
       for (const superClass of member["__InheritInfo"]) {
         const superButton = document.createElement("button");
 
-        superButton.addEventListener("click", function () {
-          displayCurrentType(superClass);
-        });
+        superButton.addEventListener(
+          "click",
+          function (superClass) {
+            displayCurrentType(superClass);
+          }.bind(null, superClass)
+        );
         superButton.classList.add(
           "transition",
           "duration-200",
@@ -600,26 +606,190 @@ function displayMembers(CName, data) {
 }
 
 function displayFunctions(CName, data) {
+  //remove all children, in function viewer everything works different
+  const itemsOverviewDiv = document.getElementById("overview-items");
+  while (itemsOverviewDiv.firstChild) {
+    itemsOverviewDiv.removeChild(itemsOverviewDiv.firstChild);
+  }
+
   const funcs = data[Object.keys(data)[0]];
 
   for (const func of funcs) {
-    const memberName = Object.keys(func)[0];
-    console.log(memberName);
-    for (const item of func[memberName]) {
+    const funcName = Object.keys(func)[0];
+    console.log(funcName);
+    for (const item of func[funcName]) {
       console.log(item);
     }
-    const returnType = func[memberName][0];
-    console.log("type: " + returnType);
-    const clickableReturn = func[memberName][1];
-    console.log("clickableReturn: " + clickableReturn);
-    const params = func[memberName][2];
-    if (params.length > 0) {
-      console.log("params.length: " + params.length);
-      for (const param of params) {
-        console.log("paramType: " + param[0]);
-        console.log("paramName: " + param[1]);
-      }
+
+    const coreDiv = document.createElement("div");
+    coreDiv.classList.add(
+      "border-b",
+      "border-gray-200",
+      "dark:border-gray-600",
+      "py-2",
+      "px-4",
+      "text-slate-700",
+      "dark:text-slate-100"
+    );
+
+    const offsetDiv = document.createElement("div");
+    offsetDiv.classList.add("flex", "space-x-4");
+    const offsetP = document.createElement("p");
+    offsetP.classList.add("text-slate-600", "dark:text-slate-400");
+    offsetP.textContent = "Function offset:";
+    const offsetButton = document.createElement("button");
+    offsetButton.classList.add(
+      "transition",
+      "duration-200",
+      "ease-in-out",
+      "hover:text-blue-500"
+    );
+    offsetButton.textContent = "0x" + func[funcName][3].toString(16);
+    offsetButton.addEventListener(
+      "click",
+      function (textContent) {
+        navigator.clipboard.writeText(textContent);
+        showToast("Copied offset to clipboard!", false);
+      }.bind(null, offsetButton.textContent)
+    );
+    offsetDiv.appendChild(offsetP);
+    offsetDiv.appendChild(offsetButton);
+    coreDiv.appendChild(offsetDiv);
+    const functionDiv = document.createElement("div");
+    functionDiv.classList.add(
+      "flex",
+      "flex-wrap",
+      "items-center",
+      "justify-between",
+      "mr-4"
+    );
+    const functionHeaderDiv = document.createElement("div");
+    functionHeaderDiv.classList.add("flex", "space-x-3");
+    const returnType = func[funcName][0];
+    const returnSpecType = func[funcName][1];
+    const funcParams = func[funcName][2];
+    if (returnSpecType !== "D") {
+      const returnTypeButton = document.createElement("button");
+      //we call from function page, it can only be class or struct
+      returnTypeButton.addEventListener(
+        "click",
+        function (CName, Type) {
+          reloadWithNewCName(CName, Type);
+        }.bind(null, returnType, returnSpecType)
+      );
+    } else {
+      const returnTypeP = document.createElement("p");
+      returnTypeP.textContent = returnType;
+      functionHeaderDiv.appendChild(returnTypeP);
     }
+    const funcNameP = document.createElement("p");
+    if (funcParams.length > 0) funcNameP.textContent = funcName + "(";
+    else funcNameP.textContent = funcName + "();";
+    functionHeaderDiv.appendChild(funcNameP);
+
+    functionDiv.appendChild(functionHeaderDiv);
+
+    const functionCopyButton = document.createElement("button");
+
+    functionCopyButton.classList.add(
+      "flex",
+      "items-center",
+      "bg-blue-700",
+      "hover:bg-blue-500",
+      "py-2",
+      "px-4",
+      "rounded-md",
+      "text-white"
+    );
+
+    const svgCopyButton = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "svg"
+    );
+    svgCopyButton.setAttribute("width", "20");
+    svgCopyButton.setAttribute("height", "20");
+    svgCopyButton.setAttribute("viewBox", "0 0 24 24");
+    svgCopyButton.setAttribute("stroke", "white");
+    svgCopyButton.setAttribute("fill", "none");
+
+    const pathCopyButton = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "path"
+    );
+    pathCopyButton.setAttribute(
+      "d",
+      "M17.5 14H19C20.1046 14 21 13.1046 21 12V5C21 3.89543 20.1046 3 19 3H12C10.8954 3 10 3.89543 10 5V6.5M5 10H12C13.1046 10 14 10.8954 14 12V19C14 20.1046 13.1046 21 12 21H5C3.89543 21 3 20.1046 3 19V12C3 10.8954 3.89543 10 5 10Z"
+    );
+    pathCopyButton.setAttribute("stroke-width", "1.5");
+    pathCopyButton.setAttribute("stroke-linecap", "round");
+    pathCopyButton.setAttribute("stroke-linejoin", "round");
+
+    svgCopyButton.appendChild(pathCopyButton);
+    functionCopyButton.appendChild(svgCopyButton);
+
+    var bakedString = returnType + " " + funcName + "(";
+    for (const param of funcParams) {
+      bakedString += param[0] + " " + param[1] + ", ";
+    }
+    bakedString = bakedString.slice(0, -2);
+    bakedString += ")";
+    functionCopyButton.addEventListener(
+      "click",
+      function (bakedString) {
+        navigator.clipboard.writeText(bakedString);
+        showToast("Copied function to clipboard!", false);
+      }.bind(null, bakedString)
+    );
+
+    functionDiv.appendChild(functionCopyButton);
+
+    coreDiv.appendChild(functionDiv);
+
+    if (funcParams.length > 0) {
+      const functionFooterDiv = document.createElement("div");
+      functionFooterDiv.classList.add("grid", "grid-cols-8", "mx-10");
+      var paramCount = 0;
+      for (const param of funcParams) {
+        if (param[2] !== "D") {
+          const functionParamButton = document.createElement("button");
+          functionParamButton.classList.add(
+            "col-span-2",
+            "transition",
+            "duration-200",
+            "ease-in-out",
+            "hover:text-blue-500",
+            "text-left"
+          );
+          functionParamButton.textContent = param[0];
+          functionParamButton.addEventListener(
+            "click",
+            function (paramCName, paramType) {
+              reloadWithNewCName(paramCName, paramType);
+            }.bind(null, param[0], param[2])
+          );
+          functionFooterDiv.appendChild(functionParamButton);
+        } else {
+          const functionParamP = document.createElement("p");
+          functionParamP.classList.add("col-span-2", "text-left");
+          functionParamP.textContent = param[0];
+          functionFooterDiv.appendChild(functionParamP);
+        }
+        const functionParamNameP = document.createElement("p");
+        functionParamNameP.classList.add("col-span-5");
+
+        if (paramCount < funcParams.length - 1)
+          functionParamNameP.textContent = param[1] + ",";
+        else functionParamNameP.textContent = param[1];
+
+        functionFooterDiv.appendChild(functionParamNameP);
+        paramCount++;
+      }
+      coreDiv.appendChild(functionFooterDiv);
+      const functionClosureP = document.createElement("p");
+      functionClosureP.textContent = ");";
+      coreDiv.appendChild(functionClosureP);
+    }
+    itemsOverviewDiv.appendChild(coreDiv);
   }
 
   if (document.getElementById("class-desc-name") !== null)
@@ -640,14 +810,6 @@ function displayFunctions(CName, data) {
 
   if (document.getElementById("overview-items-skeleton") != null) {
     document.getElementById("overview-items-skeleton").remove();
-  }
-
-  //remove all children, in function viewer everything works different
-
-  return;
-  const itemsOverviewDiv = document.getElementById("overview-items");
-  while (itemsOverviewDiv.firstChild) {
-    itemsOverviewDiv.removeChild(itemsOverviewDiv.firstChild);
   }
 }
 
