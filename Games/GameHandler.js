@@ -362,7 +362,8 @@ function displayOverviewPage(members) {
       "grid",
       "grid-cols-8",
       "text-sm",
-      "px-6",
+      "px-2",
+      "sm:px-6",
       "text-slate-700",
       "dark:text-slate-100",
       "pt-2",
@@ -664,7 +665,7 @@ function displayFunctions(CName, data) {
       "mr-4"
     );
     const functionHeaderDiv = document.createElement("div");
-    functionHeaderDiv.classList.add("flex", "space-x-3");
+    functionHeaderDiv.classList.add("flex", "space-x-3", "truncate");
     const returnType = func[funcName][0];
     const returnSpecType = func[funcName][1];
     const funcParams = func[funcName][2];
@@ -685,6 +686,12 @@ function displayFunctions(CName, data) {
     const funcNameP = document.createElement("p");
     if (funcParams.length > 0) funcNameP.textContent = funcName + "(";
     else funcNameP.textContent = funcName + "();";
+    funcNameP.classList.add(
+      "text-ellipsis",
+      "overflow-hidden",
+      "truncate",
+      "sm:max-w-prose"
+    );
     functionHeaderDiv.appendChild(funcNameP);
 
     functionDiv.appendChild(functionHeaderDiv);
@@ -732,7 +739,7 @@ function displayFunctions(CName, data) {
       bakedString += param[0] + " " + param[1] + ", ";
     }
     bakedString = bakedString.slice(0, -2);
-    bakedString += ")";
+    bakedString += ");";
     functionCopyButton.addEventListener(
       "click",
       function (bakedString) {
@@ -758,7 +765,8 @@ function displayFunctions(CName, data) {
             "duration-200",
             "ease-in-out",
             "hover:text-blue-500",
-            "text-left"
+            "text-left",
+            "truncate"
           );
           functionParamButton.textContent = param[0];
           functionParamButton.addEventListener(

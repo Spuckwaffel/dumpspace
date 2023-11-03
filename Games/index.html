@@ -39,7 +39,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     -->
 
-    <link rel="stylesheet" type="text/css" href="../tailwind.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body class="bg-white dark:bg-slate-900">
     <link
@@ -50,7 +50,7 @@
     <script src="../Pako/packo.min.js"></script>
 
     <nav
-      class="sticky top-0 w-full z-30 border-b border-gray-200 dark:border-gray-600 backdrop-blur transition-colors duration-500"
+      class="md:sticky top-0 w-full z-30 border-b border-gray-200 dark:border-gray-600 backdrop-blur transition-colors duration-500"
     >
       <div
         class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-3"
@@ -64,7 +64,7 @@
         <div class="flex items-center md:hidden">
           <button>
             <svg
-              class="w-8 h-8"
+              class="w-8 h-8 dark:text-slate-100"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -151,9 +151,9 @@
         </div>
       </div>
       <div
-        class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-3 text-slate-700 dark:text-slate-100"
+        class="max-w-screen-xl flex flex-wrap items-center justify-between sm:mx-auto p-3 text-slate-700 dark:text-slate-100"
       >
-        <ul class="flex space-x-8 mr-4">
+        <ul class="flex flex-wrap space-x-4 sm:space-x-8 sm:mr-4">
           <li>
             <button
               onclick="getGameInfo('classes')"
@@ -222,7 +222,7 @@
       </div>
     </nav>
 
-    <div class="xl:grid xl:grid-cols-4 xl:gap-4 xl:px-32 px-12 top-10">
+    <div class="xl:grid xl:grid-cols-4 xl:gap-4 xl:px-32 px-4 top-10">
       <div
         class="my-16 px-4 py-4 border rounded-lg border-gray-200 relative flex flex-col min-w-0 dark:border-gray-600"
       >
@@ -332,7 +332,7 @@
         <div class="flex flex-wrap items-center justify-between">
           <h1
             id="class-desc-name"
-            class="flex font-semibold text-xl mb-2 text-slate-700 dark:text-slate-100"
+            class="flex font-semibold text-xl mb-2 text-slate-700 dark:text-slate-100 truncate"
           >
             <div
               id="class-desc-skeleton"
@@ -366,7 +366,7 @@
 
         <div
           id="class-desc-inherits"
-          class="text-sm text-slate-600 truncate flex dark:text-slate-400"
+          class="text-sm text-slate-600 truncate flex dark:text-slate-400 pb-2"
         ></div>
         <nav
           class="mt-2 relative rounded-lg border border-gray-200 dark:border-gray-600 flex divide-x divide-gray-200 dark:divide-gray-600 text-slate-700 dark:text-slate-100"
@@ -402,7 +402,7 @@
           >
             <div id="overview-items" class="">
               <div
-                class="sticky top-0 w-full z-5 grid grid-cols-8 font-medium text-sm px-6 text-slate-700 dark:text-slate-100 uppercase pt-2 pb-2 border-b border-gray-200 dark:border-gray-600 bg-opacity-30 backdrop-filter backdrop-blur-md"
+                class="sticky top-0 w-full z-5 grid grid-cols-8 font-medium text-sm px-2 sm:px-6 text-slate-700 dark:text-slate-100 uppercase pt-2 pb-2 border-b border-gray-200 dark:border-gray-600 bg-opacity-30 backdrop-filter backdrop-blur-md"
               >
                 <p class="col-span-3">Type</p>
                 <p class="col-span-3">Member</p>
