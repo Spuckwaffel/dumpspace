@@ -104,6 +104,11 @@ async function decompressAndCheckCacheByURL(URL, updateTS) {
     if (updatedAt == updateTS) return plaintext;
   }
 
+  console.log(
+    "[CACHECHECK] timestamps mismatched! Fetching the data for " +
+      URL +
+      " again from the server!"
+  );
   const base64EncodedGZip = await fetchAndConvertToBase64(URL);
 
   localStorage.setItem(

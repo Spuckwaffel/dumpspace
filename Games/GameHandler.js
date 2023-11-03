@@ -1,10 +1,12 @@
-//gets the params of the url
+//gets the params of the url, expects to be a full valid url, example.com/?param=abc
+//if the url is empty, it will use the current window.location.search
 function getUrlParams(url) {
   var params = {}; // Create an empty object to store the parameters
 
   // Get the URL query string
   var queryString = null;
 
+  //remove the ugly ?
   if (url == null) {
     queryString = window.location.search.substring(1);
   } else queryString = url.substring(1);
@@ -22,17 +24,20 @@ function getUrlParams(url) {
     params[paramName] = paramValue;
   }
 
+  //return the params
   return params;
 }
 
-//current URL params
+//current URL params and stored in a global var
 var UrlParams = getUrlParams();
 var currentURL = window.location.href;
 
 //sets a valid url with params for the target game
 function getGameInfo(info, reload = true) {
+  //no url params? thats weird
   if (Object.keys(UrlParams).length == 0) return;
 
+  //the first param always has to be the game hash
   if (Object.keys(UrlParams)[0] != "hash") return;
   var newURL = window.location.origin + window.location.pathname + "?";
 
@@ -45,13 +50,14 @@ function getGameInfo(info, reload = true) {
 
   if (reload) location.reload();
 
+  //fetch the new url params
   UrlParams = getUrlParams();
 }
 
-//reloads the website with the CName and its type (C,S,D,E)
+//reloads the website with the CName and its type (C,S,F,E)
 //only call if the current type does not match the new type
 function reloadWithNewCName(CName, newType) {
-  //params always need hash and type
+  //params always need hash and current type
   if (Object.keys(UrlParams).length < 2) return;
 
   //no hash?
@@ -62,12 +68,14 @@ function reloadWithNewCName(CName, newType) {
     Object.keys(UrlParams)[1] != "type" ||
     (UrlParams["type"] != "classes" &&
       UrlParams["type"] != "structs" &&
-      UrlParams["type"] != "functions")
+      UrlParams["type"] != "functions" &&
+      UrlParams["type"] != "enums")
   )
     return;
 
   if (newType == null) return;
 
+  //craft the new valid url
   var newURL = window.location.origin + window.location.pathname + "?";
 
   // no matter what, reset the url params
@@ -83,6 +91,7 @@ function reloadWithNewCName(CName, newType) {
   if (newType === "C") newURL += "&type=classes";
   else if (newType === "S") newURL += "&type=structs";
   else if (newType === "F") newURL += "&type=functions";
+  else if (newType === "E") newURL += "&type=enums";
 
   console.log("[reloadWithNewCName] pushing " + newURL + "&idx=" + CName);
   history.pushState(null, null, newURL + "&idx=" + CName);
@@ -102,6 +111,7 @@ function returnHome() {
 const classDiv = document.getElementById("class-list");
 const classDivScroll = document.getElementById("class-list-scroll");
 
+//this is just for some vanillarecylverview to support mobile devices
 if (classDivScroll.offsetHeight == 256)
   classDivScroll.style.height = 500 + "px";
 
@@ -118,9 +128,11 @@ window.addEventListener("resize", function () {
   }
 });
 
+//current gamelistJSON is alwys empty and gets fetched by the server again
 var GameListJson = null;
 
-async function getGameByHash(hash) {
+//gets the current game json info by the given hash
+async function getGameInfoJsonByHash(hash) {
   if (GameListJson === null) {
     const response = await fetch("GameList.json");
     GameListJson = await response.json();
@@ -128,10 +140,13 @@ async function getGameByHash(hash) {
   return GameListJson.games.find((game) => game.hash == hash);
 }
 
-var CurrentInfoJson = null;
+//the current json of the game containing the real data, eg struct or class
+var currentInfoJson = null;
+//the current display type, eg struct or class
 var currentType = null;
 
 //only should get called once per reload
+//makes the game ready to be displayed with displayCurrentType and has basic checks
 async function displayCurrentGame() {
   //params always need hash and type
   if (Object.keys(UrlParams).length < 2) returnHome();
@@ -144,58 +159,68 @@ async function displayCurrentGame() {
     Object.keys(UrlParams)[1] != "type" ||
     (UrlParams["type"] != "classes" &&
       UrlParams["type"] != "structs" &&
-      UrlParams["type"] != "functions")
+      UrlParams["type"] != "functions" &&
+      UrlParams["type"] != "enums")
   )
     returnHome();
 
-  const game = await getGameByHash(UrlParams["hash"]);
+  //get the game json info
+  const gameInfoJson = await getGameInfoJsonByHash(UrlParams["hash"]);
   //no game found for hash? go back
-  if (game == null) returnHome();
+  if (gameInfoJson == null) returnHome();
 
-  const gameDirectory = game.engine + "/" + game.location + "/";
+  //directory is always engine path + location
+  const gameDirectory = gameInfoJson.engine + "/" + gameInfoJson.location + "/";
 
   console.log(
     "crunching latest data for: " + gameDirectory + " - " + UrlParams["type"]
   );
 
+  //get the data for the current type and check cache persistance
   if (UrlParams["type"] === "classes") {
     const response = await decompressAndCheckCacheByURL(
       gameDirectory + "ClassesInfo.json.gz",
-      game.uploaded
+      gameInfoJson.uploaded
     );
-    CurrentInfoJson = JSON.parse(response);
+    currentInfoJson = JSON.parse(response);
     currentType = "C";
   } else if (UrlParams["type"] === "structs") {
     const response = await decompressAndCheckCacheByURL(
       gameDirectory + "StructsInfo.json.gz",
-      game.uploaded
+      gameInfoJson.uploaded
     );
-    CurrentInfoJson = JSON.parse(response);
+    currentInfoJson = JSON.parse(response);
     currentType = "S";
   } else if (UrlParams["type"] === "functions") {
     const response = await decompressAndCheckCacheByURL(
       gameDirectory + "FunctionsInfo.json.gz",
-      game.uploaded
+      gameInfoJson.uploaded
     );
-    CurrentInfoJson = JSON.parse(response);
+    currentInfoJson = JSON.parse(response);
     currentType = "F";
+  } else if (UrlParams["type"] === "enums") {
+    const response = await decompressAndCheckCacheByURL(
+      gameDirectory + "EnumsInfo.json.gz",
+      gameInfoJson.uploaded
+    );
+    currentInfoJson = JSON.parse(response);
+    currentType = "E";
   }
 
-  console.log(CurrentInfoJson);
   //no data?
-  if (CurrentInfoJson == null) returnHome();
+  if (currentInfoJson == null) returnHome();
 
   // Sort the array by the object's name
-  CurrentInfoJson.data.sort((a, b) => {
+  currentInfoJson.data.sort((a, b) => {
     const nameA = Object.keys(a)[0];
     const nameB = Object.keys(b)[0];
     return nameA.localeCompare(nameB);
   });
 
+  //update the time label
   var timeDiv = document.getElementById("updateLabel");
   if (timeDiv != null) {
-    timeDiv = document.getElementById("updateLabel");
-    formatElapsedTime(Date.now(), CurrentInfoJson.updated_at, timeDiv);
+    formatElapsedTime(Date.now(), currentInfoJson.updated_at, timeDiv);
   }
 
   //try getting a valid cname out of the params or get the first index of the json
@@ -205,20 +230,30 @@ async function displayCurrentGame() {
   ) {
     targetClassName = UrlParams["idx"];
     //or select the first one as default
-  } else if (Object.keys(CurrentInfoJson.data).length > 0) {
-    targetClassName = Object.keys(CurrentInfoJson.data[0])[0];
+  } else if (Object.keys(currentInfoJson.data).length > 0) {
+    targetClassName = Object.keys(currentInfoJson.data[0])[0];
+    //yeah if there arent any items what are we supposed to show lol
   } else returnHome();
 
   console.log("chose name " + targetClassName + " for displaying...");
 
+  //actual baking
   displayCurrentType(targetClassName);
 }
 
+//persistent global data
+//used for vanilla recycler to unhighlight the older focussed div
 var oldFocussedDataDiv = null;
+//whether we ever formatted the data with vanillarecycler view
 var formattedArrayDataValid = false;
+//the formatted data we display in the vrv
 var formattedArrayData = [];
+//storing the vrv object
 var dVanillaRecyclerView = null;
+
 //only works on current data, if different type than current, call reloadwithnewdata
+//good thing about being able to call this func is no refetching of any data, so being once in a viewer
+//yoi can navigate every item in the viewer without reloading
 function displayCurrentType(CName) {
   console.log("trying to display " + CName);
   //fixup cnames having pointers
@@ -234,6 +269,7 @@ function displayCurrentType(CName) {
   if (currentType === "C") newURL += "&type=classes";
   else if (currentType === "S") newURL += "&type=structs";
   else if (currentType === "F") newURL += "&type=functions";
+  else if (currentType === "E") newURL += "&type=enums";
 
   newURL += "&idx=" + CName;
 
@@ -241,33 +277,35 @@ function displayCurrentType(CName) {
   currentURL = window.location.origin + window.location.pathname + newURL;
   UrlParams = getUrlParams(newURL);
 
-  //only needed on website refresh
+  //only needed on website refresh or clicking on different items
   var scrollToIdx = 0;
 
-  var targetIndexData = null;
+  var targetGameClass = null;
 
   var idx = 0;
-  for (const gameClass of CurrentInfoJson.data) {
+  //get the index scroll and also format the data if never formatted (first run)
+  for (const gameClass of currentInfoJson.data) {
     idx++;
     if (!formattedArrayDataValid)
       formattedArrayData.push(Object.keys(gameClass)[0]);
 
     if (CName !== null && Object.keys(gameClass)[0] === CName) {
       scrollToIdx = idx;
-      targetIndexData = gameClass;
+      targetGameClass = gameClass;
     }
   }
 
-  //
-  if (targetIndexData == null) {
-    if (CName != Object.keys(CurrentInfoJson.data[0])[0]) {
+  //is the target game class even there?
+  if (targetGameClass == null) {
+    //just a bandaid fix displaying older toasts lol
+    if (CName != Object.keys(currentInfoJson.data[0])[0]) {
       console.log("could not find " + CName);
       showToast("Could not find type " + CName + "!");
-      //go back to older one that worked
+      //go back to older one that worked, however we dont store the entire url so we have to do some trickery
       const paramsBefore = getUrlParams("." + oldURL.split("?")[1]);
       //guaranteed to be valid
       if (oldURL === currentURL)
-        displayCurrentType(Object.keys(CurrentInfoJson.data[0])[0]);
+        displayCurrentType(Object.keys(currentInfoJson.data[0])[0]);
       else displayCurrentType(paramsBefore[Object.keys(paramsBefore)[2]]);
       return;
     }
@@ -279,6 +317,7 @@ function displayCurrentType(CName) {
     history.pushState(null, "", currentURL);
   }
 
+  //first time? make the vrv
   if (!formattedArrayDataValid) {
     dVanillaRecyclerView = new VanillaRecyclerView(classDiv, {
       data: formattedArrayData,
@@ -304,7 +343,7 @@ function displayCurrentType(CName) {
             oldFocussedDataDiv = this.layout;
           }
           this.layout.addEventListener("click", function (event) {
-            //remove the by of the old button
+            //remove the bg of the old button
             if (
               oldFocussedDataDiv != null &&
               oldFocussedDataDiv.classList.contains("bg-gray-600/10")
@@ -335,8 +374,9 @@ function displayCurrentType(CName) {
   }
 
   if (currentType === "C" || currentType === "S")
-    displayMembers(CName, targetIndexData);
-  if (currentType === "F") displayFunctions(CName, targetIndexData);
+    displayMembers(CName, targetGameClass);
+  if (currentType === "F") displayFunctions(CName, targetGameClass);
+  if (currentType === "E") displayEnums(CName, targetGameClass);
 }
 
 //save them, used by displayOverviewPage to restore the sticky bar
@@ -378,7 +418,7 @@ function displayOverviewPage(members) {
     memberNameButton.textContent = member[Object.keys(member)[0]][0];
 
     const memberType = member[Object.keys(member)[0]][3];
-    if (memberType === "C" || memberType === "S") {
+    if (memberType === "C" || memberType === "S" || memberType === "E") {
       memberNameButton.classList.add("underline", "dark:decoration-gray-400");
       memberNameButton.addEventListener(
         "click",
@@ -603,6 +643,167 @@ function displayMembers(CName, data) {
 
   if (document.getElementById("class-skeleton") != null) {
     document.getElementById("class-skeleton").remove();
+  }
+}
+
+function displayEnums(CName, data) {
+  //remove all children, in function viewer everything works different
+  const itemsOverviewDiv = document.getElementById("overview-items");
+  while (itemsOverviewDiv.firstChild) {
+    itemsOverviewDiv.removeChild(itemsOverviewDiv.firstChild);
+  }
+
+  //get the actual array of the cname
+  const enumItems = data[Object.keys(data)[0]];
+  //now this is some next level shit, get the first index of the items,
+  //then get the array of the first item and then get the second item which is uint8_t or smth
+  const enumType = enumItems[0][Object.keys(enumItems[0])[0]][1];
+  console.log("type: " + enumType);
+
+  const coreDiv = document.createElement("div");
+  coreDiv.classList.add(
+    "py-2",
+    "px-4",
+    "text-slate-700",
+    "dark:text-slate-100"
+  );
+
+  const enumDiv = document.createElement("div");
+  enumDiv.classList.add("flex", "flex-wrap", "items-center", "justify-between");
+
+  const enumHeaderDiv = document.createElement("div");
+  enumHeaderDiv.classList.add("flex", "space-x-2");
+
+  const enumNameP = document.createElement("p");
+  enumNameP.textContent = CName;
+  enumNameP.classList.add(
+    "text-ellipsis",
+    "overflow-hidden",
+    "truncate",
+    "sm:max-w-prose"
+  );
+
+  const enumTypeP = document.createElement("p");
+  enumTypeP.textContent = ": " + enumType;
+  enumTypeP.classList.add("text-slate-600", "dark:text-slate-400");
+
+  const enumOpen = document.createElement("p");
+  enumOpen.textContent = "{";
+
+  enumHeaderDiv.appendChild(enumNameP);
+  enumHeaderDiv.appendChild(enumTypeP);
+  enumHeaderDiv.appendChild(enumOpen);
+
+  const enumCopyButton = document.createElement("button");
+
+  enumCopyButton.classList.add(
+    "flex",
+    "items-center",
+    "bg-blue-700",
+    "hover:bg-blue-500",
+    "py-2",
+    "px-4",
+    "rounded-md",
+    "text-white"
+  );
+
+  const svgCopyButton = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "svg"
+  );
+  svgCopyButton.setAttribute("width", "20");
+  svgCopyButton.setAttribute("height", "20");
+  svgCopyButton.setAttribute("viewBox", "0 0 24 24");
+  svgCopyButton.setAttribute("stroke", "white");
+  svgCopyButton.setAttribute("fill", "none");
+
+  const pathCopyButton = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "path"
+  );
+  pathCopyButton.setAttribute(
+    "d",
+    "M17.5 14H19C20.1046 14 21 13.1046 21 12V5C21 3.89543 20.1046 3 19 3H12C10.8954 3 10 3.89543 10 5V6.5M5 10H12C13.1046 10 14 10.8954 14 12V19C14 20.1046 13.1046 21 12 21H5C3.89543 21 3 20.1046 3 19V12C3 10.8954 3.89543 10 5 10Z"
+  );
+  pathCopyButton.setAttribute("stroke-width", "1.5");
+  pathCopyButton.setAttribute("stroke-linecap", "round");
+  pathCopyButton.setAttribute("stroke-linejoin", "round");
+
+  svgCopyButton.appendChild(pathCopyButton);
+  enumCopyButton.appendChild(svgCopyButton);
+
+  var bakedString = CName + " : " + enumType + " {\n";
+  for (const enu of enumItems) {
+    const enun = Object.keys(enu);
+    console.log(Object.keys(enu));
+    bakedString += enun + " = " + enu[enun][0] + ", ";
+  }
+  bakedString = bakedString.slice(0, -2);
+  bakedString += "};";
+  enumCopyButton.addEventListener(
+    "click",
+    function (bakedString) {
+      navigator.clipboard.writeText(bakedString);
+      showToast("Copied enum to clipboard!", false);
+    }.bind(null, bakedString)
+  );
+
+  enumDiv.appendChild(enumHeaderDiv);
+
+  enumDiv.appendChild(enumCopyButton);
+
+  const enumFooterDiv = document.createElement("div");
+  enumFooterDiv.classList.add("grid", "grid-cols-8", "mx-10");
+  var enuItemCount = 0;
+  for (const _enu of enumItems) {
+    const enu = _enu[Object.keys(_enu)];
+    const enuItemNameP = document.createElement("p");
+    enuItemNameP.classList.add(
+      "col-span-7",
+      "sm:col-span-6",
+      "text-left",
+      "truncate"
+    );
+    enuItemNameP.textContent = Object.keys(_enu);
+    enumFooterDiv.appendChild(enuItemNameP);
+    const enuItemValueP = document.createElement("p");
+    enuItemValueP.classList.add("col-span-1", "sm:col-span-2");
+
+    if (enuItemCount < enumItems.length - 1)
+      enuItemValueP.textContent = "= " + enu[0] + ",";
+    else enuItemValueP.textContent = "= " + enu[0];
+
+    enumFooterDiv.appendChild(enuItemValueP);
+    enuItemCount++;
+  }
+
+  const enumClosureP = document.createElement("p");
+  enumClosureP.textContent = ");";
+
+  coreDiv.appendChild(enumDiv);
+  coreDiv.appendChild(enumFooterDiv);
+  coreDiv.appendChild(enumClosureP);
+
+  itemsOverviewDiv.appendChild(coreDiv);
+
+  if (document.getElementById("class-desc-name") !== null)
+    document.getElementById("class-desc-name").textContent = CName;
+
+  if (document.getElementById("class-list-name") != null) {
+    document.getElementById("class-list-name").textContent = "Enums";
+  }
+
+  //theres only one tab available
+  if (document.getElementById("selection-tabs") != null) {
+    document.getElementById("selection-tabs").remove();
+  }
+
+  if (document.getElementById("class-skeleton") != null) {
+    document.getElementById("class-skeleton").remove();
+  }
+
+  if (document.getElementById("overview-items-skeleton") != null) {
+    document.getElementById("overview-items-skeleton").remove();
   }
 }
 
