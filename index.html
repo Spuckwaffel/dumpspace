@@ -33,15 +33,17 @@
       sizes="16x16"
       href="Images/favicon-16x16.png"
     />
+
+		<link rel="stylesheet" type="text/css" href="tailwind.css" />
     -->
 
     <script>
       // On page load or when changing themes, best to add inline in `head` to avoid FOUC
     </script>
 
-    <!--<script src="https://cdn.tailwindcss.com"></script>-->
+    <!---->
 
-    <link rel="stylesheet" type="text/css" href="tailwind.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body class="bg-white dark:bg-slate-900">
     <nav
@@ -57,9 +59,9 @@
           >
         </a>
         <div class="flex items-center md:hidden">
-          <button>
+          <button data-dropdown-toggle="dropdownNavbar">
             <svg
-              class="w-8 h-8"
+              class="w-8 h-8 dark:text-slate-100"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -73,6 +75,33 @@
               ></path>
             </svg>
           </button>
+        </div>
+        <div class="w-full hidden" id="navbar-hamburger">
+          <ul
+            class="flex flex-col font-medium mt-4 rounded bg-gray-50 dark:bg-gray-700 dark:border-gray-700"
+          >
+            <li>
+              <a
+                href="#"
+                class="block py-2 pl-3 pr-4 dark:text-slate-100 dark:text-gray-400 hover:rounded"
+                >Discord</a
+              >
+            </li>
+            <li>
+              <a
+                href="#"
+                class="block py-2 pl-3 pr-4 dark:text-slate-100 dark:text-gray-400 hover:rounded"
+                >Recent</a
+              >
+            </li>
+            <li>
+              <a
+                href="#"
+                class="block py-2 pl-3 pr-4 dark:text-slate-100 dark:text-gray-400 hover:rounded"
+                >Changelog</a
+              >
+            </li>
+          </ul>
         </div>
         <div class="md:flex hidden md:block items-center ml-auto">
           <nav
