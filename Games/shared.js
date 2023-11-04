@@ -113,7 +113,9 @@ async function decompressAndCheckCacheByURL(URL, updateTS) {
 
   localStorage.setItem(
     URL,
-    base64EncodedGZip.replace(/^data:application\/gzip;base64,/, "")
+    base64EncodedGZip
+      .replace(/^data:application\/gzip;base64,/, "")
+      .replace(/^data:application\/octet-stream;base64,/, "")
   );
 
   return decompressJSONByURL(URL);
