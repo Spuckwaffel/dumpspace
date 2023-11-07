@@ -316,6 +316,7 @@ function displayCurrentType(CName) {
     console.log("pushed " + currentURL + " to history");
     history.pushState(null, "", currentURL);
   }
+  document.title = "Dumpspace - " + CName;
 
   //first time? make the vrv
   if (!formattedArrayDataValid) {
@@ -413,11 +414,58 @@ function displayOverviewPage(members) {
       "dark:border-gray-600"
     );
 
+    const memberTypeDiv = document.createElement("div");
+    memberTypeDiv.classList.add("col-span-3", "flex");
+
+    let cookMemberType = (typeArr) => {
+      const memberTypeButton = document.createElement("button");
+      memberTypeButton.classList.add("text-left", "truncate");
+      memberTypeButton.textContent = typeArr[0];
+      if (typeArr[1] === "C" || typeArr[1] === "S" || typeArr[1] === "E") {
+        memberTypeButton.classList.add("underline", "dark:decoration-gray-400");
+        memberTypeButton.addEventListener(
+          "click",
+          function (currentType, memberType, cname) {
+            if (currentType != memberType) {
+              reloadWithNewCName(cname, memberType);
+            } else displayCurrentType(cname);
+          }.bind(null, currentType, typeArr[1], typeArr[0])
+        );
+      } else memberTypeButton.classList.add("cursor-default");
+      memberTypeDiv.appendChild(memberTypeButton);
+      if (typeArr[3].length > 0) {
+        const templateOpenP = document.createElement("p");
+        templateOpenP.textContent = "<";
+        memberTypeDiv.appendChild(templateOpenP);
+        var i = 0;
+        for (const submember of typeArr[3]) {
+          cookMemberType(submember);
+          if (i < typeArr[3].length - 1) {
+            const commaP = document.createElement("p");
+            commaP.classList.add("pr-1");
+            commaP.textContent = ",";
+            memberTypeDiv.appendChild(commaP);
+          }
+          i++;
+        }
+        const templateCloseP = document.createElement("p");
+        templateCloseP.textContent = ">";
+        memberTypeDiv.appendChild(templateCloseP);
+      }
+      if (typeArr[2] === "*") {
+        const pointerP = document.createElement("p");
+        pointerP.textContent = "*";
+        memberTypeDiv.appendChild(pointerP);
+      }
+    };
+    cookMemberType(member[memberName][0]);
+
     const memberNameButton = document.createElement("button");
     memberNameButton.classList.add("col-span-3", "text-left", "truncate");
-    memberNameButton.textContent = member[Object.keys(member)[0]][0];
+    console.log(memberName);
+    memberNameButton.textContent = member[memberName][0];
 
-    const memberType = member[Object.keys(member)[0]][3];
+    const memberType = member[memberName][3];
     if (memberType === "C" || memberType === "S" || memberType === "E") {
       memberNameButton.classList.add("underline", "dark:decoration-gray-400");
       memberNameButton.addEventListener(
@@ -430,7 +478,7 @@ function displayOverviewPage(members) {
       );
     } else memberNameButton.classList.add("cursor-default");
 
-    overviewMemberDiv.appendChild(memberNameButton);
+    overviewMemberDiv.appendChild(memberTypeDiv);
 
     const memberNameP = document.createElement("p");
     memberNameP.classList.add("col-span-3", "truncate");
@@ -522,22 +570,42 @@ function displayStructAndMDKPage(CName, members) {
     //use the new name
     textAreaSDKText += _memberName + " = ";
     //we love hex
-    textAreaSDKText +=
-      "0x" + member[Object.keys(member)[0]][1].toString(16) + ";";
+    textAreaSDKText += "0x" + member[memberName][1].toString(16) + ";";
+
+    textAreaSDKText += " // ";
+
+    let cookMemberTypeText = (typeArr) => {
+      var text = typeArr[0];
+      if (typeArr[3].length > 0) {
+        text += "<";
+        var i = 0;
+        for (const submember of typeArr[3]) {
+          text += cookMemberTypeText(submember);
+          if (i < typeArr[3].length - 1) {
+            text += ", ";
+          }
+          i++;
+        }
+        text += ">";
+      }
+      if (typeArr[2] === "*") {
+        text += "*";
+      }
+      return text;
+    };
+    textAreaSDKText += cookMemberTypeText(member[memberName][0]);
 
     //type of the member
-    textAreaSDKText += " // " + member[Object.keys(member)[0]][0];
-    if (isBitMember) textAreaSDKText += " : 1";
+
+    if (isBitMember) textAreaSDKText += " : 1 (" + member[memberName][3] + ")";
     textAreaSDKText += "\n";
     textAreaSDKRows++;
 
     //create a new one for shenanigans with the length
-    var _textAreaMDKText =
-      "	" +
-      member[Object.keys(member)[0]][3] +
-      "Member(" +
-      member[Object.keys(member)[0]][0] +
-      ")";
+    var _textAreaMDKText = "	" + member[memberName][0][1] + "Member(";
+
+    _textAreaMDKText += cookMemberTypeText(member[memberName][0]);
+    _textAreaMDKText += ")";
     //format it good aligned
     while (_textAreaMDKText.length < 54) {
       _textAreaMDKText += " ";
@@ -547,18 +615,16 @@ function displayStructAndMDKPage(CName, members) {
       _textAreaMDKText += " ";
     }
     _textAreaMDKText += "OFFSET(get";
-    if (member[Object.keys(member)[0]][3] == "C") {
+    if (member[memberName][0][1] == "C") {
       _textAreaMDKText += "<T>, ";
-    } else if (member[Object.keys(member)[0]][3] == "S") {
+    } else if (member[memberName][0][1] == "S") {
       _textAreaMDKText += "Struct<T>, ";
-    } else if (member[Object.keys(member)[0]][3] == "D") {
-      _textAreaMDKText += "<" + member[Object.keys(member)[0]][0] + ">, ";
+    } else if (member[memberName][0][1] == "D") {
+      _textAreaMDKText += "<" + member[memberName][0][0] + ">, ";
     }
-    _textAreaMDKText +=
-      "{" + "0x" + member[Object.keys(member)[0]][1].toString(16) + ", ";
-    _textAreaMDKText += member[Object.keys(member)[0]][2] + ", ";
-    if (isBitMember)
-      _textAreaMDKText += "1, " + member[Object.keys(member)[0]][4] + "})\n";
+    _textAreaMDKText += "{" + "0x" + member[memberName][1].toString(16) + ", ";
+    _textAreaMDKText += member[memberName][2] + ", ";
+    if (isBitMember) _textAreaMDKText += "1, " + member[memberName][3] + "})\n";
     else _textAreaMDKText += "0, 0})\n";
 
     textAreaMDKText += _textAreaMDKText;
@@ -846,7 +912,7 @@ function displayFunctions(CName, data) {
       "ease-in-out",
       "hover:text-blue-500"
     );
-    offsetButton.textContent = "0x" + func[funcName][3].toString(16);
+    offsetButton.textContent = "0x" + func[funcName][2].toString(16);
     offsetButton.addEventListener(
       "click",
       function (textContent) {
@@ -854,9 +920,20 @@ function displayFunctions(CName, data) {
         showToast("Copied offset to clipboard!", false);
       }.bind(null, offsetButton.textContent)
     );
+    const functionFlags = document.createElement("p");
+    functionFlags.classList.add(
+      "text-slate-600",
+      "dark:text-slate-400",
+      "pl-4",
+      "truncate"
+    );
+    functionFlags.textContent = func[funcName][3];
+
     offsetDiv.appendChild(offsetP);
     offsetDiv.appendChild(offsetButton);
+    offsetDiv.appendChild(functionFlags);
     coreDiv.appendChild(offsetDiv);
+
     const functionDiv = document.createElement("div");
     functionDiv.classList.add(
       "flex",
@@ -866,25 +943,53 @@ function displayFunctions(CName, data) {
       "mr-4"
     );
     const functionHeaderDiv = document.createElement("div");
-    functionHeaderDiv.classList.add("flex", "space-x-3", "truncate");
-    const returnType = func[funcName][0];
-    const returnSpecType = func[funcName][1];
-    const funcParams = func[funcName][2];
-    if (returnSpecType !== "D") {
-      const returnTypeButton = document.createElement("button");
-      //we call from function page, it can only be class or struct
-      returnTypeButton.addEventListener(
-        "click",
-        function (CName, Type) {
-          reloadWithNewCName(CName, Type);
-        }.bind(null, returnType, returnSpecType)
-      );
-    } else {
-      const returnTypeP = document.createElement("p");
-      returnTypeP.textContent = returnType;
-      functionHeaderDiv.appendChild(returnTypeP);
-    }
+    functionHeaderDiv.classList.add("flex", "truncate");
+
+    let cookMemberType = (typeArr, div) => {
+      const memberTypeButton = document.createElement("button");
+      memberTypeButton.classList.add("text-left", "truncate");
+      memberTypeButton.textContent = typeArr[0];
+      if (typeArr[1] === "C" || typeArr[1] === "S" || typeArr[1] === "E") {
+        memberTypeButton.classList.add("underline", "dark:decoration-gray-400");
+        memberTypeButton.addEventListener(
+          "click",
+          function (currentType, memberType, cname) {
+            if (currentType != memberType) {
+              reloadWithNewCName(cname, memberType);
+            } else displayCurrentType(cname);
+          }.bind(null, currentType, typeArr[1], typeArr[0])
+        );
+      } else memberTypeButton.classList.add("cursor-default");
+      div.appendChild(memberTypeButton);
+      if (typeArr[3].length > 0) {
+        const templateOpenP = document.createElement("p");
+        templateOpenP.textContent = "<";
+        div.appendChild(templateOpenP);
+        var i = 0;
+        for (const submember of typeArr[3]) {
+          cookMemberType(submember, div);
+          if (i < typeArr[3].length - 1) {
+            const commaP = document.createElement("p");
+            commaP.classList.add("pr-1");
+            commaP.textContent = ",";
+            div.appendChild(commaP);
+          }
+          i++;
+        }
+        const templateCloseP = document.createElement("p");
+        templateCloseP.textContent = ">";
+        div.appendChild(templateCloseP);
+      }
+      if (typeArr[2] === "*") {
+        const pointerP = document.createElement("p");
+        pointerP.textContent = "*";
+        div.appendChild(pointerP);
+      }
+    };
+    cookMemberType(func[funcName][0], functionHeaderDiv);
+    const funcParams = func[funcName][1];
     const funcNameP = document.createElement("p");
+    funcNameP.classList.add("pl-2");
     if (funcParams.length > 0) funcNameP.textContent = funcName + "(";
     else funcNameP.textContent = funcName + "();";
     funcNameP.classList.add(
@@ -935,9 +1040,31 @@ function displayFunctions(CName, data) {
     svgCopyButton.appendChild(pathCopyButton);
     functionCopyButton.appendChild(svgCopyButton);
 
-    var bakedString = returnType + " " + funcName + "(";
+    let cookBakedString = (typeArr) => {
+      var text = typeArr[0];
+      if (typeArr[3].length > 0) {
+        text += "<";
+        var i = 0;
+        for (const submember of typeArr[3]) {
+          text += cookBakedString(submember);
+          if (i < typeArr[3].length - 1) {
+            text += ", ";
+          }
+          i++;
+        }
+        text += ">";
+      }
+      if (typeArr[2] === "*") {
+        text += "*";
+      }
+      return text;
+    };
+
+    var bakedString = cookBakedString(func[funcName][0]) + " " + funcName + "(";
+
     for (const param of funcParams) {
-      bakedString += param[0] + " " + param[1] + ", ";
+      bakedString +=
+        cookBakedString(param[0]) + param[1] + " " + param[2] + ", ";
     }
     bakedString = bakedString.slice(0, -2);
     bakedString += ");";
@@ -958,37 +1085,21 @@ function displayFunctions(CName, data) {
       functionFooterDiv.classList.add("grid", "grid-cols-8", "mx-10");
       var paramCount = 0;
       for (const param of funcParams) {
-        if (param[2] !== "D") {
-          const functionParamButton = document.createElement("button");
-          functionParamButton.classList.add(
-            "col-span-2",
-            "transition",
-            "duration-200",
-            "ease-in-out",
-            "hover:text-blue-500",
-            "text-left",
-            "truncate"
-          );
-          functionParamButton.textContent = param[0];
-          functionParamButton.addEventListener(
-            "click",
-            function (paramCName, paramType) {
-              reloadWithNewCName(paramCName, paramType);
-            }.bind(null, param[0], param[2])
-          );
-          functionFooterDiv.appendChild(functionParamButton);
-        } else {
-          const functionParamP = document.createElement("p");
-          functionParamP.classList.add("col-span-2", "text-left");
-          functionParamP.textContent = param[0];
-          functionFooterDiv.appendChild(functionParamP);
-        }
+        const functionParamDiv = document.createElement("div");
+        functionParamDiv.classList.add("flex", "col-span-4");
+        cookMemberType(param[0], functionParamDiv);
+        const additionaltype = document.createElement("p");
+        additionaltype.textContent = param[1];
+        functionParamDiv.appendChild(additionaltype);
+
+        functionFooterDiv.appendChild(functionParamDiv);
+
         const functionParamNameP = document.createElement("p");
-        functionParamNameP.classList.add("col-span-5");
+        functionParamNameP.classList.add("col-span-4", "pl-4");
 
         if (paramCount < funcParams.length - 1)
-          functionParamNameP.textContent = param[1] + ",";
-        else functionParamNameP.textContent = param[1];
+          functionParamNameP.textContent = param[2] + ",";
+        else functionParamNameP.textContent = param[2];
 
         functionFooterDiv.appendChild(functionParamNameP);
         paramCount++;
