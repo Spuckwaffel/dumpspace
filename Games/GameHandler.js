@@ -160,7 +160,8 @@ async function displayCurrentGame() {
     (UrlParams["type"] != "classes" &&
       UrlParams["type"] != "structs" &&
       UrlParams["type"] != "functions" &&
-      UrlParams["type"] != "enums")
+      UrlParams["type"] != "enums" &&
+      UrlParams["type"] != "offsets")
   )
     returnHome();
 
@@ -205,6 +206,13 @@ async function displayCurrentGame() {
     );
     currentInfoJson = JSON.parse(response);
     currentType = "E";
+  } else if (UrlParams["type"] === "offsets") {
+    const response = await decompressAndCheckCacheByURL(
+      gameDirectory + "OffsetsInfo.json.gz",
+      gameInfoJson.uploaded
+    );
+    currentInfoJson = JSON.parse(response);
+    currentType = "O";
   }
 
   //no data?
@@ -223,11 +231,17 @@ async function displayCurrentGame() {
     formatElapsedTime(Date.now(), currentInfoJson.updated_at, timeDiv);
   }
 
-  //try getting a valid cname out of the params or get the first index of the json
+  //custom
+  if (currentType === "O") {
+    showOffsets(currentInfoJson.data);
+    return;
+  }
+
   if (
     Object.keys(UrlParams).length === 3 &&
     Object.keys(UrlParams)[2] === "idx"
   ) {
+    //try getting a valid cname out of the params or get the first index of the json
     targetClassName = UrlParams["idx"];
     //or select the first one as default
   } else if (Object.keys(currentInfoJson.data).length > 0) {
@@ -720,10 +734,10 @@ function displayEnums(CName, data) {
   }
 
   //get the actual array of the cname
-  const enumItems = data[Object.keys(data)[0]];
+  const enumItems = data[Object.keys(data)[0]][0];
   //now this is some next level shit, get the first index of the items,
   //then get the array of the first item and then get the second item which is uint8_t or smth
-  const enumType = enumItems[0][Object.keys(enumItems[0])[0]][1];
+  const enumType = data[Object.keys(data)[0]][1];
   console.log("type: " + enumType);
 
   const coreDiv = document.createElement("div");
@@ -741,7 +755,7 @@ function displayEnums(CName, data) {
   enumHeaderDiv.classList.add("flex", "space-x-2");
 
   const enumNameP = document.createElement("p");
-  enumNameP.textContent = CName;
+  enumNameP.textContent = "enum " + CName;
   enumNameP.classList.add(
     "text-ellipsis",
     "overflow-hidden",
@@ -798,14 +812,13 @@ function displayEnums(CName, data) {
   svgCopyButton.appendChild(pathCopyButton);
   enumCopyButton.appendChild(svgCopyButton);
 
-  var bakedString = CName + " : " + enumType + " {\n";
+  var bakedString = enumNameP.textContent + enumTypeP.textContent + " {\n";
   for (const enu of enumItems) {
     const enun = Object.keys(enu);
-    console.log(Object.keys(enu));
-    bakedString += enun + " = " + enu[enun][0] + ", ";
+    bakedString += "  " + enun + " = " + enu[enun] + ", \n";
   }
-  bakedString = bakedString.slice(0, -2);
-  bakedString += "};";
+  bakedString = bakedString.slice(0, -3);
+  bakedString += "\n};";
   enumCopyButton.addEventListener(
     "click",
     function (bakedString) {
@@ -836,15 +849,15 @@ function displayEnums(CName, data) {
     enuItemValueP.classList.add("col-span-1", "sm:col-span-2");
 
     if (enuItemCount < enumItems.length - 1)
-      enuItemValueP.textContent = "= " + enu[0] + ",";
-    else enuItemValueP.textContent = "= " + enu[0];
+      enuItemValueP.textContent = "= " + enu + ",";
+    else enuItemValueP.textContent = "= " + enu;
 
     enumFooterDiv.appendChild(enuItemValueP);
     enuItemCount++;
   }
 
   const enumClosureP = document.createElement("p");
-  enumClosureP.textContent = ");";
+  enumClosureP.textContent = "};";
 
   coreDiv.appendChild(enumDiv);
   coreDiv.appendChild(enumFooterDiv);
@@ -1194,6 +1207,117 @@ function showMDK() {
   if (itemOverview != null) itemOverview.classList.add("hidden");
   if (itemClickDiv != null)
     itemClickDiv.classList.remove("bg-gray-50", "dark:bg-slate-800");
+}
+
+function showOffsets(dataJSON) {
+  const viewer = document.getElementById("full-viewer");
+  while (viewer.firstChild) {
+    viewer.removeChild(viewer.firstChild);
+  }
+  viewer.classList.remove(
+    "xl:grid",
+    "xl:grid-cols-4",
+    "xl:gap-4",
+    "xl:px-32",
+    "px-4",
+    "top-10"
+  );
+  viewer.classList.add("xl:px-64", "md:px-32", "px-8");
+  const fullOffsetDiv = document.createElement("div");
+  fullOffsetDiv.classList.add(
+    "border",
+    "py-4",
+    "my-16",
+    "px-4",
+    "rounded-lg",
+    "border-gray-200",
+    "dark:border-gray-600",
+    "text-slate-700",
+    "dark:text-slate-100"
+  );
+  for (const offset of dataJSON) {
+    const offsetDiv = document.createElement("div");
+    offsetDiv.classList.add(
+      "border-b",
+      "border-gray-200",
+      "dark:border-gray-600",
+      "flex",
+      "justify-between",
+      "py-3"
+    );
+    const offsetNameP = document.createElement("p");
+    offsetNameP.classList.add("self-center");
+    offsetNameP.textContent = offset[0];
+
+    const offsetNumP = document.createElement("p");
+    offsetNumP.classList.add("self-center", "pr-4");
+    offsetNumP.textContent = "0x" + offset[1].toString(16);
+
+    const rightSideDiv = document.createElement("div");
+    rightSideDiv.classList.add("flex");
+    const offsetCopyButton = document.createElement("button");
+
+    offsetCopyButton.classList.add(
+      "flex",
+      "items-center",
+      "bg-blue-700",
+      "hover:bg-blue-500",
+      "py-2",
+      "px-4",
+      "rounded-md",
+      "text-white"
+    );
+
+    const svgCopyButton = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "svg"
+    );
+    svgCopyButton.setAttribute("width", "20");
+    svgCopyButton.setAttribute("height", "20");
+    svgCopyButton.setAttribute("viewBox", "0 0 24 24");
+    svgCopyButton.setAttribute("stroke", "white");
+    svgCopyButton.setAttribute("fill", "none");
+
+    const pathCopyButton = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "path"
+    );
+    pathCopyButton.setAttribute(
+      "d",
+      "M17.5 14H19C20.1046 14 21 13.1046 21 12V5C21 3.89543 20.1046 3 19 3H12C10.8954 3 10 3.89543 10 5V6.5M5 10H12C13.1046 10 14 10.8954 14 12V19C14 20.1046 13.1046 21 12 21H5C3.89543 21 3 20.1046 3 19V12C3 10.8954 3.89543 10 5 10Z"
+    );
+    pathCopyButton.setAttribute("stroke-width", "1.5");
+    pathCopyButton.setAttribute("stroke-linecap", "round");
+    pathCopyButton.setAttribute("stroke-linejoin", "round");
+
+    svgCopyButton.appendChild(pathCopyButton);
+    offsetCopyButton.appendChild(svgCopyButton);
+
+    const bakedString =
+      "constexpr auto " +
+      offset[0] +
+      " = " +
+      "0x" +
+      offset[1].toString(16) +
+      ";";
+
+    offsetCopyButton.addEventListener(
+      "click",
+      function (bakedString) {
+        navigator.clipboard.writeText(bakedString);
+        showToast("Copied function to clipboard!", false);
+      }.bind(null, bakedString)
+    );
+
+    offsetDiv.appendChild(offsetNameP);
+
+    rightSideDiv.appendChild(offsetNumP);
+    rightSideDiv.appendChild(offsetCopyButton);
+    offsetDiv.appendChild(rightSideDiv);
+
+    fullOffsetDiv.appendChild(offsetDiv);
+  }
+  viewer.appendChild(fullOffsetDiv);
 }
 
 if (

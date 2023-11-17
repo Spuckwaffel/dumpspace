@@ -1,0 +1,1 @@
+{"data":[{"UObject":[{"OnPlayImpactFX":[["void","D","",[]],[[["FHitResult","S","",[]],"&","HitResult"],[["TEnumAsByte","C","",[["EPhysicalSurface","E","",[]]]],"","ImpactPhysicalSurface"],[["UFXSystemComponent","C","*",[]],"","SpawnedPSC"]],1640420,"RequiredAPI|Native|Event|Protected|HasOutParms|BlueprintEvent"]}]}],"updated_at":"1700179747285"}
