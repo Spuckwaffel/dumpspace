@@ -34,16 +34,13 @@
       href="Images/favicon-16x16.png"
     />
 
-		<link rel="stylesheet" type="text/css" href="tailwind.css" />
-    -->
-
-    <script>
-      // On page load or when changing themes, best to add inline in `head` to avoid FOUC
-    </script>
-
-    <!---->
+		
 
     <script src="https://cdn.tailwindcss.com"></script>
+    -->
+
+    <!---->
+    <link rel="stylesheet" type="text/css" href="tailwind.css" />
   </head>
   <body class="bg-white dark:bg-slate-900">
     <nav
@@ -396,14 +393,12 @@
       id="allGamesDiv"
     >
       <div
-        class="mx-4 xl:w-[45vw] bg-white dark:bg-slate-800 rounded-lg text-black dark:text-slate-100 border border-gray-600"
+        class="mx-4 xl:w-[45vw] bg-gray-100 dark:bg-slate-800 rounded-lg text-black dark:text-slate-100 border border-gray-200 dark:border-gray-600"
       >
         <div
-          class="flex items-center justify-between p-5 border-b rounded-t dark:border-gray-600"
+          class="flex items-center justify-between p-5 border-b rounded-t border-gray-200 dark:border-gray-600"
         >
-          <h3
-            class="text-xl font-semibold text-slate-700 dark:text-slate-100 pr-4"
-          >
+          <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100 pr-4">
             All Supported Games
           </h3>
           <button
@@ -428,7 +423,9 @@
           </button>
         </div>
         <div class="p-5 space-y-4">
-          <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+          <p
+            class="text-base leading-relaxed text-slate-600 dark:text-slate-500"
+          >
             Here is a list of all supported games of every supported engine in
             alphabetical order.
           </p>

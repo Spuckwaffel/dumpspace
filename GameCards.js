@@ -142,7 +142,8 @@ function createAndPushGameToList(game) {
   const gameListA = document.createElement("a");
   gameListA.classList.add(
     "border-b",
-    "border-gray-600",
+    "border-gray-200",
+    "dark:border-gray-600",
     "py-2",
     "px-4",
     "flex",
@@ -156,7 +157,7 @@ function createAndPushGameToList(game) {
   gameListA.href = currentPath + "?hash=" + game.hash;
 
   const gameListTitle = document.createElement("p");
-  gameListTitle.classList.add("pr-2", "text-lg");
+  gameListTitle.classList.add("pr-2", "text-lg", "font-semibold");
   gameListTitle.textContent = game.name;
   gameListA.appendChild(gameListTitle);
 

@@ -1246,7 +1246,7 @@ function showOffsets(dataJSON) {
       "py-3"
     );
     const offsetNameP = document.createElement("p");
-    offsetNameP.classList.add("self-center");
+    offsetNameP.classList.add("self-center", "font-semibold");
     offsetNameP.textContent = offset[0];
 
     const offsetNumP = document.createElement("p");
