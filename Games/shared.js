@@ -175,3 +175,7 @@ if (
 } else {
   document.documentElement.classList.remove("dark");
 }
+
+document.getElementById("go-root-url").addEventListener("click", function () {
+  window.location.href = localStorage.getItem("root-url");
+});

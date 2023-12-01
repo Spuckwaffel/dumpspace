@@ -235,3 +235,6 @@ for (let key in localStorage) {
     localStorage.removeItem(key);
   }
 }
+
+//will save the current url (used for raw.githubusercontent)
+localStorage.setItem("root-url", window.location.href);
