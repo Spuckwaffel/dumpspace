@@ -102,8 +102,8 @@ function reloadWithNewCName(CName, newType) {
 //error? go to home page
 function returnHome() {
   history.pushState(null, null, window.location.origin);
-  //console.log("returnHome called? Unexpected issue?");
-  //throw e;
+  console.log("returnHome called? Unexpected issue?");
+  throw e;
   location.reload();
 }
 
@@ -1323,7 +1323,7 @@ function showOffsets(dataJSON) {
 if (
   Object.keys(UrlParams).length === 0 ||
   Object.keys(UrlParams)[0] !== "hash" ||
-  UrlParams["hash"].length !== 16
+  (UrlParams["hash"].length !== 16 && UrlParams["hash"].length !== 8)
 ) {
   returnHome();
 }

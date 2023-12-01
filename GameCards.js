@@ -227,3 +227,11 @@ allGamesOpener.addEventListener("click", function () {
 allGamesDivCloser.addEventListener("click", function () {
   allGamesDiv.classList.add("hidden");
 });
+
+// this is a very bad fix, this clears the cache of cached game files laying around in localstorage
+// if we dont do this the user will eventually get the DOM exception when viewing other games
+for (let key in localStorage) {
+  if (key.startsWith("cGame")) {
+    localStorage.removeItem(key);
+  }
+}

@@ -88,7 +88,7 @@ function fetchAndConvertToBase64(url) {
 }
 
 async function decompressAndCheckCacheByURL(URL, updateTS) {
-  var cache = localStorage.getItem(URL);
+  var cache = localStorage.getItem("cGame" + URL);
 
   if (cache) {
     const gezipedData = atob(cache);
@@ -111,8 +111,10 @@ async function decompressAndCheckCacheByURL(URL, updateTS) {
   );
   const base64EncodedGZip = await fetchAndConvertToBase64(URL);
 
+  console.log("bytes written: " + base64EncodedGZip.length);
+
   localStorage.setItem(
-    URL,
+    "cGame" + URL,
     base64EncodedGZip
       .replace(/^data:application\/gzip;base64,/, "")
       .replace(/^data:application\/octet-stream;base64,/, "")
