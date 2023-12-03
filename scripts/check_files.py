@@ -16,6 +16,8 @@ repo = git.get_repo(os.getenv("GITHUB_REPOSITORY"))
 
 event_path = os.environ['GITHUB_EVENT_PATH']
 
+master_branch = "main"
+
 with open(event_path, 'r') as epfile:
   event_data = json.load(epfile)
 
@@ -28,22 +30,28 @@ pr = repo.get_pull(pull_request_number)
 commits = pr.get_commits()
 
 # Get the master branch
-master_branch = repo.get_branch('master')
+master_branch = repo.get_branch(master_branch)
 
 # Get the gameList
 gameListC = repo.get_contents("Games/GameList.json", ref=master_branch.commit.sha)
 gameList = gameListC.decoded_content.decode('utf-8')
 
+def get_file_arrays():
+
+  # Get the diff of the pull request compared to the 'main' branch
+  diff = pr.diff()
+  file_names = [file.filename for file in diff]
+  added_files = [file.filename for file in diff if file.status == 'added']
+  deleted_files = [file.filename for file in diff if file.status == 'deleted']
+
+  
+  return file_names, added_files, deleted_files
 
 def get_content_by_name(filename):
-  for commit in commits:
-    files = commit.files
-    for file in files:
-        if file.filename == filename:
-          blob = repo.get_git_blob(file.sha)
-          b64 = base64.b64decode(blob.content)
-          return b64.decode("utf8")
-  return ""
+  pr_branch = pr.head.ref
+  blob = repo.get_git_blob(repo.get_contents(filename, ref=pr_branch).sha)
+  b64 = base64.b64decode(blob.content)
+  return b64.decode("utf8")
 
 
 def write_to_env(var, value):
@@ -55,9 +63,9 @@ def write_to_env(var, value):
 def env_comment(type, msg):
   write_to_env("ACTION_STATUS", type)
   if type == "success":
-    write_to_env("ACTION_MESSAGE", "Good news! Your commit passed all checks and is ready to merge, thanks! " + msg)
+    write_to_env("ACTION_MESSAGE", "Good news! Your commit passed all checks and is ready to merge, thanks!\\n" + msg)
   else:
-    write_to_env("ACTION_MESSAGE", "Hey there, your pull request could not be merged automatically, reason:\\n" + msg + 
+    write_to_env("ACTION_MESSAGE", "Hey there, your pull request could not be merged automatically.\\n\\n" + msg + 
                  "\\n\\nYou can close this commit or wait for manual acceptance if you belive this was unexpected. You can" + 
                  " ignore this and wait if your pull request was NOT for updating or adding games.")
   
@@ -320,8 +328,7 @@ def check_added_files(added_files):
   
 
 def main():
-  changed_files = sys.argv[1].split("\n") if sys.argv[1] else []
-  added_files = sys.argv[2].split("\n") if sys.argv[2] else []
+  changed_files, added_files, deleted_files = get_file_arrays()
 
   print("Changed files:", changed_files)
   print("Added files:", added_files)
@@ -331,6 +338,12 @@ def main():
       print("both changed files and added files are not allowed.")
       env_comment("failure", "Both changed files and added files are not allowed.")
       return
+    
+	
+  if not deleted_files:
+    print("Deleted files cannnot be processed automatically.")
+    env_comment("failure", "Deleted files cannnot be processed automatically.")
+    return
 
   _bRes, _sRes = basic_check(changed_files)
   if not _bRes:
