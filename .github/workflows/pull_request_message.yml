@@ -1,7 +1,7 @@
 name: Pull Request Message
 
 on:
-  pull_request:
+  pull_request_target:
     types:
       - opened
 
@@ -23,7 +23,7 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: 'Thanks for the pull request! I will look into the request and merge it upon success'
+              body: 'Thanks for the pull request! I will look into the request and merge it upon success.'
             })
 
       - name: Set up Python
