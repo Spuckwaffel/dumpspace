@@ -37,7 +37,6 @@ jobs:
 
       - name: Check files
         run: |
-
           python scripts/check_files.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

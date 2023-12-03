@@ -14,12 +14,13 @@ import requests
 # using an access token
 auth = Auth.Token(os.getenv("GITHUB_TOKEN"))
 git = Github(auth=auth)
+
 repo = git.get_repo(os.getenv("GITHUB_REPOSITORY"))
 
-event_path = os.environ['GITHUB_EVENT_PATH']
 
 _master_branch = "main"
 
+event_path = os.environ['GITHUB_EVENT_PATH']
 with open(event_path, 'r') as epfile:
   event_data = json.load(epfile)
 
@@ -40,11 +41,12 @@ gameList = gameListC.decoded_content.decode('utf-8')
 def get_file_arrays():
 
   # Get the diff of the pull request compared to the 'main' branch
-  base_branch = pr.base.ref
-  head_branch = pr.head.ref
 
+  print(f"looking up pr {pr.number}: {pr.merge_commit_sha}")
   #  Get the file changes between the pull request branch and the main branch
-  files = repo.compare(head_branch, master_branch.name).files
+  files = pr.get_files()
+  for file in files:
+    print(f"{file.filename} : {file.status}")
 
   file_names = [file.filename for file in files]
   added_files = [file.filename for file in files if file.status == 'added']
@@ -336,7 +338,7 @@ def main():
 
   print("Changed files:", changed_files)
   print("Added files:", added_files)
-  print("Added files:", deleted_files)
+  print("Deleted files:", deleted_files)
 
   if set(changed_files) != set(added_files):
     if changed_files and added_files:
