@@ -18,7 +18,7 @@ repo = git.get_repo(os.getenv("GITHUB_REPOSITORY"))
 
 event_path = os.environ['GITHUB_EVENT_PATH']
 
-master_branch = "main"
+_master_branch = "main"
 
 with open(event_path, 'r') as epfile:
   event_data = json.load(epfile)
@@ -31,7 +31,7 @@ print("Handling Pull Request Number: " + str(pull_request_number))
 pr = repo.get_pull(pull_request_number)
 
 # Get the master branch
-master_branch = repo.get_branch(master_branch)
+master_branch = repo.get_branch(_master_branch)
 
 # Get the gameList
 gameListC = repo.get_contents("Games/GameList.json", ref=master_branch.commit.sha)
@@ -44,7 +44,7 @@ def get_file_arrays():
   head_branch = pr.head.ref
 
   #  Get the file changes between the pull request branch and the main branch
-  files = repo.compare(base_branch, master_branch).files
+  files = repo.compare(base_branch, master_branch.name).files
 
   file_names = [file.filename for file in files]
   added_files = [file.filename for file in files if file.status == 'added']
