@@ -44,7 +44,7 @@ def get_file_arrays():
   head_branch = pr.head.ref
 
   #  Get the file changes between the pull request branch and the main branch
-  files = repo.compare(base_branch, head_branch).files
+  files = repo.compare(base_branch, master_branch).files
 
   file_names = [file.filename for file in files]
   added_files = [file.filename for file in files if file.status == 'added']
@@ -336,6 +336,7 @@ def main():
 
   print("Changed files:", changed_files)
   print("Added files:", added_files)
+  print("Added files:", deleted_files)
 
   if set(changed_files) != set(added_files):
     if changed_files and added_files:
@@ -344,7 +345,7 @@ def main():
       return
     
 	
-  if not deleted_files:
+  if deleted_files:
     print("Deleted files cannnot be processed automatically.")
     env_comment("failure", "Deleted files cannnot be processed automatically.")
     return
