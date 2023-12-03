@@ -7,6 +7,8 @@ from github import Auth
 import base64
 import hashlib
 import gzip
+from itertools import islice
+import requests
 
 
 # using an access token
@@ -27,7 +29,6 @@ print("Handling Pull Request Number: " + str(pull_request_number))
 
 #get pr
 pr = repo.get_pull(pull_request_number)
-commits = pr.get_commits()
 
 # Get the master branch
 master_branch = repo.get_branch(master_branch)
@@ -39,17 +40,20 @@ gameList = gameListC.decoded_content.decode('utf-8')
 def get_file_arrays():
 
   # Get the diff of the pull request compared to the 'main' branch
-  diff = pr.diff()
-  file_names = [file.filename for file in diff]
-  added_files = [file.filename for file in diff if file.status == 'added']
-  deleted_files = [file.filename for file in diff if file.status == 'deleted']
+  base_branch = pr.base.ref
+  head_branch = pr.head.ref
 
-  
+  #  Get the file changes between the pull request branch and the main branch
+  files = repo.compare(base_branch, head_branch).files
+
+  file_names = [file.filename for file in files]
+  added_files = [file.filename for file in files if file.status == 'added']
+  deleted_files = [file.filename for file in files if file.status == 'deleted']
+
   return file_names, added_files, deleted_files
 
 def get_content_by_name(filename):
-  pr_branch = pr.head.ref
-  blob = repo.get_git_blob(repo.get_contents(filename, ref=pr_branch).sha)
+  blob = repo.get_git_blob(repo.get_contents(filename, ref=pr.head.sha).sha)
   b64 = base64.b64decode(blob.content)
   return b64.decode("utf8")
 
