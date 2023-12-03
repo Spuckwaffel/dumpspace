@@ -44,7 +44,7 @@ def get_file_arrays():
   head_branch = pr.head.ref
 
   #  Get the file changes between the pull request branch and the main branch
-  files = repo.compare(base_branch, master_branch.name).files
+  files = repo.compare(head_branch, master_branch.name).files
 
   file_names = [file.filename for file in files]
   added_files = [file.filename for file in files if file.status == 'added']
