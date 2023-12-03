@@ -147,7 +147,7 @@ def compress_and_commit(files):
     path= file + ".gz",
     message= "Adding compressed file for " + os.path.basename(file),
     content=compressed_data,
-    branch='master'
+    branch=_master_branch
     )
 
 def compress_and_update_commit(files):
