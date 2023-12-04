@@ -117,8 +117,8 @@ def basic_check(files):
   folder1 = 'Games'
   folder2_options = ['Unity', 'Unreal-Engine-4', 'Unreal-Engine-5']
 
-  if any(file_name.count('/') < 3 for file_name in files):
-    st = "A file is not in at least 3 subfolders. All files have to be in Games/<engine>/<Game>/."
+  if any(file_name.count('/') != 3 for file_name in files):
+    st = "A file is not in 3 subfolders. All files have to be in Games/(engine)/(Game)."
     print(st)
     return False, st
   
