@@ -179,3 +179,17 @@ if (
 document.getElementById("go-root-url").addEventListener("click", function () {
   window.location.href = localStorage.getItem("root-url");
 });
+
+var subroot = localStorage
+  .getItem("root-url")
+  .substring(0, localStorage.getItem("root-url").length - 10);
+
+document.getElementById("go-recent-url").addEventListener("click", function () {
+  window.location.href = subroot + "/recent";
+});
+
+document
+  .getElementById("go-changelog-url")
+  .addEventListener("click", function () {
+    window.location.href = subroot + "/changelog";
+  });
