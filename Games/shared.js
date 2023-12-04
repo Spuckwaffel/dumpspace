@@ -182,14 +182,7 @@ document.getElementById("go-root-url").addEventListener("click", function () {
 
 var subroot = localStorage
   .getItem("root-url")
-  .substring(0, localStorage.getItem("root-url").length - 10);
+  .substring(0, localStorage.getItem("root-url").length - 11);
 
-document.getElementById("go-recent-url").addEventListener("click", function () {
-  window.location.href = subroot + "/recent";
-});
-
-document
-  .getElementById("go-changelog-url")
-  .addEventListener("click", function () {
-    window.location.href = subroot + "/changelog";
-  });
+document.getElementById("go-recent-url").href = subroot + "/recent";
+document.getElementById("go-changelog-url").href = subroot + "/changelog";
