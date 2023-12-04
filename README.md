@@ -15,6 +15,7 @@
 <p>&nbsp;</p>
 <h2>Adding Your Game</h2>
 <p>You want to add your game? - Sure, it's very easy.</p>
+<p>Watch the video <a href="https://youtu.be/urUdnCld1rY">here</a> or follow the steps below.</p>
 <ol>
 <li>Fork the GitHub so you can create a pull request with your files.</li>
 <li>Get the <a href="https://github.com/Spuckwaffel/UEDumper">UEDumper</a> or use the <a href="https://github.com/Spuckwaffel/Dumpspace-Gen">Dumpspace Gen library</a> to generate the Dumpspace JSON files.</li>
@@ -42,3 +43,5 @@
 <p>Special thanks to Blue fire for countless tips while I made this website.</p>
 <p>Also, special thanks to <a href="https://github.com/winetree94/VanillaRecyclerView">VanillaRecyclerView</a> which gets rid of all the lag when having Grids with thousands of items.&nbsp;</p>
 <p><a href="https://tailwindcss.com/">https://tailwindcss.com/</a> and <a href="https://icons8.com/">https://icons8.com/</a> were used in this project.</p>
+
+<p>Join the discord for more info and questions <a href="https://discord.gg/XZAqYVhpjm">here</a>.</p>
