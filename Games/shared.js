@@ -184,5 +184,6 @@ var subroot = localStorage
   .getItem("root-url")
   .substring(0, localStorage.getItem("root-url").length - 11);
 
-document.getElementById("go-recent-url").href = subroot + "/recent";
-document.getElementById("go-changelog-url").href = subroot + "/changelog";
+document.getElementById("go-recent-url").href = subroot + "/recent/index.html";
+document.getElementById("go-changelog-url").href =
+  subroot + "/changelog/index.html";
