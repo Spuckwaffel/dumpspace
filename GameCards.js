@@ -52,6 +52,9 @@ fetch(currentPath + "GameList.json")
   .then((data) => {
     const gamesArray = data.games;
 
+    document.getElementById("supported-games").textContent =
+      gamesArray.length + " Supported Games";
+
     gamesArray.forEach((game) => {
       const box = document.createElement("a");
       box.classList.add(
@@ -59,7 +62,7 @@ fetch(currentPath + "GameList.json")
         "overflow-hidden",
         "rounded-lg",
         "ring-1",
-        "ring-slate-500/10",
+        "ring-slate-500/5",
         "shadow-sm",
         "transition",
         "duration-300",
@@ -73,6 +76,7 @@ fetch(currentPath + "GameList.json")
       const dataPath = currentPath + game.engine + "/" + game.location;
       box.href = currentPath + "?hash=" + game.hash;
       const img = document.createElement("img");
+      img.classList.add("md:h-48", "w-full", "sm:h-40", "xl:h-60");
       img.src = dataPath + "/image.jpg";
       img.alt = "missing image.jpg";
       box.appendChild(img);
@@ -95,9 +99,11 @@ fetch(currentPath + "GameList.json")
       byPara.classList.add("text-sm");
       byPara.textContent = "By";
 
-      const namePara = document.createElement("p");
-      namePara.classList.add("text-sm", "font-semibold");
+      const namePara = document.createElement("a");
+      namePara.classList.add("text-sm", "font-semibold", "hover:text-blue-500");
       namePara.textContent = game.uploader.name;
+      namePara.href = game.uploader.link;
+      namePara.target = "_blank";
 
       creditDiv.appendChild(byPara);
       creditDiv.appendChild(namePara);
@@ -152,7 +158,8 @@ function createAndPushGameToList(game) {
     "transition",
     "duration-200",
     "ease-in-out",
-    "hover:text-blue-500"
+    "hover:text-blue-500",
+    "dark:hover:text-blue-500"
   );
   gameListA.href = currentPath + "?hash=" + game.hash;
 
@@ -171,14 +178,18 @@ function createAndPushGameToList(game) {
   gameListEngine.textContent = "- " + game.engine;
   gameListA.appendChild(gameListEngine);
 
-  const gameListCreator = document.createElement("p");
+  const gameListCreator = document.createElement("a");
   gameListCreator.classList.add(
-    "pr-1",
+    "px-2",
     "self-center",
     "text-gray-500",
-    "dark:text-gray-400"
+    "dark:text-gray-400",
+    "hover:text-blue-500",
+    "dark:hover:text-blue-500"
   );
-  gameListCreator.textContent = "- By " + game.uploader.name + " -";
+  gameListCreator.textContent = game.uploader.name;
+  gameListCreator.href = game.uploader.link;
+  gameListCreator.target = "_blank";
   gameListA.appendChild(gameListCreator);
 
   const timeDiv = document.createElement("div");
@@ -237,4 +248,4 @@ for (let key in localStorage) {
 }
 
 //will save the current url (used for raw.githubusercontent)
-localStorage.setItem("root-url", window.location.href);
+localStorage.setItem("root-url", window.location.href.split("#")[0]);

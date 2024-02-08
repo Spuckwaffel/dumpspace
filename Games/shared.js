@@ -9,7 +9,7 @@ function formatElapsedTime(currentTime, givenTime, elem) {
   const yearsInMilli = 365 * daysInMilli;
 
   let timeElapsedString = "";
-
+  elem.classList.add("text-slate-700", "dark:text-slate-100");
   if (timeElapsed < minutesInMilli) {
     const val = Math.floor(timeElapsed / secondsInMilli);
     timeElapsedString = val + " second" + (val > 1 ? "s" : "");
@@ -29,6 +29,7 @@ function formatElapsedTime(currentTime, givenTime, elem) {
     const val = Math.floor(timeElapsed / monthsInMilli);
     timeElapsedString = val + " month" + (val > 1 ? "s" : "");
     if (val >= 1) {
+      elem.classList.remove("text-slate-700", "dark:text-slate-100");
       if (val >= 6) {
         elem.classList.add("text-red-500");
       } else {
@@ -101,7 +102,10 @@ async function decompressAndCheckCacheByURL(URL, updateTS) {
     var JSONData = JSON.parse(plaintext);
     var updatedAt = JSONData.updated_at;
 
-    if (updatedAt == updateTS) return plaintext;
+    if (updatedAt == updateTS) {
+      console.log("[CACHECHECK] cache hit! Getting the data from the cache");
+      return plaintext;
+    }
   }
 
   console.log(
@@ -111,7 +115,7 @@ async function decompressAndCheckCacheByURL(URL, updateTS) {
   );
   const base64EncodedGZip = await fetchAndConvertToBase64(URL);
 
-  console.log("bytes written: " + base64EncodedGZip.length);
+  console.log("[CACHECHECK] Bytes written: " + base64EncodedGZip.length);
 
   localStorage.setItem(
     "cGame" + URL,

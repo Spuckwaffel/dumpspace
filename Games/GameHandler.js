@@ -33,7 +33,7 @@ var UrlParams = getUrlParams();
 var currentURL = window.location.href;
 
 //sets a valid url with params for the target game
-function getGameInfo(info, reload = true) {
+function getGameInfo(info, reload = true, newWindow = false) {
   //no url params? thats weird
   if (Object.keys(UrlParams).length == 0) return;
 
@@ -42,21 +42,25 @@ function getGameInfo(info, reload = true) {
   var newURL = window.location.origin + window.location.pathname + "?";
 
   // no matter what, reset the url params
-  newURL += "hash=" + UrlParams["hash"];
+  newURL += "hash=" + UrlParams["hash"] + "&type=" + info;
 
-  history.pushState(null, null, newURL + "&type=" + info);
+  if (newWindow) {
+    window.open(newURL, "_blank");
+  } else {
+    history.pushState(null, null, newURL);
 
-  console.log("[getGameInfo] pushing " + newURL + "&type=" + info);
+    console.log("[getGameInfo] pushing " + newURL);
 
-  if (reload) location.reload();
+    if (reload) location.reload();
 
-  //fetch the new url params
-  UrlParams = getUrlParams();
+    //fetch the new url params
+    UrlParams = getUrlParams();
+  }
 }
 
 //reloads the website with the CName and its type (C,S,F,E)
 //only call if the current type does not match the new type
-function reloadWithNewCName(CName, newType) {
+function reloadWithNewCName(CName, newType, member, newWindow = false) {
   //params always need hash and current type
   if (Object.keys(UrlParams).length < 2) return;
 
@@ -86,17 +90,25 @@ function reloadWithNewCName(CName, newType) {
     CName = CName.slice(0, -1);
   }
 
-  console.log("received type " + newType);
-
   if (newType === "C") newURL += "&type=classes";
   else if (newType === "S") newURL += "&type=structs";
   else if (newType === "F") newURL += "&type=functions";
   else if (newType === "E") newURL += "&type=enums";
 
-  console.log("[reloadWithNewCName] pushing " + newURL + "&idx=" + CName);
-  history.pushState(null, null, newURL + "&idx=" + CName);
+  if (member) {
+    newURL += "&idx=" + CName + "&member=" + member;
+    console.log("[reloadWithNewCName] pushing " + newURL);
+    if (newWindow) window.open(newURL, "_blank");
+    else history.pushState(null, null, newURL);
+  } else {
+    newURL += "&idx=" + CName;
+    console.log("[reloadWithNewCName] pushing " + newURL);
+    if (newWindow) window.open(newURL, "_blank");
+    else history.pushState(null, null, newURL);
+  }
+
   // Reload the page to apply the changes
-  location.reload();
+  if (!newWindow) location.reload();
 }
 
 //error? go to home page
@@ -117,7 +129,6 @@ if (classDivScroll.offsetHeight == 256)
 
 classDiv.style.height = classDiv.offsetHeight + "px";
 classDiv.style.width = "100%";
-console.log(classDiv.style.height);
 
 window.addEventListener("resize", function () {
   //support downscaling, upscaling wont work and wont fix, stop resizing ur window
@@ -145,6 +156,11 @@ var currentInfoJson = null;
 //the current display type, eg struct or class
 var currentType = null;
 
+var gameName = "";
+
+var gameDirectory = "";
+
+var uploadTS = null;
 //only should get called once per reload
 //makes the game ready to be displayed with displayCurrentType and has basic checks
 async function displayCurrentGame() {
@@ -170,8 +186,12 @@ async function displayCurrentGame() {
   //no game found for hash? go back
   if (gameInfoJson == null) returnHome();
 
+  gameName = gameInfoJson.name;
+
+  uploadTS = gameInfoJson.uploaded;
+
   //directory is always engine path + location
-  const gameDirectory = gameInfoJson.engine + "/" + gameInfoJson.location + "/";
+  gameDirectory = gameInfoJson.engine + "/" + gameInfoJson.location + "/";
 
   console.log(
     "crunching latest data for: " + gameDirectory + " - " + UrlParams["type"]
@@ -181,35 +201,35 @@ async function displayCurrentGame() {
   if (UrlParams["type"] === "classes") {
     const response = await decompressAndCheckCacheByURL(
       gameDirectory + "ClassesInfo.json.gz",
-      gameInfoJson.uploaded
+      uploadTS
     );
     currentInfoJson = JSON.parse(response);
     currentType = "C";
   } else if (UrlParams["type"] === "structs") {
     const response = await decompressAndCheckCacheByURL(
       gameDirectory + "StructsInfo.json.gz",
-      gameInfoJson.uploaded
+      uploadTS
     );
     currentInfoJson = JSON.parse(response);
     currentType = "S";
   } else if (UrlParams["type"] === "functions") {
     const response = await decompressAndCheckCacheByURL(
       gameDirectory + "FunctionsInfo.json.gz",
-      gameInfoJson.uploaded
+      uploadTS
     );
     currentInfoJson = JSON.parse(response);
     currentType = "F";
   } else if (UrlParams["type"] === "enums") {
     const response = await decompressAndCheckCacheByURL(
       gameDirectory + "EnumsInfo.json.gz",
-      gameInfoJson.uploaded
+      uploadTS
     );
     currentInfoJson = JSON.parse(response);
     currentType = "E";
   } else if (UrlParams["type"] === "offsets") {
     const response = await decompressAndCheckCacheByURL(
       gameDirectory + "OffsetsInfo.json.gz",
-      gameInfoJson.uploaded
+      uploadTS
     );
     currentInfoJson = JSON.parse(response);
     currentType = "O";
@@ -238,7 +258,8 @@ async function displayCurrentGame() {
   }
 
   if (
-    Object.keys(UrlParams).length === 3 &&
+    (Object.keys(UrlParams).length === 3 ||
+      Object.keys(UrlParams).length === 4) &&
     Object.keys(UrlParams)[2] === "idx"
   ) {
     //try getting a valid cname out of the params or get the first index of the json
@@ -251,13 +272,18 @@ async function displayCurrentGame() {
 
   console.log("chose name " + targetClassName + " for displaying...");
 
+  var member = null;
+  if (Object.keys(UrlParams).length === 4) {
+    member = UrlParams["member"];
+    console.log("focussing member " + member);
+  }
   //actual baking
-  displayCurrentType(targetClassName);
+  displayCurrentType(targetClassName, member);
 }
 
 //persistent global data
 //used for vanilla recycler to unhighlight the older focussed div
-var oldFocussedDataDiv = null;
+var focussedCName = null;
 //whether we ever formatted the data with vanillarecycler view
 var formattedArrayDataValid = false;
 //the formatted data we display in the vrv
@@ -265,10 +291,34 @@ var formattedArrayData = [];
 //storing the vrv object
 var dVanillaRecyclerView = null;
 
+var firstScroll = true;
+var focussedCNameVisible = false;
+
+function fixHighlightColor() {
+  // Get the child div that contains the buttons
+  var childDiv = classDiv.querySelector("div");
+
+  var divs = childDiv.querySelectorAll("div");
+
+  var found = false;
+  divs.forEach(function (div) {
+    var childButton = div.querySelector("button");
+    if (childButton == null) return;
+    if (focussedCName !== null && focussedCName === childButton.textContent) {
+      childButton.classList.add("bg-gray-600/10");
+
+      found = true;
+    } else {
+      childButton.classList.remove("bg-gray-600/10");
+    }
+  });
+  focussedCNameVisible = found;
+}
+
 //only works on current data, if different type than current, call reloadwithnewdata
 //good thing about being able to call this func is no refetching of any data, so being once in a viewer
 //yoi can navigate every item in the viewer without reloading
-function displayCurrentType(CName) {
+function displayCurrentType(CName, member) {
   console.log("trying to display " + CName);
   //fixup cnames having pointers
   if (CName.charAt(CName.length - 1) === "*") {
@@ -286,6 +336,10 @@ function displayCurrentType(CName) {
   else if (currentType === "E") newURL += "&type=enums";
 
   newURL += "&idx=" + CName;
+
+  if (member) {
+    newURL += "&member=" + member;
+  }
 
   const oldURL = currentURL;
   currentURL = window.location.origin + window.location.pathname + newURL;
@@ -330,7 +384,10 @@ function displayCurrentType(CName) {
     console.log("pushed " + currentURL + " to history");
     history.pushState(null, "", currentURL);
   }
-  document.title = "Dumpspace - " + CName;
+  document.title = "Dumpspace - " + gameName;
+  document.getElementById("dumpspace-text").textContent = document.title;
+
+  focussedCName = CName;
 
   //first time? make the vrv
   if (!formattedArrayDataValid) {
@@ -355,37 +412,47 @@ function displayCurrentType(CName) {
           );
           if (targetClassName != null && params.data === targetClassName) {
             this.layout.classList.add("bg-gray-600/10");
-            oldFocussedDataDiv = this.layout;
           }
-          this.layout.addEventListener("click", function (event) {
-            //remove the bg of the old button
-            if (
-              oldFocussedDataDiv != null &&
-              oldFocussedDataDiv.classList.contains("bg-gray-600/10")
-            ) {
-              oldFocussedDataDiv.classList.remove("bg-gray-600/10");
+          this.layout.addEventListener("mouseup", function (event) {
+            if (event.button === 1) {
+              event.stopPropagation();
+              reloadWithNewCName(params.data, currentType, null, true);
+            } else {
+              //change the focusseddataname
+              focussedCName = params.data;
+              fixHighlightColor();
+              displayCurrentType(params.data);
             }
-            oldFocussedDataDiv = event.target;
-            event.target.classList.add("bg-gray-600/10");
-            displayCurrentType(params.data);
           });
         }
         getLayout() {
           return this.layout;
         }
         onUnmount() {}
+        onMount() {
+          fixHighlightColor();
+        }
       },
     });
 
-    if (scrollToIdx > 0) {
-      // calculating the box with a fixed size of 50px lol
-      const scrollTo = scrollToIdx * 50 + 200;
-
-      // Scroll the container to center the button
-      //classDiv.style.scrollBehavior = "smooth";
-      classDiv.scrollTop = scrollTo;
-    }
     formattedArrayDataValid = true;
+  }
+
+  //only scroll if the focussedcname isnt visible in the view, otherwise it has a ugly look
+  if (scrollToIdx > 0 && !focussedCNameVisible) {
+    // calculating the box with a fixed size of 50px lol
+    var scrollTo = scrollToIdx * 50;
+
+    if (firstScroll) {
+      scrollTo += 200;
+      firstScroll = false;
+    } else {
+      scrollTo -= 300;
+    }
+
+    // Scroll the container to center the button
+    //classDiv.style.scrollBehavior = "smooth";
+    classDiv.scrollTop = scrollTo;
   }
 
   if (currentType === "C" || currentType === "S")
@@ -408,12 +475,16 @@ function displayOverviewPage(members) {
   for (const child of emtpyOverViewDivChildren) {
     itemsOverviewDiv.appendChild(child);
   }
+  var focusIdx = 0;
+  var focusFound = false;
   for (const member of members) {
     const memberName = Object.keys(member)[0];
     if (memberName === "__InheritInfo") continue;
     if (memberName === "__MDKClassSize") continue;
+
     const overviewMemberDiv = document.createElement("div");
     overviewMemberDiv.classList.add(
+      "max-sm:w-[70vh]",
       "grid",
       "grid-cols-8",
       "text-sm",
@@ -438,11 +509,16 @@ function displayOverviewPage(members) {
       if (typeArr[1] === "C" || typeArr[1] === "S" || typeArr[1] === "E") {
         memberTypeButton.classList.add("underline", "dark:decoration-gray-400");
         memberTypeButton.addEventListener(
-          "click",
-          function (currentType, memberType, cname) {
-            if (currentType != memberType) {
-              reloadWithNewCName(cname, memberType);
-            } else displayCurrentType(cname);
+          "mouseup",
+          function (currentType, memberType, cname, event) {
+            if (event.button === 1) {
+              event.stopPropagation();
+              reloadWithNewCName(cname, memberType, null, true);
+            } else {
+              if (currentType != memberType) {
+                reloadWithNewCName(cname, memberType);
+              } else displayCurrentType(cname);
+            }
           }.bind(null, currentType, typeArr[1], typeArr[0])
         );
       } else memberTypeButton.classList.add("cursor-default");
@@ -476,7 +552,6 @@ function displayOverviewPage(members) {
 
     const memberNameButton = document.createElement("button");
     memberNameButton.classList.add("col-span-3", "text-left", "truncate");
-    console.log(memberName);
     memberNameButton.textContent = member[memberName][0];
 
     const memberType = member[memberName][3];
@@ -494,10 +569,63 @@ function displayOverviewPage(members) {
 
     overviewMemberDiv.appendChild(memberTypeDiv);
 
+    const memberNameDiv = document.createElement("div");
+    memberNameDiv.classList.add("flex", "col-span-3", "space-x-3");
+
     const memberNameP = document.createElement("p");
-    memberNameP.classList.add("col-span-3", "truncate");
+    memberNameP.classList.add("truncate");
     memberNameP.textContent = memberName;
-    overviewMemberDiv.appendChild(memberNameP);
+    memberNameDiv.appendChild(memberNameP);
+
+    if (Object.keys(UrlParams).length === 4) {
+      if (memberName === UrlParams["member"]) {
+        overviewMemberDiv.classList.add("bg-sky-400/10");
+        focusFound = true;
+      }
+    }
+
+    const memberLinkButton = document.createElement("button");
+    memberLinkButton.classList.add(
+      "text-gray-500",
+      "dark:text-gray-400",
+      "hover:text-blue-500",
+      "dark:hover:text-blue-500",
+      "hidden"
+    );
+    memberLinkButton.addEventListener(
+      "click",
+      function (bakedString) {
+        navigator.clipboard.writeText(bakedString);
+        showToast("Copied member to clipboard!", false);
+      }.bind(
+        null,
+        window.location.href.split("&member")[0] + "&member=" + memberName
+      )
+    );
+    var linkSVG = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    linkSVG.setAttribute("width", "20");
+    linkSVG.setAttribute("height", "20");
+    linkSVG.setAttribute("viewBox", "0 0 24 24");
+    linkSVG.setAttribute("fill", "none");
+
+    // Create the path element
+    var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute(
+      "d",
+      "M14 7H16C18.7614 7 21 9.23858 21 12C21 14.7614 18.7614 17 16 17H14M10 7H8C5.23858 7 3 9.23858 3 12C3 14.7614 5.23858 17 8 17H10M8 12H16"
+    );
+    path.setAttribute("stroke", "currentColor");
+    path.setAttribute("stroke-width", "2");
+    path.setAttribute("stroke-linecap", "round");
+    path.setAttribute("stroke-linejoin", "round");
+
+    // Append the path element to the SVG element
+    linkSVG.appendChild(path);
+
+    memberLinkButton.appendChild(linkSVG);
+    memberNameDiv.appendChild(memberLinkButton);
+
+    overviewMemberDiv.appendChild(memberNameDiv);
 
     const memberOffsetP = document.createElement("p");
     memberOffsetP.classList.add("col-span-1", "font-mono");
@@ -514,7 +642,25 @@ function displayOverviewPage(members) {
 
     overviewMemberDiv.appendChild(memberSizeP);
 
+    overviewMemberDiv.addEventListener(
+      "mouseover",
+      function (button) {
+        memberLinkButton.classList.remove("hidden");
+      }.bind(null, memberLinkButton)
+    );
+
+    overviewMemberDiv.addEventListener(
+      "mouseout",
+      function (button) {
+        memberLinkButton.classList.add("hidden");
+      }.bind(null, memberLinkButton)
+    );
+
     itemsOverviewDiv.appendChild(overviewMemberDiv);
+    if (!focusFound) focusIdx++;
+  }
+  if (focusFound) {
+    document.getElementById("member-list").scrollTop = focusIdx * 35 - 100;
   }
 }
 
@@ -755,7 +901,7 @@ function displayEnums(CName, data) {
   enumHeaderDiv.classList.add("flex", "space-x-2");
 
   const enumNameP = document.createElement("p");
-  enumNameP.textContent = "enum " + CName;
+  enumNameP.textContent = "enum class " + CName;
   enumNameP.classList.add(
     "text-ellipsis",
     "overflow-hidden",
@@ -895,12 +1041,9 @@ function displayFunctions(CName, data) {
 
   const funcs = data[Object.keys(data)[0]];
 
+  var moveTo = 0;
   for (const func of funcs) {
     const funcName = Object.keys(func)[0];
-    console.log(funcName);
-    for (const item of func[funcName]) {
-      console.log(item);
-    }
 
     const coreDiv = document.createElement("div");
     coreDiv.classList.add(
@@ -945,12 +1088,67 @@ function displayFunctions(CName, data) {
     offsetDiv.appendChild(offsetP);
     offsetDiv.appendChild(offsetButton);
     offsetDiv.appendChild(functionFlags);
+
+    const functionLinkButton = document.createElement("button");
+    functionLinkButton.classList.add(
+      "text-gray-500",
+      "dark:text-gray-400",
+      "hover:text-blue-500",
+      "dark:hover:text-blue-500",
+      "hidden"
+    );
+    functionLinkButton.addEventListener(
+      "click",
+      function (bakedString) {
+        navigator.clipboard.writeText(bakedString);
+        showToast("Copied member to clipboard!", false);
+      }.bind(
+        null,
+        window.location.href.split("&member")[0] + "&member=" + funcName
+      )
+    );
+    var linkSVG = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    linkSVG.setAttribute("width", "20");
+    linkSVG.setAttribute("height", "20");
+    linkSVG.setAttribute("viewBox", "0 0 24 24");
+    linkSVG.setAttribute("fill", "none");
+
+    // Create the path element
+    var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute(
+      "d",
+      "M14 7H16C18.7614 7 21 9.23858 21 12C21 14.7614 18.7614 17 16 17H14M10 7H8C5.23858 7 3 9.23858 3 12C3 14.7614 5.23858 17 8 17H10M8 12H16"
+    );
+    path.setAttribute("stroke", "currentColor");
+    path.setAttribute("stroke-width", "2");
+    path.setAttribute("stroke-linecap", "round");
+    path.setAttribute("stroke-linejoin", "round");
+
+    // Append the path element to the SVG element
+    linkSVG.appendChild(path);
+
+    functionLinkButton.appendChild(linkSVG);
+    offsetDiv.appendChild(functionLinkButton);
+
     coreDiv.appendChild(offsetDiv);
+
+    coreDiv.addEventListener(
+      "mouseover",
+      function (button) {
+        button.classList.remove("hidden");
+      }.bind(null, functionLinkButton)
+    );
+
+    coreDiv.addEventListener(
+      "mouseout",
+      function (button) {
+        button.classList.add("hidden");
+      }.bind(null, functionLinkButton)
+    );
 
     const functionDiv = document.createElement("div");
     functionDiv.classList.add(
       "flex",
-      "flex-wrap",
       "items-center",
       "justify-between",
       "mr-4"
@@ -1005,12 +1203,7 @@ function displayFunctions(CName, data) {
     funcNameP.classList.add("pl-2");
     if (funcParams.length > 0) funcNameP.textContent = funcName + "(";
     else funcNameP.textContent = funcName + "();";
-    funcNameP.classList.add(
-      "text-ellipsis",
-      "overflow-hidden",
-      "truncate",
-      "sm:max-w-prose"
-    );
+    funcNameP.classList.add("text-ellipsis", "overflow-hidden", "truncate");
     functionHeaderDiv.appendChild(funcNameP);
 
     functionDiv.appendChild(functionHeaderDiv);
@@ -1079,7 +1272,7 @@ function displayFunctions(CName, data) {
       bakedString +=
         cookBakedString(param[0]) + param[1] + " " + param[2] + ", ";
     }
-    bakedString = bakedString.slice(0, -2);
+    if (funcParams.length > 0) bakedString = bakedString.slice(0, -2);
     bakedString += ");";
     functionCopyButton.addEventListener(
       "click",
@@ -1123,6 +1316,17 @@ function displayFunctions(CName, data) {
       coreDiv.appendChild(functionClosureP);
     }
     itemsOverviewDiv.appendChild(coreDiv);
+    if (Object.keys(UrlParams).length === 4) {
+      if (funcName === UrlParams["member"]) {
+        coreDiv.classList.add("bg-sky-400/10");
+        focusFound = true;
+        moveTo = coreDiv.offsetTop;
+      }
+    }
+  }
+
+  if (moveTo > 0) {
+    document.getElementById("member-list").scrollTop = moveTo - 300;
   }
 
   if (document.getElementById("class-desc-name") !== null)
@@ -1305,7 +1509,7 @@ function showOffsets(dataJSON) {
       "click",
       function (bakedString) {
         navigator.clipboard.writeText(bakedString);
-        showToast("Copied function to clipboard!", false);
+        showToast("Copied offset to clipboard!", false);
       }.bind(null, bakedString)
     );
 
@@ -1328,6 +1532,7 @@ if (
   returnHome();
 }
 
+//fix when the games folder is first downloaded classes are listed by default
 if (Object.keys(UrlParams).length === 1) {
   getGameInfo("classes", false);
 }
@@ -1337,8 +1542,9 @@ window.addEventListener("popstate", function () {
   var oldParams = getUrlParams(currentURL);
   var newParams = getUrlParams();
   console.log(
-    oldParams[Object.keys(oldParams)[1]] +
-      ":" +
+    "viewer changed from type " +
+      oldParams[Object.keys(oldParams)[1]] +
+      " -> " +
       newParams[Object.keys(newParams)[1]]
   );
   if (
@@ -1356,6 +1562,7 @@ window.addEventListener("popstate", function () {
     return;
   }
 
+  console.log("page reload was not needed!");
   displayCurrentType(newParams[Object.keys(newParams)[2]]);
 });
 
@@ -1420,3 +1627,33 @@ searchCancelButton.addEventListener("click", function () {
   searchInput.value = "";
   handleSearchInput();
 });
+
+document
+  .getElementById("ClassesButton")
+  .addEventListener("mouseup", function (event) {
+    getGameInfo("classes", true, event.button === 1);
+  });
+document
+  .getElementById("StructsButton")
+  .addEventListener("mouseup", function (event) {
+    getGameInfo("structs", true, event.button === 1);
+  });
+document
+  .getElementById("FunctionsButton")
+  .addEventListener("mouseup", function (event) {
+    getGameInfo("functions", true, event.button === 1);
+  });
+document
+  .getElementById("EnumsButton")
+  .addEventListener("mouseup", function (event) {
+    getGameInfo("enums", true, event.button === 1);
+  });
+document
+  .getElementById("OffsetsButton")
+  .addEventListener("mouseup", function (event) {
+    getGameInfo("offsets", true, event.button === 1);
+  });
+
+document.body.onmousedown = function (e) {
+  if (e.button === 1) return false;
+};

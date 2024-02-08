@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Dumpspace - Changelog</title>
+    <title>Dumpspace - Loading</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -9,16 +9,19 @@
       name="description"
       content="Dumpspace provides game dumps for multiple games and game engines, created by the community for the community"
     />
-    <meta name="keywords" content="DumpSpace, SDK" />
+    <meta name="keywords" content="Dumpspace, SDK" />
     <meta property="og:locale" content="en_US" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Game Dumps Info" />
+    <meta property="og:title" content="Dumpspace Game Dump Viewer" />
     <meta
       property="og:description"
       content="Get the latest dumps of any supported game."
     />
-    <meta property="og:url" content="https://spuckwaffel.com/dumpspace/" />
-    <meta property="og:site_name" content="spuckwaffel.com/dumpspace" />
+    <meta property="og:url" content="https://dumpspace.spuckwaffel.com/" />
+    <meta
+      property="og:site_name"
+      content="https://dumpspace.spuckwaffel.com/"
+    />
 
     <!--
     <link
@@ -34,9 +37,9 @@
       href="Images/favicon-16x16.png"
     />
 
-    <link rel="stylesheet" type="text/css" href="../tailwind.css" />
-
-    <script src="https://cdn.tailwindcss.com"></script>
+    
+<script src="https://cdn.tailwindcss.com"></script>
+    
     -->
 
     <link rel="stylesheet" type="text/css" href="../tailwind.css" />
@@ -53,13 +56,15 @@
       class="md:sticky top-0 w-full z-30 border-b border-gray-200 dark:border-gray-600 backdrop-blur transition-colors duration-500"
     >
       <div
-        class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-3"
+        class="max-w-screen-2xl md:px-16 flex flex-wrap items-center justify-between mx-auto p-3"
       >
         <a id="go-root-url" href="#" class="flex items-center">
-          <span
+          <p
+            id="dumpspace-text"
             class="self-center text-2xl font-semibold whitespace-nowrap text-black dark:text-slate-100"
-            >Dumpspace</span
           >
+            Dumpspace
+          </p>
         </a>
         <div class="flex items-center md:hidden">
           <button>
@@ -153,12 +158,12 @@
         </div>
       </div>
       <div
-        class="max-w-screen-xl flex flex-wrap items-center justify-between sm:mx-auto p-3 text-slate-700 dark:text-slate-100"
+        class="max-w-screen-2xl md:px-16 flex flex-wrap items-center justify-between sm:mx-auto p-3 text-slate-700 dark:text-slate-100"
       >
         <ul class="flex flex-wrap space-x-4 sm:space-x-8 sm:mr-4">
           <li>
             <button
-              onclick="getGameInfo('classes')"
+              id="ClassesButton"
               class="font-semibold transition duration-200 ease-in-out hover:text-blue-500"
             >
               Classes
@@ -166,7 +171,7 @@
           </li>
           <li>
             <button
-              onclick="getGameInfo('structs')"
+              id="StructsButton"
               class="font-semibold transition duration-200 ease-in-out hover:text-blue-500"
             >
               Structs
@@ -174,7 +179,7 @@
           </li>
           <li>
             <button
-              onclick="getGameInfo('functions')"
+              id="FunctionsButton"
               class="font-semibold transition duration-200 ease-in-out hover:text-blue-500"
             >
               Functions
@@ -182,7 +187,7 @@
           </li>
           <li>
             <button
-              onclick="getGameInfo('enums')"
+              id="EnumsButton"
               class="font-semibold transition duration-200 ease-in-out hover:text-blue-500"
             >
               Enums
@@ -190,10 +195,31 @@
           </li>
           <li>
             <button
-              onclick="getGameInfo('offsets')"
+              id="OffsetsButton"
               class="font-semibold transition duration-200 ease-in-out hover:text-blue-500"
             >
               Offsets
+            </button>
+          </li>
+          <li>
+            <button
+              onclick="openGlobalSearch()"
+              class="font-semibold transition duration-200 ease-in-out hover:text-blue-500 flex space-x-1"
+            >
+              <svg
+                width="20"
+                height="20"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="m19 19-3.5-3.5"></path>
+                <circle cx="11" cy="11" r="6"></circle>
+              </svg>
+              <p>Global Search</p>
             </button>
           </li>
         </ul>
@@ -211,25 +237,21 @@
               stroke-linejoin="round"
             ></path>
           </svg>
-          <button
-            id="updateLabel"
-            onclick="getGameInfo('history')"
-            class="font-semibold transition duration-200 ease-in-out hover:text-blue-500"
-          >
+          <div id="updateLabel" class="font-semibold">
             <div
               class="h-2 bg-gray-200 dark:bg-slate-700 rounded-full w-24 animate-pulse"
             ></div>
-          </button>
+          </div>
         </div>
       </div>
     </nav>
 
     <div
-      class="xl:grid xl:grid-cols-4 xl:gap-4 xl:px-32 px-4 top-10"
+      class="xl:grid xl:grid-cols-4 xl:gap-4 xl:px-28 px-4 top-10"
       id="full-viewer"
     >
       <div
-        class="my-16 px-4 py-4 border rounded-lg border-gray-200 relative flex flex-col min-w-0 dark:border-gray-600"
+        class="mt-6 px-4 py-4 border rounded-lg border-gray-200 relative flex flex-col min-w-0 dark:border-gray-600"
       >
         <h1
           class="font-semibold text-xl mb-2 text-slate-700 dark:text-slate-100"
@@ -332,7 +354,7 @@
         </div>
       </div>
       <div
-        class="h-[70vh] my-16 px-4 py-4 border rounded-lg border-gray-200 dark:border-gray-600 relative flex flex-col min-w-0 col-span-3"
+        class="h-[78vh] mt-6 px-4 py-4 border rounded-lg border-gray-200 dark:border-gray-600 relative flex flex-col min-w-0 col-span-3"
       >
         <div class="flex flex-wrap items-center justify-between">
           <h1
@@ -402,12 +424,12 @@
         </nav>
         <div class="min-h-0 h-full w-full pt-4">
           <div
-            id="class-list"
-            class="h-full w-full rounded-md border border-gray-200 dark:border-gray-600 overflow-y-auto overflow-x-hidden"
+            id="member-list"
+            class="h-full rounded-md border border-gray-200 dark:border-gray-600 overflow-y-auto max-sm:overflow-x-scroll"
           >
             <div id="overview-items" class="">
               <div
-                class="sticky top-0 w-full z-5 grid grid-cols-8 font-medium text-sm px-2 sm:px-6 text-slate-700 dark:text-slate-100 uppercase pt-2 pb-2 border-b border-gray-200 dark:border-gray-600 bg-opacity-30 backdrop-filter backdrop-blur-md"
+                class="max-sm:w-[70vh] sticky top-0 z-5 grid grid-cols-8 font-medium text-sm px-2 sm:px-6 text-slate-700 dark:text-slate-100 uppercase pt-2 pb-2 border-b border-gray-200 dark:border-gray-600 bg-opacity-30 backdrop-filter backdrop-blur-md"
               >
                 <p class="col-span-3">Type</p>
                 <p class="col-span-3">Member</p>
@@ -447,9 +469,9 @@ Loading...</textarea
       </div>
     </div>
 
-    <div class="pt-32 mb-8">
+    <div class="pt-3">
       <div
-        class="mx-0 relative max-w-none sm:grid sm:grid-cols-3 sm:gap-4 items-center pb-8"
+        class="mx-0 relative max-w-none sm:grid sm:grid-cols-3 sm:gap-4 items-center"
       >
         <p class="text-center text-sm font-semibold text-slate-600 pb-4">
           Made with &#9825; by Spuckwaffel
@@ -528,7 +550,164 @@ Loading...</textarea
       </button>
     </div>
 
+    <div
+      class="absolute inset-0 flex items-center justify-center z-40 my-48 hidden"
+      id="globalSearchDiv"
+    >
+      <div
+        class="mx-4 xl:w-[60vw] bg-gray-100 dark:bg-gray-900 rounded-lg text-black dark:text-slate-100 border border-gray-200 dark:border-gray-600"
+      >
+        <div
+          class="flex items-center justify-between p-5 border-b rounded-t border-gray-200 dark:border-gray-600"
+        >
+          <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100 pr-4">
+            Global search
+          </h3>
+          <button
+            class="flex-none -mr-2 -my-1.5 text-gray-400 hover:text-blue-500 rounded-lg p-1.5 inline-flex items-center justify-center h-8 w-8 transition duration-200 ease-in-out"
+            id="globalSearchDivCloser"
+          >
+            <svg
+              class="w-3 h-3"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 14 14"
+            >
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+              />
+            </svg>
+          </button>
+        </div>
+        <div class="p-5 space-y-4">
+          <p
+            class="text-base leading-relaxed text-slate-600 dark:text-slate-500"
+          >
+            Perform a global search for the selected types below that contain
+            the given name. Only select needed types, selected types have to be
+            downloaded.
+          </p>
+          <div
+            class="flex items-center justify-center w-full text-left space-x-1 px-2 h-10 bg-white ring-1 ring-slate-900/10 hover:ring-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm rounded-lg text-slate-400 transition duration-300 ease-in-out hover:shadow-inner dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-slate-100"
+          >
+            <svg
+              width="24"
+              height="24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="flex-none text-slate-300 dark:text-slate-400"
+              aria-hidden="true"
+            >
+              <path d="m19 19-3.5-3.5"></path>
+              <circle cx="11" cy="11" r="6"></circle>
+            </svg>
+            <input
+              id="global-search-input"
+              onkeypress="handleGlobalSearchInput(event)"
+              class="w-full !outline-none bg-white dark:bg-gray-700 text-slate-700 placeholder-gray-600 dark:placeholder-gray-400 dark:text-white transition duration-300 ease-in-out"
+              placeholder="Search..."
+              required
+            />
+            <button
+              id="global-search-cancel-button"
+              class="text-slate-300 dark:text-slate-400 hidden"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 30 30"
+                width="20px"
+                height="20px"
+                fill="currentColor"
+              >
+                <path
+                  d="M15,3C8.373,3,3,8.373,3,15c0,6.627,5.373,12,12,12s12-5.373,12-12C27,8.373,21.627,3,15,3z M16.414,15 c0,0,3.139,3.139,3.293,3.293c0.391,0.391,0.391,1.024,0,1.414c-0.391,0.391-1.024,0.391-1.414,0C18.139,19.554,15,16.414,15,16.414 s-3.139,3.139-3.293,3.293c-0.391,0.391-1.024,0.391-1.414,0c-0.391-0.391-0.391-1.024,0-1.414C10.446,18.139,13.586,15,13.586,15 s-3.139-3.139-3.293-3.293c-0.391-0.391-0.391-1.024,0-1.414c0.391-0.391,1.024-0.391,1.414,0C11.861,10.446,15,13.586,15,13.586 s3.139-3.139,3.293-3.293c0.391-0.391,1.024-0.391,1.414,0c0.391,0.391,0.391,1.024,0,1.414C19.554,11.861,16.414,15,16.414,15z"
+                />
+              </svg>
+            </button>
+          </div>
+          <div class="flex space-x-5">
+            <label class="flex items-center">
+              <input
+                id="classCheckbox"
+                type="checkbox"
+                class="h-5 w-5 text-blue-500"
+                checked
+              />
+              <p class="ml-2">Classes</p>
+            </label>
+            <label class="inline-flex items-center">
+              <input
+                id="structCheckbox"
+                type="checkbox"
+                class="h-5 w-5 text-blue-500"
+                checked
+              />
+              <p class="ml-2">Structs</p>
+            </label>
+            <label class="inline-flex items-center">
+              <input
+                id="functionCheckbox"
+                type="checkbox"
+                class="h-5 w-5 text-blue-500"
+              />
+              <p class="ml-2">Functions</p>
+            </label>
+            <label class="inline-flex items-center">
+              <input
+                id="enumCheckbox"
+                type="checkbox"
+                class="h-5 w-5 text-blue-500"
+                checked
+              />
+              <p class="ml-2">Enums</p>
+            </label>
+          </div>
+          <div
+            class="h-[45vh] my-16 border rounded-lg border-gray-200 dark:border-gray-600 relative flex flex-col min-w-0 col-span-3 overflow-y-auto overflow-x-hidden px-4 py-2"
+            id="GlobalSearchListDiv"
+          >
+            <div id="globalSearchFoundDiv" class="hidden"></div>
+            <div id="search-spinner" class="m-auto hidden">
+              <div class="flex items-center">
+                <svg
+                  aria-hidden="true"
+                  class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
+                  viewBox="0 0 100 101"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                    fill="currentColor"
+                  />
+                  <path
+                    d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                    fill="currentFill"
+                  />
+                </svg>
+                <p
+                  id="global-search-status"
+                  class="ml-2 text-slate-600 dark:text-slate-500 animate-pulse"
+                >
+                  Loading...
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="shared.js"></script>
     <script src="GameHandler.js"></script>
+    <script src="GlobalSearch.js"></script>
   </body>
 </html>

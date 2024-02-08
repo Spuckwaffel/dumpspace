@@ -221,7 +221,7 @@ def check_changed_files(changed_files):
   for game in gameListData['games']:
     if game['location'] == changed_files[0].split('/')[2]:
       game['uploaded'] = updated_at
-      game['uploader']['name'] = json.dumps(pr.user.login, ensure_ascii=False)
+      game['uploader']['name'] = json.dumps(pr.user.login, ensure_ascii=False).replace("\"", "")
       game['uploader']['link'] = json.dumps(pr.user.html_url, ensure_ascii=False).replace("\"", "") 
 
 
