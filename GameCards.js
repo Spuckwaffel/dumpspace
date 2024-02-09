@@ -247,5 +247,16 @@ for (let key in localStorage) {
   }
 }
 
+function removeTrailingSlash(str) {
+  if (str.endsWith("/")) {
+    return str.slice(0, -1);
+  } else {
+    return str;
+  }
+}
+
 //will save the current url (used for raw.githubusercontent)
-localStorage.setItem("root-url", window.location.href.split("#")[0]);
+localStorage.setItem(
+  "root-url",
+  removeTrailingSlash(window.location.href.split("#")[0].split("index.html"))
+);

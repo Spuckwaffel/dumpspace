@@ -184,9 +184,7 @@ document.getElementById("go-root-url").addEventListener("click", function () {
   window.location.href = localStorage.getItem("root-url");
 });
 
-var subroot = localStorage
-  .getItem("root-url")
-  .substring(0, localStorage.getItem("root-url").length - 11);
+var subroot = localStorage.getItem("root-url");
 
 document.getElementById("go-recent-url").href = subroot + "/Recent/index.html";
 document.getElementById("go-changelog-url").href =
