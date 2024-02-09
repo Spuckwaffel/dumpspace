@@ -258,5 +258,5 @@ function removeTrailingSlash(str) {
 //will save the current url (used for raw.githubusercontent)
 localStorage.setItem(
   "root-url",
-  removeTrailingSlash(window.location.href.split("#")[0].split("index.html"))
+  removeTrailingSlash(window.location.href.split("#")[0].split("index.html")[0])
 );
