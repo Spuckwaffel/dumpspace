@@ -189,3 +189,14 @@ var subroot = localStorage.getItem("root-url");
 document.getElementById("go-recent-url").href = subroot + "/Recent/index.html";
 document.getElementById("go-changelog-url").href =
   subroot + "/Changelog/index.html";
+
+document
+  .getElementById("dropdownNavbar")
+  .addEventListener("click", function () {
+    const navbar = document.getElementById("navbar-regular");
+    if (navbar.classList.contains("max-md:hidden")) {
+      document
+        .getElementById("navbar-regular")
+        .classList.remove("max-md:hidden");
+    } else document.getElementById("navbar-regular").classList.add("max-md:hidden");
+  });

@@ -684,7 +684,7 @@ function displayStructAndMDKPage(CName, members) {
         }
         if (i == 0) {
           _MDKText =
-            "class " +
+            "\nclass " +
             CName +
             " : public " +
             superClass +
