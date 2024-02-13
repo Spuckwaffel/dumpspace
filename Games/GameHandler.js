@@ -599,7 +599,9 @@ function displayOverviewPage(members) {
         showToast("Copied member to clipboard!", false);
       }.bind(
         null,
-        window.location.href.split("&member")[0] + "&member=" + memberName
+        window.location.href.split("&member")[0] +
+          "&member=" +
+          memberName.replace(/ /g, "%20")
       )
     );
     var linkSVG = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -1104,7 +1106,9 @@ function displayFunctions(CName, data) {
         showToast("Copied member to clipboard!", false);
       }.bind(
         null,
-        window.location.href.split("&member")[0] + "&member=" + funcName
+        window.location.href.split("&member")[0] +
+          "&member=" +
+          funcName.replace(/ /g, "%20")
       )
     );
     var linkSVG = document.createElementNS("http://www.w3.org/2000/svg", "svg");
