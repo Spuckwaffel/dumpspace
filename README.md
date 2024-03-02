@@ -11,7 +11,7 @@
 <li>Open source!</li>
 </ol>
 <h2>Viewing The Website</h2>
-<p>The website can be viewed by visiting <a href="https://raw.githack.com/spuckwaffel/dumpspace/main/index.html">https://raw.githack.com/spuckwaffel/dumpspace/main/index.html</a> which just showcases the GitHub repository as a website. The website itself is static and does not need any server to run.</p>
+<p>The website can be viewed by visiting <a href="https://dumpspace.spuckwaffel.com">https://dumpspace.spuckwaffel.com</a> which just showcases the GitHub repository as a website. The website itself is static and does not need any server to run.</p>
 <p>&nbsp;</p>
 <h2>Adding Your Game</h2>
 <p>You want to add your game? - Sure, it's very easy.</p>
