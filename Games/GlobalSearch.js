@@ -15,6 +15,7 @@ const classCheckbox = document.getElementById("classCheckbox");
 const structCheckbox = document.getElementById("structCheckbox");
 const functionCheckbox = document.getElementById("functionCheckbox");
 const enumCheckbox = document.getElementById("enumCheckbox");
+const typeSearchCheckbox = document.getElementById("typeSearchCheckbox");
 const globalSearchListDiv = document.getElementById("GlobalSearchListDiv");
 const globalSearchFoundDiv = document.getElementById("globalSearchFoundDiv");
 
@@ -100,8 +101,15 @@ async function handleClassesOrStructs(isClass) {
   for (const gameClass of (isClass === true ? classJSON : structJSON).data) {
     for (const member of gameClass[Object.keys(gameClass)[0]]) {
       const memberName = Object.keys(member)[0];
+      if (memberName === "__InheritInfo") continue;
+      if (memberName === "__MDKClassSize") continue;
+
+      const memberType = member[memberName][0][0];
+
+      const searchType = typeSearchCheckbox.checked ? memberType : memberName;
+
       if (
-        memberName.toLowerCase().includes(searchTerm.toLowerCase()) === true
+        searchType.toLowerCase().includes(searchTerm.toLowerCase()) === true
       ) {
         resultsFound++;
         gameClassButton = document.createElement("button");
