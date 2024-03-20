@@ -562,7 +562,7 @@ Loading...</textarea
       id="globalSearchDiv"
     >
       <div
-        class="mx-4 xl:w-[60vw] bg-gray-100 dark:bg-gray-900 rounded-lg text-black dark:text-slate-100 border border-gray-200 dark:border-gray-600"
+        class="xl:w-[75vw] max-md:mx-2 bg-gray-100 dark:bg-gray-900 rounded-lg text-black dark:text-slate-100 border border-gray-200 dark:border-gray-600"
       >
         <div
           class="flex items-center justify-between p-5 border-b rounded-t border-gray-200 dark:border-gray-600"
@@ -640,8 +640,8 @@ Loading...</textarea
               </svg>
             </button>
           </div>
-          <div class="flex space-x-5">
-            <label class="flex items-center">
+          <div class="max-sm:grid max-sm:grid-cols-2 sm:flex sm:space-x-5">
+            <div class="flex items-center">
               <input
                 id="classCheckbox"
                 type="checkbox"
@@ -649,8 +649,8 @@ Loading...</textarea
                 checked
               />
               <p class="ml-2">Classes</p>
-            </label>
-            <label class="inline-flex items-center">
+            </div>
+            <div class="flex items-center">
               <input
                 id="structCheckbox"
                 type="checkbox"
@@ -658,35 +658,41 @@ Loading...</textarea
                 checked
               />
               <p class="ml-2">Structs</p>
-            </label>
-            <label class="inline-flex items-center">
+            </div>
+            <div class="flex items-center">
               <input
                 id="functionCheckbox"
                 type="checkbox"
                 class="h-5 w-5 text-blue-500"
               />
               <p class="ml-2">Functions</p>
-            </label>
-            <label class="inline-flex items-center">
+            </div>
+            <div class="flex items-center">
               <input
                 id="enumCheckbox"
                 type="checkbox"
                 class="h-5 w-5 text-blue-500"
-                checked
               />
               <p class="ml-2">Enums</p>
-            </label>
-            <label class="inline-flex items-center">
+            </div>
+          </div>
+          <label class="flex items-center">
+            <div class="flex flex-shrink-0">
               <input
                 id="typeSearchCheckbox"
                 type="checkbox"
                 class="h-5 w-5 text-blue-500"
               />
-              <p class="ml-2">Type search</p>
-            </label>
-          </div>
+              <p class="ml-2">Type Search</p>
+            </div>
+
+            <p class="text-slate-600 dark:text-slate-500 ml-4">
+              When enabled, it will search for the given member type instead of
+              member name.
+            </p>
+          </label>
           <div
-            class="h-[45vh] my-16 border rounded-lg border-gray-200 dark:border-gray-600 relative flex flex-col min-w-0 col-span-3 overflow-y-auto overflow-x-hidden px-4 py-2"
+            class="h-[45vh] my-16 border rounded-lg border-gray-200 dark:border-gray-600 relative flex flex-col min-w-0 col-span-3 overflow-y-auto overflow-x-hidden px-1 sm:px-2 md:px-4 py-1 md:py-2"
             id="GlobalSearchListDiv"
           >
             <div id="globalSearchFoundDiv" class="hidden"></div>

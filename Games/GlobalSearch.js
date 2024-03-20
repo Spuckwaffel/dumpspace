@@ -18,6 +18,7 @@ const enumCheckbox = document.getElementById("enumCheckbox");
 const typeSearchCheckbox = document.getElementById("typeSearchCheckbox");
 const globalSearchListDiv = document.getElementById("GlobalSearchListDiv");
 const globalSearchFoundDiv = document.getElementById("globalSearchFoundDiv");
+const globalSearchDiv = document.getElementById("globalSearchDiv");
 
 var classJSON = null;
 var structJSON = null;
@@ -91,8 +92,10 @@ async function handleClassesOrStructs(isClass) {
   resultsFoundP = document.createElement("p");
   resultsFoundP.classList.add(
     "font-semibold",
+    "text-xl",
     "text-slate-900",
-    "dark:text-slate-100"
+    "dark:text-slate-100",
+    "pb-4"
   );
   resultsFoundP.textContent =
     (isClass === true ? "Class" : "Struct") + " results found: ...";
@@ -124,22 +127,12 @@ async function handleClassesOrStructs(isClass) {
           "w-full"
         );
         gameClassClassDiv = document.createElement("div");
-        gameClassClassDiv.classList.add("flex", "col-span-3");
-
-        gameClassClassP = document.createElement("p");
-        gameClassClassP.classList.add(
-          "text-gray-500",
-          "dark:text-gray-400",
-          "mr-2",
-          "col-span-3"
-        );
-        gameClassClassP.textContent = isClass === true ? "Class" : "Struct";
+        gameClassClassDiv.classList.add("flex", "sm:col-span-3", "col-span-4");
 
         gameClassClassNameP = document.createElement("p");
         gameClassClassNameP.classList.add("font-semibold", "truncate");
         gameClassClassNameP.textContent = Object.keys(gameClass)[0];
 
-        gameClassClassDiv.appendChild(gameClassClassP);
         gameClassClassDiv.appendChild(gameClassClassNameP);
 
         gameClassButton.appendChild(gameClassClassDiv);
@@ -148,23 +141,39 @@ async function handleClassesOrStructs(isClass) {
         gameClassMemberDiv.classList.add("flex", "col-span-4");
 
         gameClassMemberP = document.createElement("p");
-        gameClassMemberP.classList.add(
-          "text-gray-500",
-          "dark:text-gray-400",
-          "mr-2"
-        );
-        gameClassMemberP.textContent = "member";
+        gameClassMemberP.classList.add("sm:mr-2", "truncate");
+        gameClassMemberP.textContent = memberType;
         gameClassMemberNameP = document.createElement("p");
-        gameClassMemberNameP.classList.add("font-semibold", "truncate");
+        gameClassMemberNameP.classList.add("truncate");
         gameClassMemberNameP.textContent = memberName;
 
+        if (typeSearchCheckbox.checked) {
+          gameClassMemberNameP.classList.add(
+            "max-sm:hidden",
+            "text-gray-500",
+            "dark:text-gray-400"
+          );
+          gameClassMemberP.classList.add("font-semibold");
+        } else {
+          gameClassMemberP.classList.add(
+            "max-sm:hidden",
+            "text-gray-500",
+            "dark:text-gray-400"
+          );
+          gameClassMemberNameP.classList.add("font-semibold");
+        }
         gameClassMemberDiv.appendChild(gameClassMemberP);
         gameClassMemberDiv.appendChild(gameClassMemberNameP);
 
         gameClassButton.appendChild(gameClassMemberDiv);
 
         memberOffsetP = document.createElement("p");
-        memberOffsetP.classList.add("col-span-1", "font-mono", "text-left");
+        memberOffsetP.classList.add(
+          "col-span-1",
+          "font-mono",
+          "text-left",
+          "max-sm:hidden"
+        );
         memberOffsetP.textContent =
           "0x" + member[Object.keys(member)[0]][1].toString(16);
 
@@ -180,6 +189,7 @@ async function handleClassesOrStructs(isClass) {
                 reloadWithNewCName(cname, memberType, memberName);
               } else displayCurrentType(cname, memberName);
             }
+            globalSearchDiv.classList.add("hidden");
           }.bind(
             null,
             currentType,

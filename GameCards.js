@@ -11,7 +11,7 @@ const currentPath = "Games/";
 
 var gameArray = [];
 
-function createTimeSVG() {
+function createTimeSVG(hideClock) {
   const svgElement = document.createElementNS(
     "http://www.w3.org/2000/svg",
     "svg"
@@ -24,6 +24,8 @@ function createTimeSVG() {
     "stroke-black",
     "dark:stroke-slate-100"
   );
+  if (hideClock !== null && hideClock === true)
+    svgElement.classList.add("max-sm:hidden");
   svgElement.setAttribute("viewBox", "0 0 24 24");
   svgElement.setAttribute("fill", "none");
 
@@ -152,19 +154,20 @@ function createAndPushGameToList(game) {
     "dark:border-gray-600",
     "py-2",
     "px-4",
-    "flex",
     "text-slate-700",
     "dark:text-slate-100",
     "transition",
     "duration-200",
     "ease-in-out",
     "hover:text-blue-500",
-    "dark:hover:text-blue-500"
+    "dark:hover:text-blue-500",
+    "grid",
+    "grid-cols-5"
   );
   gameListA.href = currentPath + "?hash=" + game.hash;
 
   const gameListTitle = document.createElement("p");
-  gameListTitle.classList.add("pr-2", "text-lg", "font-semibold");
+  gameListTitle.classList.add("pr-2", "text-lg", "font-semibold", "col-span-2");
   gameListTitle.textContent = game.name;
   gameListA.appendChild(gameListTitle);
 
@@ -173,9 +176,10 @@ function createAndPushGameToList(game) {
     "pr-1",
     "self-center",
     "text-gray-500",
-    "dark:text-gray-400"
+    "dark:text-gray-400",
+    "max-sm:hidden"
   );
-  gameListEngine.textContent = "- " + game.engine;
+  gameListEngine.textContent = game.engine.replace(/-/g, " ");
   gameListA.appendChild(gameListEngine);
 
   const gameListCreator = document.createElement("a");
@@ -185,7 +189,9 @@ function createAndPushGameToList(game) {
     "text-gray-500",
     "dark:text-gray-400",
     "hover:text-blue-500",
-    "dark:hover:text-blue-500"
+    "dark:hover:text-blue-500",
+    "max-sm:col-span-2",
+    "truncate"
   );
   gameListCreator.textContent = game.uploader.name;
   gameListCreator.href = game.uploader.link;
@@ -199,7 +205,7 @@ function createAndPushGameToList(game) {
   timePara.classList.add("text-sm");
   timePara = formatElapsedTime(Date.now(), game.uploaded, timePara);
 
-  timeDiv.appendChild(createTimeSVG());
+  timeDiv.appendChild(createTimeSVG(true));
   timeDiv.appendChild(timePara);
 
   gameListA.appendChild(timeDiv);
