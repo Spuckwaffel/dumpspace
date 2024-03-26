@@ -33,7 +33,7 @@ var UrlParams = getUrlParams();
 var currentURL = window.location.href;
 
 //sets a valid url with params for the target game
-function getGameInfo(info, reload = true, newWindow = false) {
+function getGameInfo(info, reload = true, newWindow = false, push = true) {
   //no url params? thats weird
   if (Object.keys(UrlParams).length == 0) return;
 
@@ -47,9 +47,16 @@ function getGameInfo(info, reload = true, newWindow = false) {
   if (newWindow) {
     window.open(newURL, "_blank");
   } else {
-    history.pushState(null, null, newURL);
-
-    console.log("[getGameInfo] pushing " + newURL);
+    if (push) {
+      console.log("[getGameInfo] pushing state " + newURL);
+      history.pushState(null, null, newURL);
+    } else {
+      console.log(
+        "[getGameInfo] replacing state " + currentURL + " with " + newURL
+      );
+      history.replaceState(null, null, newURL);
+    }
+    currentURL = newURL;
 
     if (reload) location.reload();
 
@@ -194,7 +201,10 @@ async function displayCurrentGame() {
   gameDirectory = gameInfoJson.engine + "/" + gameInfoJson.location + "/";
 
   console.log(
-    "crunching latest data for: " + gameDirectory + " - " + UrlParams["type"]
+    "[displayCurrentGame] Crunching latest data for: " +
+      gameDirectory +
+      " - " +
+      UrlParams["type"]
   );
 
   //get the data for the current type and check cache persistance
@@ -270,12 +280,14 @@ async function displayCurrentGame() {
     //yeah if there arent any items what are we supposed to show lol
   } else returnHome();
 
-  console.log("chose name " + targetClassName + " for displaying...");
+  console.log(
+    "[displayCurrentGame] Chose name " + targetClassName + " for displaying..."
+  );
 
   var member = null;
   if (Object.keys(UrlParams).length === 4) {
     member = UrlParams["member"];
-    console.log("focussing member " + member);
+    console.log("[displayCurrentGame] Focussing member " + member);
   }
   //actual baking
   displayCurrentType(targetClassName, member);
@@ -319,7 +331,8 @@ function fixHighlightColor() {
 //good thing about being able to call this func is no refetching of any data, so being once in a viewer
 //yoi can navigate every item in the viewer without reloading
 function displayCurrentType(CName, member) {
-  console.log("trying to display " + CName);
+  console.log("[displayCurrentType] Trying to display " + CName);
+  focussedCNameVisible = false;
   //fixup cnames having pointers
   if (CName.charAt(CName.length - 1) === "*") {
     CName = CName.slice(0, -1);
@@ -329,6 +342,8 @@ function displayCurrentType(CName, member) {
 
   // no matter what, reset the url params
   var newURL = "?hash=" + UrlParams["hash"];
+
+  var hadIdx = Object.keys(UrlParams).includes("idx");
 
   if (currentType === "C") newURL += "&type=classes";
   else if (currentType === "S") newURL += "&type=structs";
@@ -367,8 +382,8 @@ function displayCurrentType(CName, member) {
   if (targetGameClass == null) {
     //just a bandaid fix displaying older toasts lol
     if (CName != Object.keys(currentInfoJson.data[0])[0]) {
-      console.log("could not find " + CName);
-      showToast("Could not find type " + CName + "!");
+      console.log("[displayCurrentType] Could not find " + CName);
+      showToast("[displayCurrentType] Could not find type " + CName + "!");
       //go back to older one that worked, however we dont store the entire url so we have to do some trickery
       const paramsBefore = getUrlParams("." + oldURL.split("?")[1]);
       //guaranteed to be valid
@@ -381,8 +396,19 @@ function displayCurrentType(CName, member) {
 
   //now we can push, the entry is valid. we do this to not push invalid shit
   if (window.location.href !== currentURL) {
-    console.log("pushed " + currentURL + " to history");
-    history.pushState(null, "", currentURL);
+    if (hadIdx) {
+      console.log("[displayCurrentType] Pushed " + currentURL + " to history");
+      history.pushState(null, "", currentURL);
+    } else {
+      console.log(
+        "[displayCurrentType] Replaced " +
+          oldURL +
+          " with " +
+          currentURL +
+          " in history"
+      );
+      history.replaceState(null, "", currentURL);
+    }
   }
   document.title = "Dumpspace - " + gameName;
   document.getElementById("dumpspace-text").textContent = document.title;
@@ -437,6 +463,9 @@ function displayCurrentType(CName, member) {
 
     formattedArrayDataValid = true;
   }
+
+  //fix the current highlight color because if we do no page reloads we most likely focus a different class
+  fixHighlightColor();
 
   //only scroll if the focussedcname isnt visible in the view, otherwise it has a ugly look
   if (scrollToIdx > 0 && !focussedCNameVisible) {
@@ -633,6 +662,13 @@ function displayOverviewPage(members) {
     memberOffsetP.classList.add("col-span-1", "font-mono");
     memberOffsetP.textContent =
       "0x" + member[Object.keys(member)[0]][1].toString(16);
+
+    if (
+      memberName.length > 4 &&
+      memberName.charAt(memberName.length - 3) === ":"
+    ) {
+      memberOffsetP.textContent += " : " + member[memberName][3];
+    }
     overviewMemberDiv.appendChild(memberOffsetP);
 
     const memberSizeP = document.createElement("p");
@@ -1418,6 +1454,8 @@ function showMDK() {
 }
 
 function showOffsets(dataJSON) {
+  document.title = "Dumpspace - " + gameName;
+  document.getElementById("dumpspace-text").textContent = document.title;
   const viewer = document.getElementById("full-viewer");
   while (viewer.firstChild) {
     viewer.removeChild(viewer.firstChild);
@@ -1538,7 +1576,7 @@ if (
 
 //fix when the games folder is first downloaded classes are listed by default
 if (Object.keys(UrlParams).length === 1) {
-  getGameInfo("classes", false);
+  getGameInfo("classes", false, false, false);
 }
 
 //add reload listener

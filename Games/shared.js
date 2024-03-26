@@ -180,11 +180,9 @@ if (
   document.documentElement.classList.remove("dark");
 }
 
-document.getElementById("go-root-url").addEventListener("click", function () {
-  window.location.href = localStorage.getItem("root-url");
-});
-
 var subroot = localStorage.getItem("root-url");
+
+document.getElementById("go-root-url").href = subroot;
 
 document.getElementById("go-recent-url").href = subroot + "/Recent/index.html";
 document.getElementById("go-changelog-url").href =
