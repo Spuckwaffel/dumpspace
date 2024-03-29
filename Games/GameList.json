@@ -217,28 +217,6 @@
       "uploader": { "name": "Pepejson", "link": "https://github.com/Pepejson" }
     },
     {
-      "hash": "1f55437f",
-      "name": "Tower of Fantasy Steam",
-      "engine": "Unreal-Engine-4",
-      "location": "Tower-of-Fantasy-Steam",
-      "uploaded": 1711618246890,
-      "uploader": {
-        "name": "\"griffith1deady\"",
-        "link": "https://github.com/griffith1deady"
-      }
-    },
-    {
-      "hash": "1f55438f",
-      "name": "Tower of Fantasy Official",
-      "engine": "Unreal-Engine-4",
-      "location": "Tower-of-Fantasy-Official",
-      "uploaded": 1711618246890,
-      "uploader": {
-        "name": "\"griffith1deady\"",
-        "link": "https://github.com/griffith1deady"
-      }
-    },
-    {
       "hash": "3e13d370",
       "name": "Project Playtime",
       "engine": "Unreal-Engine-4",
