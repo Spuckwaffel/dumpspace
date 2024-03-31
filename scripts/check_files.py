@@ -38,6 +38,10 @@ master_branch = repo.get_branch(_master_branch)
 gameListC = repo.get_contents("Games/GameList.json", ref=master_branch.commit.sha)
 gameList = gameListC.decoded_content.decode('utf-8')
 
+# Get the updateHistory
+gameUpdatesC = repo.get_contents("Recent/GameUpdates.json", ref=master_branch.commit.sha)
+gameUpdates = gameListC.decoded_content.decode('utf-8')
+
 def get_file_arrays():
 
   # Get the diff of the pull request compared to the 'main' branch
@@ -175,6 +179,7 @@ def check_changed_files(changed_files):
     return False, st
 
   gameListData = json.loads(gameList)
+  updateListData = json.loads(gameUpdates)
   game_names = [game["location"] for game in gameListData["games"]]
 
   # i 100% know this will just look for fortnite and not Unity/Fortnite but i cba, this all is just for CHANGED files not for new files
@@ -218,23 +223,50 @@ def check_changed_files(changed_files):
   
   print("updated timestamp: " +  str(updated_at))
 
+  gHash = 0
+  gType = "Updated"
+  gUploaded = updated_at
+  gUploader = {
+        "name": json.dumps(pr.user.login, ensure_ascii=False).replace("\"", ""),
+        "link": json.dumps(pr.user.html_url, ensure_ascii=False).replace("\"", "") 
+  }
+
   for game in gameListData['games']:
     if game['location'] == changed_files[0].split('/')[2]:
       game['uploaded'] = updated_at
+      gHash = game["hash"]
       game['uploader']['name'] = json.dumps(pr.user.login, ensure_ascii=False).replace("\"", "")
-      game['uploader']['link'] = json.dumps(pr.user.html_url, ensure_ascii=False).replace("\"", "") 
+      game['uploader']['link'] = json.dumps(pr.user.html_url, ensure_ascii=False).replace("\"", "")
 
+  new_update = {
+    "type": gType,
+    "hash": gHash,
+    "uploaded": gUploaded,
+    "uploader": gUploader
+  }
+
+  updateListData["updates"].insert(0, new_update)
 
   print("creating new ref to be safe")
   repo.create_git_ref('refs/heads/master_copy_bpr-'+ str(pull_request_number), master_branch.commit.sha)
 
   commit_message = "Updating Game in GameList.json for " + changed_files[0].split('/')[2]
 
+  commit_message1 = "Updating GameUpdates.json"
+
   repo.update_file(
     path="Games/GameList.json",
     message=commit_message,
     content= json.dumps(gameListData),
     sha=gameListC.sha,
+    branch=_master_branch
+  )
+
+  repo.update_file(
+    path="Recent/GameUpdates.json",
+    message=commit_message1,
+    content= json.dumps(updateListData),
+    sha=gameUpdatesC.sha,
     branch=_master_branch
   )
 
@@ -263,6 +295,7 @@ def check_added_files(added_files):
       return False, st
   
   gameListData = json.loads(gameList)
+  updateListData = json.loads(gameUpdates)
 
   for game in gameListData["games"]:
     if game["engine"] == added_files[0].split('/')[1] and game["location"] == added_files[0].split('/')[2]:
@@ -309,22 +342,40 @@ def check_added_files(added_files):
     "location": game_loc,
     "uploaded": updated_at,
     "uploader": {
-        "name": json.dumps(pr.user.login, ensure_ascii=False),
+        "name": json.dumps(pr.user.login, ensure_ascii=False).replace("\"", ""),
         "link": json.dumps(pr.user.html_url, ensure_ascii=False).replace("\"", "") 
     }
   }
+
+  new_update = {
+    "type": "Added",
+    "hash": new_game["hash"],
+    "uploaded": new_game["uploaded"],
+    "uploader": new_game["uploader"]
+  }
+
   gameListData["games"].append(new_game)
+  updateListData["updates"].insert(0, new_update)
 
   print("creating new ref to be safe")
   repo.create_git_ref('refs/heads/master_copy_bpr-'+ str(pull_request_number), master_branch.commit.sha)
 
   commit_message = "Adding Game " + game_loc + "in GameList.json"
+  commit_message1 = "Updating GameUpdates.json"
 
   repo.update_file(
     path="Games/GameList.json",
     message=commit_message,
     content= json.dumps(gameListData),
     sha=gameListC.sha,
+    branch=_master_branch
+  )
+
+  repo.update_file(
+    path="Recent/GameUpdates.json",
+    message=commit_message1,
+    content= json.dumps(updateListData),
+    sha=gameUpdatesC.sha,
     branch=_master_branch
   )
 

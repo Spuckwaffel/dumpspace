@@ -180,13 +180,16 @@ if (
   document.documentElement.classList.remove("dark");
 }
 
-var subroot = localStorage.getItem("root-url");
+function rootURL() {
+  return localStorage.getItem("root-url");
+}
 
-document.getElementById("go-root-url").href = subroot;
+document.getElementById("go-root-url").href = rootURL();
 
-document.getElementById("go-recent-url").href = subroot + "/Recent/index.html";
+document.getElementById("go-recent-url").href =
+  rootURL() + "/Recent/index.html";
 document.getElementById("go-changelog-url").href =
-  subroot + "/Changelog/index.html";
+  rootURL() + "/Changelog/index.html";
 
 document
   .getElementById("dropdownNavbar")
