@@ -40,7 +40,7 @@ gameList = gameListC.decoded_content.decode('utf-8')
 
 # Get the updateHistory
 gameUpdatesC = repo.get_contents("Recent/GameUpdates.json", ref=master_branch.commit.sha)
-gameUpdates = gameListC.decoded_content.decode('utf-8')
+gameUpdates = gameUpdatesC.decoded_content.decode('utf-8')
 
 def get_file_arrays():
 
