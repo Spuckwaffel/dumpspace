@@ -37,11 +37,10 @@
       href="Images/favicon-16x16.png"
     />
 
-    
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" type="text/css" href="../tailwind.css" />
     -->
 
-    <link rel="stylesheet" type="text/css" href="../tailwind.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body class="bg-white dark:bg-slate-900">
     <link
@@ -252,6 +251,26 @@
         </div>
       </div>
     </nav>
+
+    <div
+      class="xl:px-28 xl:px-64 md:px-32 px-8 pt-10 hidden"
+      id="offset-announcement"
+    >
+      <div
+        class="border rounded-lg border-gray-200 dark:border-gray-600 p-4 text-slate-700 dark:text-slate-100 bg-sky-400/20"
+      >
+        <p class="text-large font-bold pb-1">
+          Important notice to API Developers
+        </p>
+        <p class="text-large">
+          From <b>April 22nd</b> the offset <b>OFFSET_UWORLD</b> will be renamed
+          to <b>OFFSET_GWORLD</b> in all games.<br />Games dumped by Dumper-7's
+          latest release will already have this new name.<br />Until then it is
+          strongly recommended to check with the API both offset names for
+          existence.
+        </p>
+      </div>
+    </div>
 
     <div
       class="xl:grid xl:grid-cols-4 xl:gap-4 xl:px-28 px-4 top-10"

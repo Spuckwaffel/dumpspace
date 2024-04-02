@@ -383,7 +383,7 @@ function displayCurrentType(CName, member) {
     //just a bandaid fix displaying older toasts lol
     if (CName != Object.keys(currentInfoJson.data[0])[0]) {
       console.log("[displayCurrentType] Could not find " + CName);
-      showToast("[displayCurrentType] Could not find type " + CName + "!");
+      showToast("Could not find type " + CName + "!");
       //go back to older one that worked, however we dont store the entire url so we have to do some trickery
       const paramsBefore = getUrlParams("." + oldURL.split("?")[1]);
       //guaranteed to be valid
@@ -1456,6 +1456,9 @@ function showMDK() {
 function showOffsets(dataJSON) {
   document.title = "Dumpspace - " + gameName;
   document.getElementById("dumpspace-text").textContent = document.title;
+
+  document.getElementById("offset-announcement").classList.remove("hidden");
+
   const viewer = document.getElementById("full-viewer");
   while (viewer.firstChild) {
     viewer.removeChild(viewer.firstChild);
