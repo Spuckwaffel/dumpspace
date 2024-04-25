@@ -260,6 +260,7 @@ async function displayCurrentGame() {
   if (timeDiv != null) {
     formatElapsedTime(Date.now(), currentInfoJson.updated_at, timeDiv);
   }
+  console.log("[DisplayCurrentGame] Using version " + currentInfoJson.version);
 
   //custom
   if (currentType === "O") {
@@ -1457,7 +1458,7 @@ function showOffsets(dataJSON) {
   document.title = "Dumpspace - " + gameName;
   document.getElementById("dumpspace-text").textContent = document.title;
 
-  document.getElementById("offset-announcement").classList.remove("hidden");
+  //document.getElementById("offset-announcement").classList.remove("hidden");
 
   const viewer = document.getElementById("full-viewer");
   while (viewer.firstChild) {
