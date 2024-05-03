@@ -223,7 +223,7 @@ def check_changed_files(changed_files):
     jsonVersion = fileData.get('version', 0)
     
     if jsonVersion != 10201:
-        st = "File version too old. Please use the latest supported Dumper(s). Your Version: " + str(jsonVersion) + " Supported version: " + 10201
+        st = "File version too old. Please use the latest supported Dumper(s). Your Version: " + str(jsonVersion) + " Supported version: " + str(10201)
         return False, st
   
   
@@ -337,6 +337,12 @@ def check_added_files(added_files):
     if updated_at == 0:
       fileData = json.loads(f1)
       updated_at = int(fileData.get('updated_at', 0))
+
+    jsonVersion = fileData.get('version', 0)
+    
+    if jsonVersion != 10201:
+        st = "File version too old. Please use the latest supported Dumper(s). Your Version: " + str(jsonVersion) + " Supported version: " + str(10201)
+        return False, st
 
   game_engine = added_files[0].split('/')[1]
   game_loc = added_files[0].split('/')[2]
