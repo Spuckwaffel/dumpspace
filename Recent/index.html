@@ -1,29 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <title>Dumpspace - Home</title>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta
-      name="description"
-      content="Dumpspace provides game dumps for multiple games and game engines, created by the community for the community"
-    />
-    <meta name="keywords" content="Dumpspace, SDK" />
-    <meta property="og:locale" content="en_US" />
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="Dumpspace Game Dump Viewer" />
-    <meta
-      property="og:description"
-      content="Get the latest dumps of any supported game."
-    />
-    <meta property="og:url" content="https://dumpspace.spuckwaffel.com/" />
-    <meta
-      property="og:site_name"
-      content="https://dumpspace.spuckwaffel.com/"
-    />
 
-    <!--
+<head>
+  <title>Dumpspace - Home</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="description"
+    content="Dumpspace provides game dumps for multiple games and game engines, created by the community for the community" />
+  <meta name="keywords" content="Dumpspace, SDK" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Dumpspace Game Dump Viewer" />
+  <meta property="og:description" content="Get the latest dumps of any supported game." />
+  <meta property="og:url" content="https://dumpspace.spuckwaffel.com/" />
+  <meta property="og:site_name" content="https://dumpspace.spuckwaffel.com/" />
+
+  <!--
     <link
       rel="icon"
       type="image/png"
@@ -41,162 +34,106 @@
 <script src="https://cdn.tailwindcss.com"></script>
     
     -->
+  <script defer data-domain="dumpspace.spuckwaffel.com" src="https://googleisbad.wuemeli.com/js/script.js"></script>
+  <!-- PUBLIC STATS HERE: https://googleisbad.wuemeli.com/dumpspace.spuckwaffel.com -->
+  <link rel="stylesheet" type="text/css" href="../tailwind.css" />
+</head>
 
-    <link rel="stylesheet" type="text/css" href="../tailwind.css" />
-  </head>
-  <body class="bg-white dark:bg-slate-900">
-    <nav
-      class="sticky top-0 w-full z-30 border-b border-gray-200 dark:border-gray-600 backdrop-blur transition-colors duration-500"
-    >
-      <div
-        class="max-w-screen-2xl md:px-12 max-md:mx-2 md:flex flex-wrap items-center justify-between mx-auto p-3"
-      >
-        <div class="max-md:flex max-md:justify-between">
-          <a id="go-root-url" href="#" class="flex items-center">
-            <span
-              class="self-center text-2xl font-semibold whitespace-nowrap text-black dark:text-slate-100"
-              >Dumpspace</span
-            >
+<body class="bg-white dark:bg-slate-900">
+  <nav
+    class="sticky top-0 w-full z-30 border-b border-gray-200 dark:border-gray-600 backdrop-blur transition-colors duration-500">
+    <div class="max-w-screen-2xl md:px-12 max-md:mx-2 md:flex flex-wrap items-center justify-between mx-auto p-3">
+      <div class="max-md:flex max-md:justify-between">
+        <a id="go-root-url" href="#" class="flex items-center">
+          <span
+            class="self-center text-2xl font-semibold whitespace-nowrap text-black dark:text-slate-100">Dumpspace</span>
+        </a>
+        <div class="flex items-center md:hidden">
+          <button id="dropdownNavbar">
+            <svg class="w-8 h-8 dark:text-slate-100" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+              aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex justify-center items-center ml-auto max-md:hidden" id="navbar-regular">
+        <nav class="leading-6 font-semibold text-slate-700 dark:text-slate-100">
+          <ul class="flex space-x-8 items-center">
+            <li>
+              <a href="https://discord.gg/DsET2T89FF" class="transition duration-200 ease-in-out hover:text-blue-500"
+                target="_blank">Discord</a>
+            </li>
+            <li>
+              <a id="go-recent-url" href="/recent"
+                class="transition duration-200 ease-in-out hover:text-blue-500">Recent</a>
+            </li>
+            <li>
+              <a id="go-changelog-url" href="/changelog"
+                class="transition duration-200 ease-in-out hover:text-blue-500">Changelog</a>
+            </li>
+            <li>
+              <button id="theme-toggle" type="button"
+                class="rounded-lg text-sm p-2.5 transition duration-200 ease-in-out hover:text-blue-500">
+                <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg">
+                  <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                </svg>
+                <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
+                    fill-rule="evenodd" clip-rule="evenodd"></path>
+                </svg>
+              </button>
+            </li>
+          </ul>
+        </nav>
+        <div class="flex items-center border-l border-gray-200 dark:border-gray-600 ml-6 pl-6 max-md:hidden">
+          <a href="https://github.com/Spuckwaffel/dumpspace/pulls"
+            class="bg-blue-700 hover:bg-blue-500 font-bold py-2 px-4 font-medium rounded-lg text-white px-4 py-2 text-center"
+            target="_blank">
+            Upload Dump
           </a>
-          <div class="flex items-center md:hidden">
-            <button id="dropdownNavbar">
-              <svg
-                class="w-8 h-8 dark:text-slate-100"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M4 6h16M4 12h16M4 18h16"
-                ></path>
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <div
-          class="flex justify-center items-center ml-auto max-md:hidden"
-          id="navbar-regular"
-        >
-          <nav
-            class="leading-6 font-semibold text-slate-700 dark:text-slate-100"
-          >
-            <ul class="flex space-x-8 items-center">
-              <li>
-                <a
-                  href="https://discord.gg/DsET2T89FF"
-                  class="transition duration-200 ease-in-out hover:text-blue-500"
-                  target="_blank"
-                  >Discord</a
-                >
-              </li>
-              <li>
-                <a
-                  id="go-recent-url"
-                  href="/recent"
-                  class="transition duration-200 ease-in-out hover:text-blue-500"
-                  >Recent</a
-                >
-              </li>
-              <li>
-                <a
-                  id="go-changelog-url"
-                  href="/changelog"
-                  class="transition duration-200 ease-in-out hover:text-blue-500"
-                  >Changelog</a
-                >
-              </li>
-              <li>
-                <button
-                  id="theme-toggle"
-                  type="button"
-                  class="rounded-lg text-sm p-2.5 transition duration-200 ease-in-out hover:text-blue-500"
-                >
-                  <svg
-                    id="theme-toggle-dark-icon"
-                    class="hidden w-5 h-5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"
-                    ></path>
-                  </svg>
-                  <svg
-                    id="theme-toggle-light-icon"
-                    class="hidden w-5 h-5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
-                      fill-rule="evenodd"
-                      clip-rule="evenodd"
-                    ></path>
-                  </svg>
-                </button>
-              </li>
-            </ul>
-          </nav>
-          <div
-            class="flex items-center border-l border-gray-200 dark:border-gray-600 ml-6 pl-6 max-md:hidden"
-          >
-            <a
-              href="https://github.com/Spuckwaffel/dumpspace/pulls"
-              class="bg-blue-700 hover:bg-blue-500 font-bold py-2 px-4 font-medium rounded-lg text-white px-4 py-2 text-center"
-              target="_blank"
-            >
-              Upload Dump
-            </a>
-          </div>
         </div>
       </div>
-    </nav>
+    </div>
+  </nav>
 
-    <div class="px-10 md:px-28 pt-10 md:py-16">
-      <h1
-        class="text-slate-900 font-extrabold text-3xl sm:text-4xl tracking-tight text-center dark:text-slate-100"
-      >
-        Recent Game Updates<br />
-      </h1>
-      <p
-        class="mt-6 text-lg text-slate-600 text-center max-w-3xl mx-auto dark:text-slate-400"
-      >
-        All new games or game updates appear here.
+  <div class="px-10 md:px-28 pt-10 md:py-16">
+    <h1 class="text-slate-900 font-extrabold text-3xl sm:text-4xl tracking-tight text-center dark:text-slate-100">
+      Recent Game Updates<br />
+    </h1>
+    <p class="mt-6 text-lg text-slate-600 text-center max-w-3xl mx-auto dark:text-slate-400">
+      All new games or game updates appear here.
+    </p>
+  </div>
+
+  <div class="pt-10 mb-8 px-20 md:px-40">
+    <ol class="relative border-l border-gray-200" id="updateList"></ol>
+
+    <p class="text-slate-600 dark:text-slate-400">...aaand much more.</p>
+    <p class="text-slate-600 dark:text-slate-400">
+      Special thanks to everyone who contributed to this website.
+    </p>
+  </div>
+
+  <div class="pt-32 mb-8">
+    <div class="mx-0 relative max-w-none sm:grid sm:grid-cols-3 sm:gap-4 items-center pb-8">
+      <p class="text-center text-sm font-semibold text-slate-600 pb-4">
+        Made with &#9825; by Spuckwaffel
+      </p>
+      <p class="text-center text-sm font-semibold text-slate-600 pb-4">
+        Created by the community for the community
+      </p>
+      <p class="text-center text-sm font-semibold text-slate-600 pb-4">
+        contact-dumpspace@spuckwaffel.com
       </p>
     </div>
+  </div>
+  <script src="../Games/shared.js"></script>
+  <script src="GetUpdates.js"></script>
+</body>
 
-    <div class="pt-10 mb-8 px-20 md:px-40">
-      <ol class="relative border-l border-gray-200" id="updateList"></ol>
-
-      <p class="text-slate-600 dark:text-slate-400">...aaand much more.</p>
-      <p class="text-slate-600 dark:text-slate-400">
-        Special thanks to everyone who contributed to this website.
-      </p>
-    </div>
-
-    <div class="pt-32 mb-8">
-      <div
-        class="mx-0 relative max-w-none sm:grid sm:grid-cols-3 sm:gap-4 items-center pb-8"
-      >
-        <p class="text-center text-sm font-semibold text-slate-600 pb-4">
-          Made with &#9825; by Spuckwaffel
-        </p>
-        <p class="text-center text-sm font-semibold text-slate-600 pb-4">
-          Created by the community for the community
-        </p>
-        <p class="text-center text-sm font-semibold text-slate-600 pb-4">
-          contact-dumpspace@spuckwaffel.com
-        </p>
-      </div>
-    </div>
-    <script src="../Games/shared.js"></script>
-    <script src="GetUpdates.js"></script>
-  </body>
 </html>
