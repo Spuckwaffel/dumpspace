@@ -43,5 +43,9 @@
 <p>Special thanks to Blue fire for countless tips while I made this website.</p>
 <p>Also, special thanks to <a href="https://github.com/winetree94/VanillaRecyclerView">VanillaRecyclerView</a> which gets rid of all the lag when having Grids with thousands of items.&nbsp;</p>
 <p><a href="https://tailwindcss.com/">https://tailwindcss.com/</a> and <a href="https://icons8.com/">https://icons8.com/</a> were used in this project.</p>
+<p>&nbsp;</p>
+<h2>Statistics<h2>
+We are using a privacy respecting, non cookie and fully compliant analytics tool called Plausible. You can view the statistics <a href="https://googleisbad.wuemeli.com/dumpspace.spuckwaffel.com">here</a>.
+<p>&nbsp;</p>
 
 <p>Join the discord for more info and questions <a href="https://discord.gg/XZAqYVhpjm">here</a>.</p>
