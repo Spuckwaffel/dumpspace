@@ -259,11 +259,11 @@ def check_changed_files(changed_files):
   updateListData["updates"].insert(0, new_update)
 
   for entry in starboardData:
-    if entry['name'] == gUploader.name:
+    if entry['name'] == gUploader['name']:
       entry['count'] += 1
       break
   else:
-    starboardData.append({'name': gUploader.name, 'count': 1, 'url': gUploader.link})
+    starboardData.append({'name': gUploader['name'], 'count': 1, 'url': gUploader['link']})
 
   print("creating new ref to be safe")
   repo.create_git_ref('refs/heads/master_copy_bpr-'+ str(pull_request_number), master_branch.commit.sha)
@@ -397,7 +397,7 @@ def check_added_files(added_files):
       entry['count'] += 1
       break
   else:
-    starboardData.append({'name': new_game["uploader"].name, 'count': 1, 'url': new_game["uploader"].link})
+    starboardData.append({'name': new_game["uploader"]['name'], 'count': 1, 'url': new_game["uploader"]['link']})
 
   print("creating new ref to be safe")
   repo.create_git_ref('refs/heads/master_copy_bpr-'+ str(pull_request_number), master_branch.commit.sha)
