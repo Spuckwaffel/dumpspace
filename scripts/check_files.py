@@ -38,6 +38,10 @@ master_branch = repo.get_branch(_master_branch)
 gameListC = repo.get_contents("Games/GameList.json", ref=master_branch.commit.sha)
 gameList = gameListC.decoded_content.decode('utf-8')
 
+# Get the starboard
+starboardC = repo.get_contents("Games/Starboard.json", ref=master_branch.commit.sha)
+starboard = starboardC.decoded_content.decode('utf-8')
+
 # Get the updateHistory
 gameUpdatesC = repo.get_contents("Recent/GameUpdates.json", ref=master_branch.commit.sha)
 gameUpdates = gameUpdatesC.decoded_content.decode('utf-8')
@@ -180,6 +184,7 @@ def check_changed_files(changed_files):
 
   gameListData = json.loads(gameList)
   updateListData = json.loads(gameUpdates)
+  starboardData = json.loads(starboard)
   game_names = [game["location"] for game in gameListData["games"]]
 
   # i 100% know this will just look for fortnite and not Unity/Fortnite but i cba, this all is just for CHANGED files not for new files
@@ -253,12 +258,21 @@ def check_changed_files(changed_files):
 
   updateListData["updates"].insert(0, new_update)
 
+  for entry in starboardData:
+    if entry['name'] == gUploader.name:
+      entry['count'] += 1
+      break
+  else:
+    starboardData.append({'name': gUploader.name, 'count': 1, 'url': gUploader.link})
+
   print("creating new ref to be safe")
   repo.create_git_ref('refs/heads/master_copy_bpr-'+ str(pull_request_number), master_branch.commit.sha)
 
   commit_message = "Updating Game in GameList.json for " + changed_files[0].split('/')[2]
 
   commit_message1 = "Updating GameUpdates.json"
+
+  commit_message2 = "Updating Starboard.json"
 
   repo.update_file(
     path="Games/GameList.json",
@@ -273,6 +287,14 @@ def check_changed_files(changed_files):
     message=commit_message1,
     content= json.dumps(updateListData),
     sha=gameUpdatesC.sha,
+    branch=_master_branch
+  )
+
+  repo.update_file(
+    path="Games/Starboard.json",
+    message=commit_message2,
+    content= json.dumps(starboardData),
+    sha=starboardC.sha,
     branch=_master_branch
   )
 
@@ -302,6 +324,7 @@ def check_added_files(added_files):
   
   gameListData = json.loads(gameList)
   updateListData = json.loads(gameUpdates)
+  starboardData = json.loads(starboard)
 
   for game in gameListData["games"]:
     if game["engine"] == added_files[0].split('/')[1] and game["location"] == added_files[0].split('/')[2]:
@@ -369,11 +392,19 @@ def check_added_files(added_files):
   gameListData["games"].append(new_game)
   updateListData["updates"].insert(0, new_update)
 
+  for entry in starboardData:
+    if entry['name'] == new_game["uploader"].name:
+      entry['count'] += 1
+      break
+  else:
+    starboardData.append({'name': new_game["uploader"].name, 'count': 1, 'url': new_game["uploader"].link})
+
   print("creating new ref to be safe")
   repo.create_git_ref('refs/heads/master_copy_bpr-'+ str(pull_request_number), master_branch.commit.sha)
 
   commit_message = "Adding Game " + game_loc + "in GameList.json"
   commit_message1 = "Updating GameUpdates.json"
+  commit_message2 = "Updating Starboard.json"
 
   repo.update_file(
     path="Games/GameList.json",
@@ -388,6 +419,14 @@ def check_added_files(added_files):
     message=commit_message1,
     content= json.dumps(updateListData),
     sha=gameUpdatesC.sha,
+    branch=_master_branch
+  )
+
+  repo.update_file(
+    path="Games/Starboard.json",
+    message=commit_message2,
+    content= json.dumps(starboardData),
+    sha=starboardC.sha,
     branch=_master_branch
   )
 
