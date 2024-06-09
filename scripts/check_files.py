@@ -393,7 +393,7 @@ def check_added_files(added_files):
   updateListData["updates"].insert(0, new_update)
 
   for entry in starboardData:
-    if entry['name'] == new_game["uploader"].name:
+    if entry['name'] == new_game["uploader"]['name']:
       entry['count'] += 1
       break
   else:
