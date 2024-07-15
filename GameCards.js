@@ -49,6 +49,66 @@ function createTimeSVG(hideClock) {
   return svgElement;
 }
 
+fetch(currentPath + "Starboard.json")
+  .then((response) => response.json())
+  .then((data) => {
+    data.sort((a, b) => b.count - a.count);
+
+    // Take the top 5 elements
+    const top5 = data.slice(0, 5);
+    top5.forEach((contributor) => {
+      // Create the outer div
+      const outerDiv = document.createElement("div");
+      outerDiv.classList.add(
+        "items-center",
+        "flex",
+        "space-x-4",
+        "bg-slate-200/10",
+        "rounded-lg",
+        "p-4",
+        "ring-1",
+        "ring-slate-500/10",
+        "shadow-sm",
+        "hover:dark:shadow-slate-100/10",
+        "transition",
+        "duration-300",
+        "ease-in-out",
+        "hover:shadow-md"
+      );
+
+      // Create the inner div for the image
+      const imgDiv = document.createElement("div");
+      const img = document.createElement("img");
+      img.classList.add("w-16", "rounded-full");
+      img.src = contributor.aurl;
+      img.alt = "contributor";
+      imgDiv.appendChild(img);
+
+      // Create the inner div for the text
+      const textDiv = document.createElement("div");
+      const nameP = document.createElement("a");
+      nameP.classList.add(
+        "font-semibold",
+        "text-lg",
+        "dark:text-slate-100",
+        "hover:text-blue-500",
+        "dark:hover:text-blue-500"
+      );
+      nameP.textContent = contributor.name;
+      nameP.href = contributor.url;
+      const starsP = document.createElement("p");
+      starsP.classList.add("text-sm", "dark:text-slate-300");
+      starsP.textContent = contributor.count + " Game Updates";
+      textDiv.appendChild(nameP);
+      textDiv.appendChild(starsP);
+
+      // Append the inner divs to the outer div
+      outerDiv.appendChild(imgDiv);
+      outerDiv.appendChild(textDiv);
+      document.getElementById("topContributors").appendChild(outerDiv);
+    });
+  });
+
 fetch(currentPath + "GameList.json")
   .then((response) => response.json())
   .then((data) => {
