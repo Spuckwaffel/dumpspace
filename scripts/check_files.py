@@ -105,6 +105,8 @@ def check_for_malicious_code(json_str):
   if links:
     print("Potential links found:")
     for link in links:
+      if link.startswith('https://github.com/'):
+        break
       print(link)
       return True, "Potential links found"
   
