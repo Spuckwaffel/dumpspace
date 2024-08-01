@@ -214,12 +214,15 @@ async function handleClassesOrStructs(isClass) {
 
 async function handleFunctions() {
   if (functionJSON == null) return;
+  if (!functionCheckbox.checked) return;
   var resultsFound = 0;
   resultsFoundP = document.createElement("p");
   resultsFoundP.classList.add(
     "font-semibold",
+    "text-xl",
     "text-slate-900",
-    "dark:text-slate-100"
+    "dark:text-slate-100",
+    "pb-4"
   );
   resultsFoundP.textContent = "Function results found: 0";
   globalSearchFoundDiv.appendChild(resultsFoundP);
@@ -312,12 +315,15 @@ async function handleFunctions() {
 
 async function handleEnums() {
   if (enumJSON == null) return;
+  if (!enumCheckbox.checked) return;
   var resultsFound = 0;
   resultsFoundP = document.createElement("p");
   resultsFoundP.classList.add(
     "font-semibold",
+    "text-xl",
     "text-slate-900",
-    "dark:text-slate-100"
+    "dark:text-slate-100",
+    "pb-4"
   );
   resultsFoundP.textContent = "Enum results found: 0";
   globalSearchFoundDiv.appendChild(resultsFoundP);
