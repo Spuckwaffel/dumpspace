@@ -228,10 +228,17 @@ def check_changed_files(changed_files):
       updated_at = int(fileData.get('updated_at', 0))
       
     jsonVersion = fileData.get('version', 0)
+
+    lowestVersion = 10201
+    latestVersion = 10202
+    doesntHaveLatestVersion = False
+
+    if jsonVersion < lowestVersion:
+      st = "File version too old. Please use the latest supported Dumper(s). Your Version: " + str(jsonVersion) + " Latest version: " + str(latestVersion)
+      return False, st
     
-    if jsonVersion != 10201:
-        st = "File version too old. Please use the latest supported Dumper(s). Your Version: " + str(jsonVersion) + " Supported version: " + str(10201)
-        return False, st
+    if jsonVersion != latestVersion:
+        doesntHaveLatestVersion = True
   
   
   print("updated timestamp: " +  str(updated_at))
@@ -302,7 +309,10 @@ def check_changed_files(changed_files):
 
   compress_and_update_commit(changed_files)
 
-  return True, "Successfully updated " + changed_files[0].split('/')[2]+ "! You can now view it on the website."
+  if doesntHaveLatestVersion:
+    return True, "Successfully updated " + changed_files[0].split('/')[2]+ ", however the file(s) you uploaded are from generator version " + str(jsonVersion) + ". Please download the latest dumper to get the latest version (" + str(latestVersion) + "). Your version will be deprecated soon."
+  else:
+    return True, "Successfully updated " + changed_files[0].split('/')[2]+ "! You can now view it on the website."
 
 # Function to generate a hash from timestamp, location, and engine
 def generate_hash(timestamp, location, engine):

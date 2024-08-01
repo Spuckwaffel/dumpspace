@@ -167,6 +167,8 @@ var gameName = "";
 
 var gameDirectory = "";
 
+var fileVersion = 0;
+
 var uploadTS = null;
 //only should get called once per reload
 //makes the game ready to be displayed with displayCurrentType and has basic checks
@@ -260,11 +262,14 @@ async function displayCurrentGame() {
   if (timeDiv != null) {
     formatElapsedTime(Date.now(), currentInfoJson.updated_at, timeDiv);
   }
-  console.log("[DisplayCurrentGame] Using version " + currentInfoJson.version);
+
+  fileVersion = currentInfoJson.version;
+
+  console.log("[DisplayCurrentGame] Using version " + fileVersion);
 
   //custom
   if (currentType === "O") {
-    showOffsets(currentInfoJson.data);
+    showOffsets(currentInfoJson.credit, currentInfoJson.data);
     return;
   }
 
@@ -605,6 +610,19 @@ function displayOverviewPage(members) {
     const memberNameP = document.createElement("p");
     memberNameP.classList.add("truncate");
     memberNameP.textContent = memberName;
+
+    if (fileVersion === 10201) {
+      // version 1.02.01 has the : 1 within the name
+    } else if (fileVersion === 10202) {
+      // add : 1 if array size > 4 indicating bitfield
+      if (member[memberName].length >= 5) {
+        memberNameP.textContent += " : 1";
+      }
+      // if the arrayDim is > 1 display an C Style array
+      if (member[memberName][3] > 1)
+        memberNameP.textContent += " [" + member[memberName][3] + "]";
+    }
+
     memberNameDiv.appendChild(memberNameP);
 
     if (Object.keys(UrlParams).length === 4) {
@@ -664,11 +682,18 @@ function displayOverviewPage(members) {
     memberOffsetP.textContent =
       "0x" + member[Object.keys(member)[0]][1].toString(16);
 
-    if (
-      memberName.length > 4 &&
-      memberName.charAt(memberName.length - 3) === ":"
-    ) {
-      memberOffsetP.textContent += " : " + member[memberName][3];
+    if (fileVersion === 10201) {
+      // version 1.02.01 has the : 1 within the name
+      if (
+        memberName.length > 4 &&
+        memberName.charAt(memberName.length - 3) === ":"
+      ) {
+        memberOffsetP.textContent += " : " + member[memberName][3];
+      }
+    } else if (fileVersion === 10202) {
+      if (member[memberName].length >= 5) {
+        memberOffsetP.textContent += " : " + member[memberName][4];
+      }
     }
     overviewMemberDiv.appendChild(memberOffsetP);
 
@@ -1454,7 +1479,7 @@ function showMDK() {
     itemClickDiv.classList.remove("bg-gray-50", "dark:bg-slate-800");
 }
 
-function showOffsets(dataJSON) {
+function showOffsets(credit, dataJSON) {
   document.title = "Dumpspace - " + gameName;
   document.getElementById("dumpspace-text").textContent = document.title;
 
@@ -1568,6 +1593,27 @@ function showOffsets(dataJSON) {
     fullOffsetDiv.appendChild(offsetDiv);
   }
   viewer.appendChild(fullOffsetDiv);
+  if (credit !== undefined) {
+    const creditDiv = document.createElement("div");
+    creditDiv.classList.add(
+      "self-center",
+      "font-semibold",
+      "text-slate-700",
+      "dark:text-slate-100",
+      "-my-16",
+      "px-2",
+      "pb-16",
+      "transition",
+      "duration-200",
+      "ease-in-out",
+      "hover:text-blue-500"
+    );
+    const creditA = document.createElement("a");
+    creditA.textContent = "Created By " + credit.dumper_used;
+    creditA.href = credit.dumper_link;
+    creditDiv.appendChild(creditA);
+    viewer.appendChild(creditDiv);
+  }
 }
 
 if (
