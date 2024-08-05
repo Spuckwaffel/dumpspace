@@ -375,9 +375,16 @@ def check_added_files(added_files):
 
     jsonVersion = fileData.get('version', 0)
     
-    if jsonVersion != 10201:
-        st = "File version too old. Please use the latest supported Dumper(s). Your Version: " + str(jsonVersion) + " Supported version: " + str(10201)
-        return False, st
+    lowestVersion = 10201
+    latestVersion = 10202
+    doesntHaveLatestVersion = False
+
+    if jsonVersion < lowestVersion:
+      st = "File version too old. Please use the latest supported Dumper(s). Your Version: " + str(jsonVersion) + " Latest version: " + str(latestVersion)
+      return False, st
+    
+    if jsonVersion != latestVersion:
+        doesntHaveLatestVersion = True
 
   game_engine = added_files[0].split('/')[1]
   game_loc = added_files[0].split('/')[2]
@@ -444,7 +451,11 @@ def check_added_files(added_files):
 
   compress_and_commit(added_files)
 
-  return True, "Successfully added the new game! You can now view it on the website."
+
+  if doesntHaveLatestVersion:
+    return True, "Successfully added the new game, however the file(s) you uploaded are from generator version " + str(jsonVersion) + ". Please download the latest dumper to get the latest version (" + str(latestVersion) + "). Your version will be deprecated soon."
+  else:
+    return True, "Successfully added the new game! You can now view it on the website."
   
 
 def main():
