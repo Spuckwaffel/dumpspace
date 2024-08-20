@@ -141,6 +141,7 @@ fetch(currentPath + "GameList.json")
       img.classList.add("md:h-48", "w-full", "sm:h-40", "xl:h-60");
       img.src = dataPath + "/image.jpg";
       img.alt = "missing image.jpg";
+      img.loading = "lazy";
       box.appendChild(img);
 
       const descriptionDiv = document.createElement("div");
