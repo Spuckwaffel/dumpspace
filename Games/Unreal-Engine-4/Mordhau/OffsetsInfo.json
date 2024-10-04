@@ -1,1 +1,1 @@
-{"data": [["OFFSET_GNAMES", 91988992], ["OFFSET_GOBJECTS", 92090480], ["OFFSET_GWORLD", 93360576]], "updated_at": "1701706187784", "version": 10201}
+{"credit":{"dumper_link":"https://github.com/Encryqed/Dumper-7","dumper_used":"Dumper-7"},"data":[["OFFSET_GOBJECTS",92052656],["OFFSET_APPENDSTRING",26537024],["OFFSET_GNAMES",91951168],["OFFSET_GWORLD",93322752],["OFFSET_PROCESSEVENT",28640048],["INDEX_PROCESSEVENT",67]],"updated_at":"1727558892116","version":10202}
