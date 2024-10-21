@@ -1,1 +1,1 @@
-{"credit":{"dumper_link":"https://github.com/Spuckwaffel/UEDumper","dumper_used":"UEDumper"},"data":[["Stop asking if the offsets are correct",0],["they are not, eac is changing the text start",0],["OFFSET_GWORLD",0],["OFFSET_KEY",0]],"updated_at":"1728917445663","version":10202}
+{"credit":{"dumper_link":"https://github.com/Spuckwaffel/UEDumper","dumper_used":"UEDumper"},"data":[["OFFSET_GNAMES",306898176],["OFFSET_GOBJECTS",304769664],["OFFSET_GWORLD",304934632]],"updated_at":"1729536738321","version":10201}
