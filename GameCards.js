@@ -300,6 +300,7 @@ searchCancelButton.addEventListener("click", function () {
 
 allGamesOpener.addEventListener("click", function () {
   allGamesDiv.classList.remove("hidden");
+  document.getElementById("class-search-input").focus(); // Focus on the input
 });
 
 allGamesDivCloser.addEventListener("click", function () {
