@@ -524,7 +524,6 @@ def main():
     if pr.head.sha != start_sha:
       bRes = False
       sRes = "Pull request received changes while committing, merge aborted.\\nYour JSON files still got uploaded."
-    
 
     env_comment("success" if bRes else "failure", sRes)
     return
