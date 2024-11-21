@@ -1,5 +1,6 @@
 function openGlobalSearch() {
   document.getElementById("globalSearchDiv").classList.remove("hidden");
+  document.getElementById("global-search-input").focus();
 }
 
 document

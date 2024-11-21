@@ -295,12 +295,15 @@ function handleSearchInput() {
 }
 searchCancelButton.addEventListener("click", function () {
   searchInput.value = "";
+  document.getElementById("class-search-input").focus(); // Focus on the input
   handleSearchInput();
 });
 
 allGamesOpener.addEventListener("click", function () {
   allGamesDiv.classList.remove("hidden");
+  searchInput.value = "";
   document.getElementById("class-search-input").focus(); // Focus on the input
+  handleSearchInput();
 });
 
 allGamesDivCloser.addEventListener("click", function () {
