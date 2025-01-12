@@ -17,9 +17,19 @@ const structCheckbox = document.getElementById("structCheckbox");
 const functionCheckbox = document.getElementById("functionCheckbox");
 const enumCheckbox = document.getElementById("enumCheckbox");
 const typeSearchCheckbox = document.getElementById("typeSearchCheckbox");
+const includeFunctionParamsCheckbox = document.getElementById(
+  "includeFunctionParamsCheckbox"
+);
 const globalSearchListDiv = document.getElementById("GlobalSearchListDiv");
 const globalSearchFoundDiv = document.getElementById("globalSearchFoundDiv");
 const globalSearchDiv = document.getElementById("globalSearchDiv");
+
+function toggleFunctionParamsCheckbox() {
+  const div = document.getElementById("includeFunctionParamsCheckboxDiv");
+  if (!div) return;
+
+  div.classList.toggle("hidden");
+}
 
 var classJSON = null;
 var structJSON = null;
@@ -232,7 +242,35 @@ async function handleFunctions() {
     for (const funcItem of func[Object.keys(func)[0]]) {
       const funcName = Object.keys(funcItem)[0];
       const className = Object.keys(func)[0];
-      if (funcName.toLowerCase().includes(searchTerm.toLowerCase()) === true) {
+
+      //console.log(funcName);
+      console.log(funcItem);
+
+      let resultFound = false;
+      if (typeSearchCheckbox.checked) {
+        resultFound =
+          className.toLowerCase().includes(searchTerm.toLowerCase()) === true;
+      } else
+        resultFound =
+          funcName.toLowerCase().includes(searchTerm.toLowerCase()) === true;
+
+      if (includeFunctionParamsCheckbox && !resultFound) {
+        //parameters are in the second array
+        for (const param of funcItem[funcName][1]) {
+          console.log(param[0][0]);
+          let possibleMatch = "";
+          //type is the first array and name the first index of the array
+          if (typeSearchCheckbox.checked) possibleMatch = param[0][0];
+          else possibleMatch = param[2];
+
+          if (possibleMatch.toLowerCase().includes(searchTerm.toLowerCase())) {
+            resultFound = true;
+            break;
+          }
+        }
+      }
+
+      if (resultFound) {
         resultsFound++;
         funcButton = document.createElement("button");
         funcButton.classList.add(
