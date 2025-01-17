@@ -673,7 +673,7 @@ Loading...</textarea
               <input
                 id="classCheckbox"
                 type="checkbox"
-                class="h-5 w-5 text-blue-500"
+                class="h-5 w-5 text-blue-500 rounded"
                 checked
               />
               <p class="ml-2">Classes</p>
@@ -682,7 +682,7 @@ Loading...</textarea
               <input
                 id="structCheckbox"
                 type="checkbox"
-                class="h-5 w-5 text-blue-500"
+                class="h-5 w-5 text-blue-500 rounded"
                 checked
               />
               <p class="ml-2">Structs</p>
@@ -691,7 +691,8 @@ Loading...</textarea
               <input
                 id="functionCheckbox"
                 type="checkbox"
-                class="h-5 w-5 text-blue-500"
+                class="h-5 w-5 text-blue-500 rounded"
+                onclick="toggleFunctionParamsCheckbox()"
               />
               <p class="ml-2">Functions</p>
             </div>
@@ -699,7 +700,7 @@ Loading...</textarea
               <input
                 id="enumCheckbox"
                 type="checkbox"
-                class="h-5 w-5 text-blue-500"
+                class="h-5 w-5 text-blue-500 rounded"
               />
               <p class="ml-2">Enums</p>
             </div>
@@ -709,7 +710,7 @@ Loading...</textarea
               <input
                 id="typeSearchCheckbox"
                 type="checkbox"
-                class="h-5 w-5 text-blue-500"
+                class="h-5 w-5 text-blue-500 rounded"
               />
               <p class="ml-2">Type Search</p>
             </div>
@@ -717,6 +718,24 @@ Loading...</textarea
             <p class="text-slate-600 dark:text-slate-500 ml-4">
               When enabled, it will search for the given member type instead of
               member name.
+            </p>
+          </label>
+          <label
+            class="flex items-center hidden"
+            id="includeFunctionParamsCheckboxDiv"
+          >
+            <div class="flex flex-shrink-0">
+              <input
+                id="includeFunctionParamsCheckbox"
+                type="checkbox"
+                class="h-5 w-5 text-blue-500 rounded"
+              />
+              <p class="ml-2">Include Function Params</p>
+            </div>
+
+            <p class="text-slate-600 dark:text-slate-500 ml-4">
+              When enabled, the search will include the functions parameter
+              name/type.
             </p>
           </label>
           <div

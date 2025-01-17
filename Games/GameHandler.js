@@ -18,10 +18,13 @@ function getUrlParams(url) {
   for (var i = 0; i < paramArray.length; i++) {
     var param = paramArray[i].split("=");
     var paramName = decodeURIComponent(param[0]);
-    var paramValue = decodeURIComponent(param[1]);
-
-    // Store the parameter in the 'params' object
-    params[paramName] = paramValue;
+    try {
+      var paramValue = decodeURIComponent(param[1]);
+      // Store the parameter in the 'params' object
+      params[paramName] = paramValue;
+    } catch (err) {
+      params[paramName] = "";
+    }
   }
 
   //return the params
@@ -440,7 +443,8 @@ function displayCurrentType(CName, member) {
             "transition",
             "duration-200",
             "ease-in-out",
-            "hover:text-blue-500"
+            "hover:text-blue-500",
+            "truncate"
           );
           if (targetClassName != null && params.data === targetClassName) {
             this.layout.classList.add("bg-gray-600/10");
@@ -512,6 +516,7 @@ function displayOverviewPage(members) {
   }
   var focusIdx = 0;
   var focusFound = false;
+  var memberItemHeight = 0;
   for (const member of members) {
     const memberName = Object.keys(member)[0];
     if (memberName === "__InheritInfo") continue;
@@ -644,7 +649,7 @@ function displayOverviewPage(members) {
       "click",
       function (bakedString) {
         navigator.clipboard.writeText(bakedString);
-        showToast("Copied member to clipboard!", false);
+        showToast("Copied link to clipboard!", false);
       }.bind(
         null,
         window.location.href.split("&member")[0] +
@@ -722,9 +727,17 @@ function displayOverviewPage(members) {
 
     itemsOverviewDiv.appendChild(overviewMemberDiv);
     if (!focusFound) focusIdx++;
+    else {
+      memberItemHeight = overviewMemberDiv.getBoundingClientRect().height;
+    }
   }
   if (focusFound) {
-    document.getElementById("member-list").scrollTop = focusIdx * 35 - 100;
+    const memberList = document.getElementById("member-list");
+    const rect = memberList.getBoundingClientRect();
+
+    document.getElementById("member-list").scrollTop =
+      focusIdx * memberItemHeight -
+      ((rect.height - memberItemHeight) / 2 - memberItemHeight / 2);
   }
 }
 
@@ -1165,7 +1178,7 @@ function displayFunctions(CName, data) {
       "click",
       function (bakedString) {
         navigator.clipboard.writeText(bakedString);
-        showToast("Copied member to clipboard!", false);
+        showToast("Copied link to clipboard!", false);
       }.bind(
         null,
         window.location.href.split("&member")[0] +
@@ -1392,7 +1405,9 @@ function displayFunctions(CName, data) {
   }
 
   if (moveTo > 0) {
-    document.getElementById("member-list").scrollTop = moveTo - 300;
+    document.getElementById("member-list").scrollTop =
+      moveTo -
+      document.getElementById("member-list").getBoundingClientRect().height / 2;
   }
 
   if (document.getElementById("class-desc-name") !== null)

@@ -46,6 +46,10 @@ starboard = starboardC.decoded_content.decode('utf-8')
 gameUpdatesC = repo.get_contents("Recent/GameUpdates.json", ref=master_branch.commit.sha)
 gameUpdates = gameUpdatesC.decoded_content.decode('utf-8')
 
+start_sha = pr.head.sha
+
+print(f"Start head SHA: {start_sha}")
+
 def get_file_arrays():
 
   # Get the diff of the pull request compared to the 'main' branch
@@ -150,7 +154,6 @@ def compress_and_commit(files):
     if os.path.basename(file) == "image.jpg":
       continue
     f1 = get_content_by_name(file)
-
     compressed_data = compress_string(f1)
 
     repo.create_file(
@@ -159,6 +162,7 @@ def compress_and_commit(files):
     content=compressed_data,
     branch=_master_branch
     )
+  return True
 
 def compress_and_update_commit(files):
   for file in files:
@@ -175,6 +179,7 @@ def compress_and_update_commit(files):
     sha=existing_file.sha,
     branch=_master_branch
     )
+  return True
 
 def check_changed_files(changed_files):
   folder3_options = ['ClassesInfo.json', 'EnumsInfo.json', 'FunctionsInfo.json', 'OffsetsInfo.json', 'StructsInfo.json']
@@ -312,7 +317,8 @@ def check_changed_files(changed_files):
     branch=_master_branch
   )
 
-  compress_and_update_commit(changed_files)
+  if not compress_and_update_commit(changed_files):
+    return False, "Could not update files! Did you add new files?"
 
   if doesntHaveLatestVersion:
     return True, "Successfully updated " + changed_files[0].split('/')[2]+ ", however the file(s) you uploaded are from generator version " + str(jsonVersion) + ". Please download the latest dumper to get the latest version (" + str(latestVersion) + "). Your version will be deprecated soon."
@@ -459,7 +465,8 @@ def check_added_files(added_files):
     branch=_master_branch
   )
 
-  compress_and_commit(added_files)
+  if not compress_and_commit(added_files):
+    return False, "Could not commit changes! Did you add new files?"
 
 
   if doesntHaveLatestVersion:
@@ -494,11 +501,30 @@ def main():
   
   if added_files:
     bRes, sRes = check_added_files(added_files)
+
+    pr = repo.get_pull(pull_request_number)
+
+    print(f"Current head SHA: {pr.head.sha}")
+
+    if pr.head.sha != start_sha:
+      bRes = False
+      sRes = "Pull request received changes while committing, merge aborted.\\nYour JSON and image files still got uploaded."
+    
     env_comment("success" if bRes else "failure", sRes)
     return
 
   if changed_files:
     bRes, sRes = check_changed_files(changed_files)
+
+
+    pr = repo.get_pull(pull_request_number)
+
+    print(f"Current head SHA: {pr.head.sha}")
+
+    if pr.head.sha != start_sha:
+      bRes = False
+      sRes = "Pull request received changes while committing, merge aborted.\\nYour JSON files still got uploaded."
+
     env_comment("success" if bRes else "failure", sRes)
     return
 
