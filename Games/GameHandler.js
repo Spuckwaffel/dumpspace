@@ -1823,6 +1823,7 @@ function handleInheritanceView() {
 }
 mermaid.initialize({
   startOnLoad: true,
+  maxTextSize: 200000,
   theme: "default",
   themeVariables: {
     fontFamily: "Inter, sans-serif",
