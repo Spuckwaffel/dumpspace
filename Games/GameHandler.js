@@ -1764,3 +1764,68 @@ document
 document.body.onmousedown = function (e) {
   if (e.button === 1) return false;
 };
+
+function findInheritances(name) {
+  const inheritances = [];
+  for (const gameClass of currentInfoJson.data) {
+    const info = Object.keys(gameClass)[0];
+    const inheritInfo = gameClass[info][0]["__InheritInfo"];
+    if (inheritInfo.length > 0 && inheritInfo[0] === name) {
+      inheritances.push(info);
+    }
+  }
+  return inheritances;
+}
+
+function toggleInheritanceView() {
+  document.getElementById("InheritanceViewerDiv").classList.toggle("hidden");
+  handleInheritanceView();
+}
+
+function handleInheritanceView() {
+  const innerDiv = document.getElementById("InheritanceViewerInnerDiv");
+  const innerIdleDiv = document.getElementById("InheritanceViewer-spinner");
+  innerDiv.classList.add("hidden");
+  innerIdleDiv.classList.remove("hidden");
+
+  const selectedRadio = document.querySelector(
+    'input[name="inherit-depth-radio"]:checked'
+  );
+  const selectedValue = Number(
+    document.querySelector(`label[for="${selectedRadio.id}"]`).textContent || 0
+  );
+  console.log(`select: ${selectedValue}`);
+
+  innerDiv.textContent = "";
+  const search = document.getElementById("class-desc-name").textContent;
+  const names = [];
+  let mermaidDefinition = "graph LR\n";
+
+  function addInstances(inher, i) {
+    for (const inher2 of findInheritances(inher)) {
+      mermaidDefinition += `${inher} --> ${inher2}\n`;
+      if (i > 0) {
+        addInstances(inher2, i - 1);
+      }
+    }
+  }
+
+  addInstances(search, selectedValue - 1);
+
+  innerDiv.innerHTML = mermaidDefinition;
+
+  innerDiv.classList.add("mermaid");
+  //console.log(mermaidDefinition);
+  innerDiv.removeAttribute("data-processed");
+  mermaid.contentLoaded();
+  innerDiv.classList.remove("hidden");
+  innerIdleDiv.classList.add("hidden");
+}
+mermaid.initialize({
+  startOnLoad: true,
+  theme: "default",
+  themeVariables: {
+    fontFamily: "Inter, sans-serif",
+    lineColor: "#1d4ed8",
+  },
+});
