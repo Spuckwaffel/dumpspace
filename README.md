@@ -27,7 +27,7 @@
 </ul>
 </li>
 <li>The &lt;game-name&gt; folder should be the Games' name, however instead of using spaces " ", use "-", e.g "Counter Strike" &rarr; "Counter-Strike".</li>
-<li>The Games' folder should contain the 5 generated JSON files and contain one&nbsp;<span style="text-decoration: underline;"><strong>image.JPG</strong></span> file. The image.JPG file is for the thumbnail on the home website. Use and image.JPG that is related to the game. Use a simple google search and get the first JPG file.</li>
+<li>The Games' folder should contain the 5 generated JSON files and contain one&nbsp;<span style="text-decoration: underline;"><strong>image.jpg</strong></span> file. The image.jpg file is for the thumbnail on the home website. Use and image.jpg that is related to the game. Use a simple google search and get the first JPG file.</li>
 <li>Commit the 6 files and create a pull request. The pull request should only contain these 6 files! The pull request should get automatically merged by the bot if you followed these exact steps.</li>
 <li>View your new game on the website.</li>
 </ol>
