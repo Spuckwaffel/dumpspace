@@ -1729,6 +1729,8 @@ function handleSearchInput() {
   }
   dVanillaRecyclerView.setData(formattedArrayDataRef);
   dVanillaRecyclerView.calculateSize();
+
+  classDiv.scrollTop = 0;
 }
 searchCancelButton.addEventListener("click", function () {
   searchInput.value = "";
