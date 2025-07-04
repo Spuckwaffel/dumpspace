@@ -6,6 +6,7 @@ const UnityWidget = document.getElementById("unity-cards");
 const gameListDiv = document.getElementById("gameListDiv");
 const allGamesOpener = document.getElementById("allGamesOpener");
 const allGamesDiv = document.getElementById("allGamesDiv");
+const sortButton = document.getElementById("sortButton");
 
 const currentPath = "Games/";
 
@@ -109,100 +110,118 @@ fetch(currentPath + "Starboard.json")
     });
   });
 
-fetch(currentPath + "GameList.json")
-  .then((response) => response.json())
-  .then((data) => {
-    const gamesArray = data.games;
+async function createCardsX(type) {
+  gameArray = [];
+  UE5Widget.innerHTML = "";
+  UE4Widget.innerHTML = "";
+  UnityWidget.innerHTML = "";
+  const res = await fetch(currentPath + "GameList.json");
+  const data = await res.json();
 
-    document.getElementById("supported-games").textContent =
-      gamesArray.length + " Supported Games";
+  console.log("sorting after ", type);
 
-    gamesArray.forEach((game) => {
-      const box = document.createElement("a");
-      box.classList.add(
-        "bg-slate-700/10",
-        "overflow-hidden",
-        "rounded-lg",
-        "ring-1",
-        "ring-slate-500/5",
-        "shadow-sm",
-        "transition",
-        "duration-300",
-        "ease-in-out",
-        "hover:shadow-md",
-        "hover:dark:shadow-slate-100/10"
-      );
+  let gamesArray = data.games;
 
-      gameArray.push(game);
+  //if (type == "CD") nothing;
+  if (type == "AB") gamesArray.sort((a, b) => a.name.localeCompare(b.name));
+  else if (type == "LU") gamesArray.sort((a, b) => b.uploaded - a.uploaded);
+  else if (type == "UL")
+    gamesArray.sort((a, b) => a.uploader.name.localeCompare(b.uploader.name));
 
-      const dataPath = currentPath + game.engine + "/" + game.location;
-      box.href = currentPath + "?hash=" + game.hash;
-      const img = document.createElement("img");
-      img.classList.add("md:h-48", "w-full", "sm:h-40", "xl:h-60");
-      img.src = dataPath + "/image.jpg";
-      img.alt = "missing image.jpg";
-      img.loading = "lazy";
-      box.appendChild(img);
+  document.getElementById("supported-games").textContent =
+    gamesArray.length + " Supported Games";
 
-      const descriptionDiv = document.createElement("div");
-      descriptionDiv.classList.add("px-4", "py-2");
+  gamesArray.forEach((game) => {
+    const box = document.createElement("a");
+    box.classList.add(
+      "bg-slate-700/10",
+      "overflow-hidden",
+      "rounded-lg",
+      "ring-1",
+      "ring-slate-500/5",
+      "shadow-sm",
+      "transition",
+      "duration-300",
+      "ease-in-out",
+      "hover:shadow-md",
+      "hover:dark:shadow-slate-100/10"
+    );
 
-      const title = document.createElement("p");
-      title.classList.add("font-semibold", "text-lg");
-      title.textContent = game.name;
-      descriptionDiv.appendChild(title);
+    gameArray.push(game);
 
-      const bottomLineDiv = document.createElement("div");
-      bottomLineDiv.classList.add("flex", "justify-between");
+    const dataPath = currentPath + game.engine + "/" + game.location;
+    box.href = currentPath + "?hash=" + game.hash;
+    const img = document.createElement("img");
+    img.classList.add("md:h-48", "w-full", "sm:h-40", "xl:h-60");
+    img.src = dataPath + "/image.jpg";
+    img.alt = "missing image.jpg";
+    img.loading = "lazy";
+    box.appendChild(img);
 
-      const creditDiv = document.createElement("div");
-      creditDiv.classList.add("flex", "space-x-1");
+    const descriptionDiv = document.createElement("div");
+    descriptionDiv.classList.add("px-4", "py-2");
 
-      const byPara = document.createElement("p");
-      byPara.classList.add("text-sm");
-      byPara.textContent = "By";
+    const title = document.createElement("p");
+    title.classList.add("font-semibold", "text-lg");
+    title.textContent = game.name;
+    descriptionDiv.appendChild(title);
 
-      const namePara = document.createElement("a");
-      namePara.classList.add("text-sm", "font-semibold", "hover:text-blue-500");
-      namePara.textContent = game.uploader.name;
-      namePara.href = game.uploader.link;
-      namePara.target = "_blank";
+    const bottomLineDiv = document.createElement("div");
+    bottomLineDiv.classList.add("flex", "justify-between");
 
-      creditDiv.appendChild(byPara);
-      creditDiv.appendChild(namePara);
+    const creditDiv = document.createElement("div");
+    creditDiv.classList.add("flex", "space-x-1");
 
-      bottomLineDiv.appendChild(creditDiv);
+    const byPara = document.createElement("p");
+    byPara.classList.add("text-sm");
+    byPara.textContent = "By";
 
-      descriptionDiv.appendChild(bottomLineDiv);
+    const namePara = document.createElement("a");
+    namePara.classList.add("text-sm", "font-semibold", "hover:text-blue-500");
+    namePara.textContent = game.uploader.name;
+    namePara.href = game.uploader.link;
+    namePara.target = "_blank";
 
-      const timeDiv = document.createElement("div");
-      timeDiv.classList.add("flex", "items-center", "space-x-1");
+    creditDiv.appendChild(byPara);
+    creditDiv.appendChild(namePara);
 
-      let timePara = document.createElement("p");
-      timePara.classList.add("text-sm");
-      timePara = formatElapsedTime(Date.now(), game.uploaded, timePara);
+    bottomLineDiv.appendChild(creditDiv);
 
-      timeDiv.appendChild(createTimeSVG());
-      timeDiv.appendChild(timePara);
+    descriptionDiv.appendChild(bottomLineDiv);
 
-      bottomLineDiv.appendChild(timeDiv);
+    const timeDiv = document.createElement("div");
+    timeDiv.classList.add("flex", "items-center", "space-x-1");
 
-      box.appendChild(descriptionDiv);
+    let timePara = document.createElement("p");
+    timePara.classList.add("text-sm");
+    timePara = formatElapsedTime(Date.now(), game.uploaded, timePara);
 
-      if (game.engine == "Unreal-Engine-5") {
-        UE5Widget.appendChild(box);
-      } else if (game.engine == "Unreal-Engine-4") {
-        UE4Widget.appendChild(box);
-      } else if (game.engine == "Unity") {
-        UnityWidget.appendChild(box);
-      }
-    });
-    gameArray.sort((a, b) => {
-      return a.name.localeCompare(b.name);
-    });
-    handleSearchInput();
-  })
-  .catch((error) => console.error("Error fetching or parsing JSON:", error));
+    timeDiv.appendChild(createTimeSVG());
+    timeDiv.appendChild(timePara);
+
+    bottomLineDiv.appendChild(timeDiv);
+
+    box.appendChild(descriptionDiv);
+
+    if (game.engine == "Unreal-Engine-5") {
+      UE5Widget.appendChild(box);
+    } else if (game.engine == "Unreal-Engine-4") {
+      UE4Widget.appendChild(box);
+    } else if (game.engine == "Unity") {
+      UnityWidget.appendChild(box);
+    }
+  });
+  gameArray.sort((a, b) => {
+    return a.name.localeCompare(b.name);
+  });
+  handleSearchInput();
+}
+
+const savedSortingType = localStorage.getItem("cardSortType") || "CD";
+
+setLabelByDataType(savedSortingType);
+
+createCardsX(savedSortingType);
 
 const searchInput = document.getElementById("class-search-input");
 const searchCancelButton = document.getElementById("search-cancel-button");
@@ -316,6 +335,53 @@ for (let key in localStorage) {
   if (key.startsWith("cGame")) {
     localStorage.removeItem(key);
   }
+}
+
+sortButton.addEventListener("click", function () {
+  document.getElementById("game-sort-dropdown").classList.toggle("hidden");
+});
+
+function setLabelByDataType(dataType) {
+  // Select the label element with the matching data-type attribute.
+  const labelElement = document.querySelector(`label[data-type="${dataType}"]`);
+
+  // If the label exists, return its text content.
+  // Otherwise, return a message indicating it wasn't found.
+
+  document.getElementById("sort-type").textContent = labelElement
+    ? labelElement.textContent
+    : "...";
+
+  if (labelElement) {
+    const radioId = labelElement.getAttribute("for");
+    const radioButton = document.getElementById(radioId);
+
+    // 3. If the radio button exists, set its 'checked' property to true.
+    if (radioButton) {
+      radioButton.checked = true;
+    }
+  }
+}
+
+function handleGameSort() {
+  const selectedRadio = document.querySelector(
+    'input[name="game-sort-radio"]:checked'
+  );
+  const selectedValue = document.querySelector(
+    `label[for="${selectedRadio.id}"]`
+  );
+
+  const sortType = selectedValue.dataset.type;
+
+  console.log(`select: ${sortType}`);
+
+  document.getElementById("game-sort-dropdown").classList.toggle("hidden");
+
+  localStorage.setItem("cardSortType", sortType);
+
+  document.getElementById("sort-type").textContent = selectedValue.textContent;
+
+  createCardsX(sortType);
 }
 
 function removeTrailingSlash(str) {

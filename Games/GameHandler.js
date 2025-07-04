@@ -47,6 +47,8 @@ function getGameInfo(info, reload = true, newWindow = false, push = true) {
   // no matter what, reset the url params
   newURL += "hash=" + UrlParams["hash"] + "&type=" + info;
 
+  if (UrlParams["sha"]) newURL += "&sha=" + UrlParams["sha"];
+
   if (newWindow) {
     window.open(newURL, "_blank");
   } else {
@@ -212,42 +214,82 @@ async function displayCurrentGame() {
       UrlParams["type"]
   );
 
-  //get the data for the current type and check cache persistance
-  if (UrlParams["type"] === "classes") {
-    const response = await decompressAndCheckCacheByURL(
-      gameDirectory + "ClassesInfo.json.gz",
-      uploadTS
-    );
-    currentInfoJson = JSON.parse(response);
-    currentType = "C";
-  } else if (UrlParams["type"] === "structs") {
-    const response = await decompressAndCheckCacheByURL(
-      gameDirectory + "StructsInfo.json.gz",
-      uploadTS
-    );
-    currentInfoJson = JSON.parse(response);
-    currentType = "S";
-  } else if (UrlParams["type"] === "functions") {
-    const response = await decompressAndCheckCacheByURL(
-      gameDirectory + "FunctionsInfo.json.gz",
-      uploadTS
-    );
-    currentInfoJson = JSON.parse(response);
-    currentType = "F";
-  } else if (UrlParams["type"] === "enums") {
-    const response = await decompressAndCheckCacheByURL(
-      gameDirectory + "EnumsInfo.json.gz",
-      uploadTS
-    );
-    currentInfoJson = JSON.parse(response);
-    currentType = "E";
-  } else if (UrlParams["type"] === "offsets") {
-    const response = await decompressAndCheckCacheByURL(
-      gameDirectory + "OffsetsInfo.json.gz",
-      uploadTS
-    );
-    currentInfoJson = JSON.parse(response);
-    currentType = "O";
+  const sha = UrlParams["sha"];
+
+  console.log("custom sha?: ", sha);
+
+  if (!sha) {
+    //get the data for the current type and check cache persistance
+    if (UrlParams["type"] === "classes") {
+      const response = await decompressAndCheckCacheByURL(
+        gameDirectory + "ClassesInfo.json.gz",
+        uploadTS
+      );
+      currentInfoJson = JSON.parse(response);
+      currentType = "C";
+    } else if (UrlParams["type"] === "structs") {
+      const response = await decompressAndCheckCacheByURL(
+        gameDirectory + "StructsInfo.json.gz",
+        uploadTS
+      );
+      currentInfoJson = JSON.parse(response);
+      currentType = "S";
+    } else if (UrlParams["type"] === "functions") {
+      const response = await decompressAndCheckCacheByURL(
+        gameDirectory + "FunctionsInfo.json.gz",
+        uploadTS
+      );
+      currentInfoJson = JSON.parse(response);
+      currentType = "F";
+    } else if (UrlParams["type"] === "enums") {
+      const response = await decompressAndCheckCacheByURL(
+        gameDirectory + "EnumsInfo.json.gz",
+        uploadTS
+      );
+      currentInfoJson = JSON.parse(response);
+      currentType = "E";
+    } else if (UrlParams["type"] === "offsets") {
+      const response = await decompressAndCheckCacheByURL(
+        gameDirectory + "OffsetsInfo.json.gz",
+        uploadTS
+      );
+      currentInfoJson = JSON.parse(response);
+      currentType = "O";
+    }
+  } else {
+    console.log("getting older data!");
+    //get the data for the current type and check cache persistance
+    if (UrlParams["type"] === "classes") {
+      const response = await decompressJSONByURL(
+        `https://raw.githubusercontent.com/Spuckwaffel/dumpspace/${sha}/Games/${gameDirectory}ClassesInfo.json.gz`
+      );
+      currentInfoJson = JSON.parse(response);
+      currentType = "C";
+    } else if (UrlParams["type"] === "structs") {
+      const response = await decompressJSONByURL(
+        `https://raw.githubusercontent.com/Spuckwaffel/dumpspace/${sha}/Games/${gameDirectory}StructsInfo.json.gz`
+      );
+      currentInfoJson = JSON.parse(response);
+      currentType = "S";
+    } else if (UrlParams["type"] === "functions") {
+      const response = await decompressJSONByURL(
+        `https://raw.githubusercontent.com/Spuckwaffel/dumpspace/${sha}/Games/${gameDirectory}FunctionsInfo.json.gz`
+      );
+      currentInfoJson = JSON.parse(response);
+      currentType = "F";
+    } else if (UrlParams["type"] === "enums") {
+      const response = await decompressJSONByURL(
+        `https://raw.githubusercontent.com/Spuckwaffel/dumpspace/${sha}/Games/${gameDirectory}EnumsInfo.json.gz`
+      );
+      currentInfoJson = JSON.parse(response);
+      currentType = "E";
+    } else if (UrlParams["type"] === "offsets") {
+      const response = await decompressJSONByURL(
+        `https://raw.githubusercontent.com/Spuckwaffel/dumpspace/${sha}/Games/${gameDirectory}OffsetsInfo.json.gz`
+      );
+      currentInfoJson = JSON.parse(response);
+      currentType = "O";
+    }
   }
 
   //no data?
@@ -276,11 +318,7 @@ async function displayCurrentGame() {
     return;
   }
 
-  if (
-    (Object.keys(UrlParams).length === 3 ||
-      Object.keys(UrlParams).length === 4) &&
-    Object.keys(UrlParams)[2] === "idx"
-  ) {
+  if (UrlParams["idx"]) {
     //try getting a valid cname out of the params or get the first index of the json
     targetClassName = UrlParams["idx"];
     //or select the first one as default
@@ -294,7 +332,7 @@ async function displayCurrentGame() {
   );
 
   var member = null;
-  if (Object.keys(UrlParams).length === 4) {
+  if (UrlParams["member"]) {
     member = UrlParams["member"];
     console.log("[displayCurrentGame] Focussing member " + member);
   }
@@ -363,6 +401,10 @@ function displayCurrentType(CName, member) {
 
   if (member) {
     newURL += "&member=" + member;
+  }
+
+  if (UrlParams["sha"]) {
+    newURL += "&sha=" + UrlParams["sha"];
   }
 
   const oldURL = currentURL;
@@ -630,7 +672,7 @@ function displayOverviewPage(members) {
 
     memberNameDiv.appendChild(memberNameP);
 
-    if (Object.keys(UrlParams).length === 4) {
+    if (UrlParams["member"]) {
       if (memberName === UrlParams["member"]) {
         overviewMemberDiv.classList.add("bg-sky-400/10");
         focusFound = true;
@@ -645,17 +687,28 @@ function displayOverviewPage(members) {
       "dark:hover:text-blue-500",
       "hidden"
     );
+
+    function updateMemberParam(memberName) {
+      const url = window.location.href;
+      const encodedMember = memberName.replace(/ /g, "%20");
+
+      if (url.includes("member=")) {
+        // Replace existing member param
+        return url.replace(/(member=)[^&]*/, `$1${encodedMember}`);
+        //window.location.href = newUrl;
+      } else {
+        // Add member param at the end, with ? or &
+        const separator = url.includes("?") ? "&" : "?";
+        return url + separator + "member=" + encodedMember;
+      }
+    }
+
     memberLinkButton.addEventListener(
       "click",
       function (bakedString) {
         navigator.clipboard.writeText(bakedString);
         showToast("Copied link to clipboard!", false);
-      }.bind(
-        null,
-        window.location.href.split("&member")[0] +
-          "&member=" +
-          memberName.replace(/ /g, "%20")
-      )
+      }.bind(null, updateMemberParam(memberName))
     );
     var linkSVG = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     linkSVG.setAttribute("width", "20");
@@ -1395,7 +1448,7 @@ function displayFunctions(CName, data) {
       coreDiv.appendChild(functionClosureP);
     }
     itemsOverviewDiv.appendChild(coreDiv);
-    if (Object.keys(UrlParams).length === 4) {
+    if (UrlParams["member"]) {
       if (funcName === UrlParams["member"]) {
         coreDiv.classList.add("bg-sky-400/10");
         focusFound = true;
@@ -1832,3 +1885,166 @@ mermaid.initialize({
     lineColor: "#1d4ed8",
   },
 });
+
+async function getCommits() {
+  const owner = "Spuckwaffel";
+  const repo = "dumpspace";
+  const filePath = `Games/${gameDirectory}`;
+  const perPage = 100;
+
+  const historyDiv = document.getElementById("uploadHistoryInnerDiv");
+
+  function formatDate(dateStr) {
+    const date = new Date(dateStr);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = date.toLocaleString("en-US", { month: "short" });
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    return `${day} ${month} ${year} ${hours}:${minutes}`;
+  }
+
+  let nextSha = "main"; // Start from main branch (or another starting commit/branch)
+  let hasMoreCommits = true;
+
+  const newURL = window.location.href;
+
+  while (hasMoreCommits) {
+    const url = `https://api.github.com/repos/${owner}/${repo}/commits?path=${encodeURIComponent(
+      filePath
+    )}&per_page=${perPage}&sha=${nextSha}`;
+
+    const response = await fetch(url);
+
+    historyDiv.classList.remove("hidden");
+    document.getElementById("uploadHistory-spinner").classList.add("hidden");
+
+    if (!response.ok) {
+      showToast(`Error fetching commits: ${response.status}`);
+      return;
+    }
+
+    const commits = await response.json();
+    console.log("Fetched commits:", commits.length);
+
+    if (commits.length === 0) {
+      hasMoreCommits = false;
+      break;
+    }
+
+    let foundMergeCommits = false;
+
+    for (const commit of commits) {
+      if (commit.parents.length < 2) continue;
+
+      foundMergeCommits = true;
+
+      const innerDiv = document.createElement("a");
+      if (newURL.includes("sha=")) {
+        innerDiv.href = newURL.replace(/(sha=)[^&]*/, `$1${commit.sha}`);
+      } else {
+        const separator = newURL.includes("?") ? "&" : "?";
+        innerDiv.href = newURL + separator + "sha=" + commit.sha;
+      }
+
+      innerDiv.className =
+        "w-full grid grid-cols-3 text-sm text-slate-700 dark:text-slate-100 pt-2 pb-2 border-b border-gray-200 dark:border-gray-600";
+
+      const dateP = document.createElement("p");
+      dateP.classList.add("font-mono");
+      dateP.textContent = formatDate(commit.commit.author.date);
+      innerDiv.appendChild(dateP);
+
+      const timeAgoP = document.createElement("p");
+      formatElapsedTime(
+        Date.now(),
+        new Date(commit.commit.author.date),
+        timeAgoP
+      );
+      innerDiv.appendChild(timeAgoP);
+
+      const authorP = document.createElement("p");
+      authorP.className = "font-semibold";
+      const match = commit.commit.message.match(/from (\S+)\//);
+      if (match) authorP.textContent = match[1];
+      innerDiv.appendChild(authorP);
+
+      historyDiv.appendChild(innerDiv);
+    }
+
+    // Update SHA to last commit's SHA to continue walking back
+    nextSha = commits[commits.length - 1].sha;
+
+    // Stop if there are no merge commits in this batch to avoid unnecessary paging (optional)
+    if (!foundMergeCommits) break;
+  }
+}
+
+document
+  .getElementById("history-updates")
+  .addEventListener("click", function () {
+    document.getElementById("uploadHistoryDiv").classList.remove("hidden");
+    getCommits();
+  });
+
+function toggleHistoryView() {
+  document.getElementById("uploadHistoryDiv").classList.add("hidden");
+}
+
+async function fetchMergesAffectingFolder() {
+  const owner = "Spuckwaffel";
+  const repo = "dumpspace";
+  const folderPath = "Games/Unreal-Engine-5/Fortnite/";
+
+  const commitsUrl = `https://api.github.com/repos/${owner}/${repo}/commits?path=${encodeURIComponent(
+    folderPath
+  )}&per_page=100`;
+  const commitsResponse = await fetch(commitsUrl);
+  if (!commitsResponse.ok) {
+    console.error("Failed to fetch commits:", commitsResponse.status);
+    return;
+  }
+
+  const commits = await commitsResponse.json();
+
+  for (const commit of commits) {
+    if (commit.parents.length > 1) {
+      console.log(`Merge Commit Detected!`);
+      console.log(commit);
+      console.log(`SHA: ${commit.sha}`);
+      console.log(
+        `Author: ${
+          (commit.author && commit.author.login) || commit.commit.author.name
+        }`
+      );
+      console.log(`Date: ${commit.commit.author.date}`);
+      console.log(`Message: ${commit.commit.message}`);
+      console.log(`URL: ${commit.html_url}`);
+
+      // Extract PR number from commit message
+      const prMatch = commit.commit.message.match(/Merge pull request #(\d+)/);
+      if (prMatch && false) {
+        const prNumber = prMatch[1];
+        console.log(`Related PR: #${prNumber}`);
+
+        // Fetch PR info
+        const prUrl = `https://api.github.com/repos/${owner}/${repo}/pulls/${prNumber}`;
+        const prResponse = await fetch(prUrl);
+        if (prResponse.ok) {
+          const prData = await prResponse.json();
+          console.log(`PR Author: ${prData.user.login}`);
+          console.log(`PR Title: ${prData.title}`);
+          console.log(`PR URL: ${prData.html_url}`);
+        } else {
+          console.warn(`Failed to fetch PR #${prNumber}:`, prResponse.status);
+        }
+      } else {
+        console.log("No PR number found in commit message.");
+      }
+
+      console.log("---");
+    }
+  }
+}
+
+//etchMergesAffectingFolder();

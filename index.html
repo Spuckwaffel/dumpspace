@@ -47,7 +47,7 @@
   </head>
   <body class="bg-white dark:bg-slate-900">
     <nav
-      class="sticky top-0 w-full z-30 border-b border-gray-200 dark:border-gray-600 backdrop-blur transition-colors duration-500"
+      class="sticky top-0 w-full z-30 border-b border-gray-200 dark:border-gray-600 transition-colors duration-500 backdrop-filter backdrop-blur"
     >
       <div
         class="max-w-screen-2xl md:px-12 max-md:mx-2 md:flex flex-wrap items-center justify-between mx-auto p-3"
@@ -302,7 +302,7 @@
       id="game-categories"
       class="bg-white text-sm font-medium text-slate-700 dark:text-slate-100 py-5 border-t border-gray-200 dark:border-gray-600 dark:bg-slate-900"
     >
-      <div class="flex mx-10 px20 space-x-10">
+      <div class="flex mx-10 space-x-10">
         <a
           href="#unreal-engine-4"
           class="font-semibold text-lg transition duration-200 ease-in-out hover:text-blue-500"
@@ -323,7 +323,94 @@
     <div
       class="mx-auto bg-slate-100 dark:bg-slate-900 dark:text-slate-100 px-10"
     >
-      <div id="unreal-engine-4" class="pt-24 border-b border-gray-200 mb-5">
+      <div class="relative">
+        <button
+          id="sortButton"
+          class="bg-blue-700 hover:bg-blue-500 font-bold py-2 px-2 font-medium rounded-lg text-white text-center flex space-x-2"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24px"
+            height="24px"
+            viewBox="0 0 24 24"
+            fill="none"
+          >
+            <path
+              d="M13 12H21M13 8H21M13 16H21M6 7V17M6 17L3 14M6 17L9 14"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <p>Sort:</p>
+          <p id="sort-type">Creation Date</p>
+        </button>
+        <div
+          class="w-60 absolute border border-gray-200 dark:border-gray-600 rounded mt-2 bg-gray-100 dark:bg-gray-900 overflow-y-auto z-10 py-1 px-2 hidden"
+          id="game-sort-dropdown"
+        >
+          <div class="flex text-center items-center space-x-1">
+            <input
+              type="radio"
+              id="game-sort-radio-0"
+              name="game-sort-radio"
+              class="w-4 h-4 focus:ring-transparent border-none"
+              checked
+              onclick="handleGameSort()"
+            /><label
+              for="game-sort-radio-0"
+              class="text-lg font-medium"
+              data-type="CD"
+              >Creation Date</label
+            >
+          </div>
+          <div class="flex text-center items-center space-x-1">
+            <input
+              type="radio"
+              id="game-sort-radio-1"
+              name="game-sort-radio"
+              onclick="handleGameSort()"
+              class="w-4 h-4 focus:ring-transparent border-none"
+            /><label
+              for="game-sort-radio-1"
+              class="text-lg font-medium"
+              data-type="AB"
+              >Alphabetical (A-Z)</label
+            >
+          </div>
+          <div class="flex text-center items-center space-x-1">
+            <input
+              type="radio"
+              id="game-sort-radio-2"
+              name="game-sort-radio"
+              onclick="handleGameSort()"
+              class="w-4 h-4 focus:ring-transparent border-none"
+            /><label
+              for="game-sort-radio-2"
+              class="text-lg font-medium"
+              data-type="LU"
+              >Last Updated</label
+            >
+          </div>
+          <div class="flex text-center items-center space-x-1">
+            <input
+              type="radio"
+              id="game-sort-radio-3"
+              name="game-sort-radio"
+              onclick="handleGameSort()"
+              class="w-4 h-4 focus:ring-transparent border-none"
+            /><label
+              for="game-sort-radio-3"
+              class="text-lg font-medium"
+              data-type="UL"
+              >Uploader</label
+            >
+          </div>
+        </div>
+      </div>
+
+      <div id="unreal-engine-4" class="pt-8 border-b border-gray-200 mb-5">
         <p class="font-extrabold text-2xl pb-1.5">Unreal Engine 4</p>
         <p
           class="text-sm w-full flex-none pb-2 text-slate-600 dark:text-slate-400"
@@ -499,7 +586,7 @@
             <input
               id="class-search-input"
               onkeyup="handleSearchInput()"
-              class="w-full !outline-none bg-white dark:bg-gray-700 text-slate-700 placeholder-gray-600 dark:placeholder-gray-400 dark:text-white transition duration-300 ease-in-out"
+              class="w-full !outline-none bg-transparent border-none focus:ring-transparent dark:bg-gray-700 text-slate-700 placeholder-gray-600 dark:placeholder-gray-400 dark:text-white transition duration-300 ease-in-out"
               placeholder="Search..."
               required
             />
@@ -521,7 +608,7 @@
             </button>
           </div>
           <div
-            class="h-[30vh] my-16 border rounded-lg border-gray-200 dark:border-gray-600 relative min-w-0 overflow-y-auto overflow-x-hidden"
+            class="h-[30vh] mt-4 border rounded-lg border-gray-200 dark:border-gray-600 relative min-w-0 overflow-y-auto overflow-x-hidden"
             id="gameListDiv"
           ></div>
         </div>

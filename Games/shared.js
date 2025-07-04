@@ -45,7 +45,7 @@ function formatElapsedTime(currentTime, givenTime, elem) {
   return elem;
 }
 
-async function decompressJSONByURL(URL) {
+async function decompressJSONByURL(URL, ignored) {
   const readableStream = await fetch(URL).then((response) => response.body);
 
   const decompressionStream = new DecompressionStream("gzip");
