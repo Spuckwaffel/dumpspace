@@ -296,9 +296,9 @@ def check_changed_files(changed_files):
 
   # --- PREPARE FOR SINGLE COMMIT ---
   text_files_to_commit = {
-      "Games/GameList.json": json.dumps(gameListData, indent=2),
-      "Recent/GameUpdates.json": json.dumps(updateListData, indent=2),
-      "Games/Starboard.json": json.dumps(starboardData, indent=2)
+      "Games/GameList.json": json.dumps(gameListData),
+      "Recent/GameUpdates.json": json.dumps(updateListData),
+      "Games/Starboard.json": json.dumps(starboardData)
   }
 
   binary_files_to_commit = {}
@@ -428,9 +428,9 @@ def check_added_files(added_files):
 
   # --- PREPARE FOR SINGLE COMMIT ---
   text_files_to_commit = {
-      "Games/GameList.json": json.dumps(gameListData, indent=2),
-      "Recent/GameUpdates.json": json.dumps(updateListData, indent=2),
-      "Games/Starboard.json": json.dumps(starboardData, indent=2)
+      "Games/GameList.json": json.dumps(gameListData),
+      "Recent/GameUpdates.json": json.dumps(updateListData),
+      "Games/Starboard.json": json.dumps(starboardData)
   }
 
   binary_files_to_commit = {}
