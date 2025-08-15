@@ -129,7 +129,7 @@ def check_for_malicious_code(json_str):
 
 def basic_check(files):
   folder1 = 'Games'
-  folder2_options = ['Unity', 'Unreal-Engine-4', 'Unreal-Engine-5']
+  folder2_options = ['Unity', 'Unreal-Engine-3', 'Unreal-Engine-4', 'Unreal-Engine-5']
 
   if any(file_name.count('/') != 3 for file_name in files):
     st = "A file is not in 3 subfolders. All files have to be in Games/(engine)/(Game)."

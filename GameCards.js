@@ -1,5 +1,6 @@
 //this file is used for the homepage to add all the game cards
 
+const UE3Widget = document.getElementById("unreal-engine-3-cards");
 const UE4Widget = document.getElementById("unreal-engine-4-cards");
 const UE5Widget = document.getElementById("unreal-engine-5-cards");
 const UnityWidget = document.getElementById("unity-cards");
@@ -114,6 +115,7 @@ async function createCardsX(type) {
   gameArray = [];
   UE5Widget.innerHTML = "";
   UE4Widget.innerHTML = "";
+  UE3Widget.innerHTML = "";
   UnityWidget.innerHTML = "";
   const res = await fetch(currentPath + "GameList.json");
   const data = await res.json();
@@ -207,6 +209,8 @@ async function createCardsX(type) {
       UE5Widget.appendChild(box);
     } else if (game.engine == "Unreal-Engine-4") {
       UE4Widget.appendChild(box);
+    } else if (game.engine == "Unreal-Engine-3") {
+      UE3Widget.appendChild(box);
     } else if (game.engine == "Unity") {
       UnityWidget.appendChild(box);
     }
