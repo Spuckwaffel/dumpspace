@@ -2,8 +2,7 @@ import sys
 import os
 import json
 import re
-from github import Github
-from github import Auth
+from github import Github, Auth, InputGitTreeElement
 import base64
 import hashlib
 import gzip
@@ -90,7 +89,7 @@ def env_comment(type, msg):
 
 def compress_string(data):
   compressed_data = gzip.compress(data.encode())
-  # Convert the compressed data to base64 for GitHub API
+  # This now returns bytes, which is what we need for the new commit function
   return compressed_data
 
 
@@ -124,9 +123,6 @@ def check_for_malicious_code(json_str):
   return False, ""
 
 
-
-
-
 def basic_check(files):
   folder1 = 'Games'
   folder2_options = ['Unity', 'Unreal-Engine-3', 'Unreal-Engine-4', 'Unreal-Engine-5']
@@ -149,37 +145,52 @@ def basic_check(files):
   
   return True, ""
 
-def compress_and_commit(files):
-  for file in files:
-    if os.path.basename(file) == "image.jpg":
-      continue
-    f1 = get_content_by_name(file)
-    compressed_data = compress_string(f1)
+# --- NEW FUNCTION TO COMMIT ALL FILES AT ONCE ---
+def commit_all_changes_at_once(commit_message, text_files, binary_files):
+    """
+    Creates a single commit with multiple file changes using the Git Data API.
+    :param commit_message: The commit message.
+    :param text_files: A dictionary of {path: content_string}.
+    :param binary_files: A dictionary of {path: content_bytes}.
+    """
+    try:
+        # Get the reference for the master branch
+        ref = repo.get_git_ref(f'heads/{_master_branch}')
+        latest_commit = repo.get_git_commit(ref.object.sha)
+        base_tree = latest_commit.tree
 
-    repo.create_file(
-    path= file + ".gz",
-    message= "Adding compressed file for " + os.path.basename(file),
-    content=compressed_data,
-    branch=_master_branch
-    )
-  return True
+        tree_elements = []
 
-def compress_and_update_commit(files):
-  for file in files:
-    f1 = get_content_by_name(file)
+        # Process text files
+        for path, content in text_files.items():
+            blob = repo.create_git_blob(content, 'utf-8')
+            tree_elements.append(InputGitTreeElement(path, '100644', 'blob', sha=blob.sha))
+        
+        # Process binary files (like .gz)
+        for path, content in binary_files.items():
+            # For binary content, we need to base64 encode it
+            b64_content = base64.b64encode(content).decode('utf-8')
+            blob = repo.create_git_blob(b64_content, 'base64')
+            tree_elements.append(InputGitTreeElement(path, '100644', 'blob', sha=blob.sha))
 
-    existing_file = repo.get_contents(file + ".gz", ref=master_branch.commit.sha)
+        # Create the new tree
+        new_tree = repo.create_git_tree(tree_elements, base_tree)
 
-    compressed_data = compress_string(f1)
+        # Create the new commit
+        new_commit = repo.create_git_commit(
+            message=commit_message,
+            tree=new_tree,
+            parents=[latest_commit]
+        )
 
-    repo.update_file(
-    path= file + ".gz",
-    message= "Updating compressed file for " + os.path.basename(file),
-    content=compressed_data,
-    sha=existing_file.sha,
-    branch=_master_branch
-    )
-  return True
+        # Update the branch reference to point to the new commit
+        ref.edit(new_commit.sha)
+        print(f"Successfully created a single commit with SHA: {new_commit.sha}")
+        return True
+    except Exception as e:
+        print(f"Failed to create commit: {e}")
+        return False
+
 
 def check_changed_files(changed_files):
   folder3_options = ['ClassesInfo.json', 'EnumsInfo.json', 'FunctionsInfo.json', 'OffsetsInfo.json', 'StructsInfo.json']
@@ -194,7 +205,6 @@ def check_changed_files(changed_files):
   starboardData = json.loads(starboard)
   game_names = [game["location"] for game in gameListData["games"]]
 
-  # i 100% know this will just look for fortnite and not Unity/Fortnite but i cba, this all is just for CHANGED files not for new files
   if any(all(folder3 not in file_name.split('/')[2] for folder3 in game_names) for file_name in changed_files):
     st = "A file is not in any supported game (" + ', '.join(game_names) + ") folder. This error should not happen?"
     print(st)
@@ -228,8 +238,8 @@ def check_changed_files(changed_files):
       return False, _str
     print("file looks safe.")
 
+    fileData = json.loads(f1) # Load once
     if updated_at == 0:
-      fileData = json.loads(f1)
       updated_at = int(fileData.get('updated_at', 0))
       
     jsonVersion = fileData.get('version', 0)
@@ -284,41 +294,23 @@ def check_changed_files(changed_files):
        'aurl': json.dumps(pr.user.avatar_url, ensure_ascii=False).replace("\"", "") 
        })
 
-  print("creating new ref to be safe")
-  repo.create_git_ref('refs/heads/master_copy_bpr-'+ str(pull_request_number), master_branch.commit.sha)
+  # --- PREPARE FOR SINGLE COMMIT ---
+  text_files_to_commit = {
+      "Games/GameList.json": json.dumps(gameListData, indent=2),
+      "Recent/GameUpdates.json": json.dumps(updateListData, indent=2),
+      "Games/Starboard.json": json.dumps(starboardData, indent=2)
+  }
 
-  commit_message = "Updating Game in GameList.json for " + changed_files[0].split('/')[2]
+  binary_files_to_commit = {}
+  for file in changed_files:
+      content = get_content_by_name(file)
+      compressed_data = compress_string(content)
+      binary_files_to_commit[file + ".gz"] = compressed_data
 
-  commit_message1 = "Updating GameUpdates.json"
-
-  commit_message2 = "Updating Starboard.json"
-
-  repo.update_file(
-    path="Games/GameList.json",
-    message=commit_message,
-    content= json.dumps(gameListData),
-    sha=gameListC.sha,
-    branch=_master_branch
-  )
-
-  repo.update_file(
-    path="Recent/GameUpdates.json",
-    message=commit_message1,
-    content= json.dumps(updateListData),
-    sha=gameUpdatesC.sha,
-    branch=_master_branch
-  )
-
-  repo.update_file(
-    path="Games/Starboard.json",
-    message=commit_message2,
-    content= json.dumps(starboardData),
-    sha=starboardC.sha,
-    branch=_master_branch
-  )
-
-  if not compress_and_update_commit(changed_files):
-    return False, "Could not update files! Did you add new files?"
+  commit_message = f"Update game files for {changed_files[0].split('/')[2]}"
+  
+  if not commit_all_changes_at_once(commit_message, text_files_to_commit, binary_files_to_commit):
+      return False, "Failed to create the commit. Please check the logs."
 
   if doesntHaveLatestVersion:
     return True, "Successfully updated " + changed_files[0].split('/')[2]+ ", however the file(s) you uploaded are from generator version " + str(jsonVersion) + ". Please download the latest dumper to get the latest version (" + str(latestVersion) + "). Your version will be deprecated soon."
@@ -380,8 +372,8 @@ def check_added_files(added_files):
       return False, _str
     print("file looks safe.")
 
+    fileData = json.loads(f1) # Load once
     if updated_at == 0:
-      fileData = json.loads(f1)
       updated_at = int(fileData.get('updated_at', 0))
 
     jsonVersion = fileData.get('version', 0)
@@ -434,40 +426,25 @@ def check_added_files(added_files):
        'aurl': json.dumps(pr.user.avatar_url, ensure_ascii=False).replace("\"", "") 
        })
 
-  print("creating new ref to be safe")
-  repo.create_git_ref('refs/heads/master_copy_bpr-'+ str(pull_request_number), master_branch.commit.sha)
+  # --- PREPARE FOR SINGLE COMMIT ---
+  text_files_to_commit = {
+      "Games/GameList.json": json.dumps(gameListData, indent=2),
+      "Recent/GameUpdates.json": json.dumps(updateListData, indent=2),
+      "Games/Starboard.json": json.dumps(starboardData, indent=2)
+  }
 
-  commit_message = "Adding Game " + game_loc + "in GameList.json"
-  commit_message1 = "Updating GameUpdates.json"
-  commit_message2 = "Updating Starboard.json"
+  binary_files_to_commit = {}
+  for file in added_files:
+      if os.path.basename(file) == "image.jpg":
+          continue
+      content = get_content_by_name(file)
+      compressed_data = compress_string(content)
+      binary_files_to_commit[file + ".gz"] = compressed_data
 
-  repo.update_file(
-    path="Games/GameList.json",
-    message=commit_message,
-    content= json.dumps(gameListData),
-    sha=gameListC.sha,
-    branch=_master_branch
-  )
-
-  repo.update_file(
-    path="Recent/GameUpdates.json",
-    message=commit_message1,
-    content= json.dumps(updateListData),
-    sha=gameUpdatesC.sha,
-    branch=_master_branch
-  )
-
-  repo.update_file(
-    path="Games/Starboard.json",
-    message=commit_message2,
-    content= json.dumps(starboardData),
-    sha=starboardC.sha,
-    branch=_master_branch
-  )
-
-  if not compress_and_commit(added_files):
-    return False, "Could not commit changes! Did you add new files?"
-
+  commit_message = f"Add new game: {game_loc}"
+  
+  if not commit_all_changes_at_once(commit_message, text_files_to_commit, binary_files_to_commit):
+      return False, "Failed to create the commit. Please check the logs."
 
   if doesntHaveLatestVersion:
     return True, "Successfully added the new game, however the file(s) you uploaded are from generator version " + str(jsonVersion) + ". Please download the latest dumper to get the latest version (" + str(latestVersion) + "). Your version will be deprecated soon."
@@ -482,51 +459,52 @@ def main():
   print("Added files:", added_files)
   print("Deleted files:", deleted_files)
 
-  if set(changed_files) != set(added_files):
-    if changed_files and added_files:
-      print("both changed files and added files are not allowed.")
-      env_comment("failure", "Both changed files and added files are not allowed.")
+  # Note: The logic here assumes that changed_files is a superset of added_files,
+  # which is how the GitHub API presents files in a PR. `added_files` is just a filter.
+  # If a file is added, it's in both lists. If modified, it's only in `changed_files`.
+  # The original logic of checking `changed_files` and `added_files` separately is fine.
+  
+  files_to_check = changed_files if changed_files else added_files
+
+  if not files_to_check:
+      print("No files to process.")
+      return
+
+  if added_files and (set(changed_files) != set(added_files)):
+      print("Mixing added and modified files in this way is not supported.")
+      env_comment("failure", "Mixed added and modified files are not allowed.")
       return
     
 	
   if deleted_files:
-    print("Deleted files cannnot be processed automatically.")
-    env_comment("failure", "Deleted files cannnot be processed automatically.")
+    print("Deleted files cannot be processed automatically.")
+    env_comment("failure", "Deleted files cannot be processed automatically.")
     return
 
-  _bRes, _sRes = basic_check(changed_files)
+  _bRes, _sRes = basic_check(files_to_check)
   if not _bRes:
     env_comment("failure", _sRes)
     return
   
-  if added_files:
+  # Determine if we are adding a new game or updating an existing one
+  if all(file in added_files for file in files_to_check):
+    print("--- Running ADD files logic ---")
     bRes, sRes = check_added_files(added_files)
-
-    pr = repo.get_pull(pull_request_number)
-
-    print(f"Current head SHA: {pr.head.sha}")
-
-    if pr.head.sha != start_sha:
-      bRes = False
-      sRes = "Pull request received changes while committing, merge aborted.\\nYour JSON and image files still got uploaded."
-    
-    env_comment("success" if bRes else "failure", sRes)
-    return
-
-  if changed_files:
+  else:
+    print("--- Running CHANGE files logic ---")
     bRes, sRes = check_changed_files(changed_files)
 
 
-    pr = repo.get_pull(pull_request_number)
+  # This check for changes during commit might be less reliable now since
+  # the single commit happens faster, but it's still a good safeguard.
+  pr.update() # Refresh PR data
+  print(f"Current head SHA after processing: {pr.head.sha}")
 
-    print(f"Current head SHA: {pr.head.sha}")
+  if pr.head.sha != start_sha:
+    bRes = False
+    sRes = "Pull request received changes while processing, merge aborted."
 
-    if pr.head.sha != start_sha:
-      bRes = False
-      sRes = "Pull request received changes while committing, merge aborted.\\nYour JSON files still got uploaded."
-
-    env_comment("success" if bRes else "failure", sRes)
-    return
+  env_comment("success" if bRes else "failure", sRes)
 
 	
 if __name__ == "__main__":
