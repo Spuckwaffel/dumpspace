@@ -22,6 +22,7 @@
 <li>Add the files into a folder in Game/&lt;engine&gt;/&lt;game-name&gt; where the engine folder can have the following names:<br />
 <ul>
 <li>Unity</li>
+<li>Unreal-Engine-3</li>
 <li>Unreal-Engine-4</li>
 <li>Unreal-Engine-5</li>
 </ul>
@@ -33,7 +34,7 @@
 </ol>
 <p>&nbsp;</p>
 <h2>Updating Your Game</h2>
-<p>Updating your game is almost the same as adding a new game. Instead of adding the JSON files and an image.JPG file, just replace the JSON files and leave the image.JPG, you only need 5 files in the pull request.</p>
+<p>Updating your game is almost the same as adding a new game. Instead of adding the JSON files and an image.JPG file, just replace the JSON files. You can optionally update the image, but it isn't required.</p>
 <p>The website might take 5 minutes to display the changes due to your browsers' caching.</p>
 <p>&nbsp;</p>
 <h2>Contributing</h2>
