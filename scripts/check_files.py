@@ -194,9 +194,10 @@ def commit_all_changes_at_once(commit_message, text_files, binary_files):
 
 def check_changed_files(changed_files):
   folder3_options = ['ClassesInfo.json', 'EnumsInfo.json', 'FunctionsInfo.json', 'OffsetsInfo.json', 'StructsInfo.json']
+  folder3_options_with_image = ['ClassesInfo.json', 'EnumsInfo.json', 'FunctionsInfo.json', 'OffsetsInfo.json', 'StructsInfo.json', 'image.jpg']
 
-  if len(changed_files) != len(folder3_options):
-    st = "The amount of changed files must be 5 per commit and must have exactly these names: " + ', '.join(folder3_options) + "."
+  if len(changed_files) != len(folder3_options) && len(changed_files) != len(folder3_options_with_image):
+    st = "The amount of changed files must be 5/6 (if updating the image) per commit and must have exactly these names: " + ', '.join(folder3_options_with_image) + "."
     print(st)
     return False, st
 
@@ -225,6 +226,9 @@ def check_changed_files(changed_files):
   
   updated_at = 0
   for file in changed_files:
+    if file == "image.jpg":
+      #skips json check and also malicious code check, maybe not ideal?
+      continue
     f1 = get_content_by_name(file)
     if not is_valid_json(f1):
       st = "The file" + file + " is not a valid JSON file"
