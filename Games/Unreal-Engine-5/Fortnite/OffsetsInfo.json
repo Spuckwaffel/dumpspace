@@ -1,1 +1,5 @@
-{"credit":{"dumper_link":"","dumper_used":"AUEDumper by Stern"},"data":[["OFFSET_GWORLD",345253952],["OFFSET_GWORLD1",351147512],["OFFSET_GENGINE",351892264],["OFFSET_GNAMES",354329344],["FUNCTION_STATICFINDOBJECT",31905892],["FUNCTION_PROCESSEVENT",27530616],["INDEX_PROCESSEVENT",76]],"updated_at":"1753193376607","version":10201}
+{
+  "updated_at": "1759950279535",
+  "version": 10202,
+  "data": []
+}
