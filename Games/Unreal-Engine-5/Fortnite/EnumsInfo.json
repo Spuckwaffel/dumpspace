@@ -1,5 +1,5 @@
 {
-  "updated_at": "1759950279535",
+  "updated_at": "1760014509538",
   "version": 10202,
   "data": [
 {
@@ -17466,7 +17466,8 @@
   "EGameplayEffectStackingDurationPolicy": [
     [
       {"RefreshOnSuccessfulApplication":0},
-      {"NeverRefresh":1}
+      {"NeverRefresh":1},
+      {"ExtendDuration":2}
     ],
     "uint8_t"
   ]
@@ -19410,35 +19411,6 @@
   ]
 },
 {
-  "EStretchLimbTranslationType": [
-    [
-      {"AllAxes":0},
-      {"BoneLengthOnly":1}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EStretchLimbLengthType": [
-    [
-      {"StraightLine":0},
-      {"AlongBones":1}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EStretchLimbStretchMode": [
-    [
-      {"None":0},
-      {"SquashAndStretch":1},
-      {"StretchOnly":2},
-      {"SquashOnly":3}
-    ],
-    "uint8_t"
-  ]
-},
-{
   "EStretchLimbRotationMode": [
     [
       {"None":0},
@@ -20680,6 +20652,55 @@
       {"None":0},
       {"Static":1},
       {"Bone":2}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "ECosmeticExtensibilityPassContextState": [
+    [
+      {"NotInUse":0},
+      {"InTransit":1},
+      {"Reserved":2}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "ECosmeticStepOrdinality": [
+    [
+      {"PreStep":0},
+      {"Default":1},
+      {"PostStep":2},
+      {"NumPhases":3}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "ECosmeticsPassLifecycleStage": [
+    [
+      {"Pending":0},
+      {"Valid":1},
+      {"TornDown":2}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "ECosmeticsPassCancellationReason": [
+    [
+      {"InternallyCancelled":0},
+      {"ExternallyCancelled":1}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "ETasksOverFramesSchedulePriorityCategory": [
+    [
+      {"Default":0},
+      {"CharacterCustomization":1}
     ],
     "uint8_t"
   ]
@@ -22361,55 +22382,6 @@
   ]
 },
 {
-  "ECosmeticExtensibilityPassContextState": [
-    [
-      {"NotInUse":0},
-      {"InTransit":1},
-      {"Reserved":2}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "ECosmeticStepOrdinality": [
-    [
-      {"PreStep":0},
-      {"Default":1},
-      {"PostStep":2},
-      {"NumPhases":3}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "ECosmeticsPassLifecycleStage": [
-    [
-      {"Pending":0},
-      {"Valid":1},
-      {"TornDown":2}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "ECosmeticsPassCancellationReason": [
-    [
-      {"InternallyCancelled":0},
-      {"ExternallyCancelled":1}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "ETasksOverFramesSchedulePriorityCategory": [
-    [
-      {"Default":0},
-      {"CharacterCustomization":1}
-    ],
-    "uint8_t"
-  ]
-},
-{
   "EVehicleSimStep": [
     [
       {"None":0},
@@ -24079,7 +24051,8 @@
       {"LoadedAmmoHasBeenSet":29},
       {"ScopedViewToggled":30},
       {"SpawnedByItemEntity":31},
-      {"DropOnOverflow":32}
+      {"DurabilityCooldownOverride":32},
+      {"DropOnOverflow":33}
     ],
     "uint8_t"
   ]
@@ -30735,7 +30708,8 @@
       {"Pet":0},
       {"CustomPartType":1},
       {"Weapon":2},
-      {"SkeletalMeshComponent":3}
+      {"SkeletalMeshComponent":3},
+      {"OffhandWeapon":4}
     ],
     "uint8_t"
   ]
@@ -36457,6 +36431,17 @@
   ]
 },
 {
+  "EPhysicalScreenSize": [
+    [
+      {"Small":0},
+      {"Medium":1},
+      {"Large":2},
+      {"Count":3}
+    ],
+    "uint8_t"
+  ]
+},
+{
   "EAspectRatioComparison": [
     [
       {"LessThan":0},
@@ -37416,7 +37401,19 @@
   "EFortInputStickOption": [
     [
       {"Move":0},
-      {"Look":1}
+      {"Look":1},
+      {"MAX":2}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EFortInputDeadZoneType": [
+    [
+      {"Move":0},
+      {"Look":1},
+      {"LeftTrigger":2},
+      {"RightTrigger":3}
     ],
     "uint8_t"
   ]
@@ -42221,6 +42218,20 @@
   ]
 },
 {
+  "EGeneratedJumpVerticalLinkAction": [
+    [
+      {"None":0},
+      {"JumpAbility":1},
+      {"JumpAbility_ModifyXYZVelocity":2},
+      {"JumpAbility_ModifyXYVelocity":3},
+      {"JumpAbilityActions_LastPlusOne":4},
+      {"JumpAbilityActions_First":1},
+      {"JumpAbilityActions_Last":3}
+    ],
+    "uint8_t"
+  ]
+},
+{
   "EAICustomTargetRequestType": [
     [
       {"Movement":1},
@@ -44950,6 +44961,20 @@
   ]
 },
 {
+  "EDependencyType": [
+    [
+      {"AthenaProfile":1},
+      {"ClientInfo":2},
+      {"CommonCore":4},
+      {"OnlineAccount":8},
+      {"SocialTags":16},
+      {"SupervisedSettings":32},
+      {"QuestManager":64}
+    ],
+    "uint8_t"
+  ]
+},
+{
   "ESpatialStyleCharacterUnlockPrerequisite": [
     [
       {"BattlepassPurchase":0},
@@ -45819,7 +45844,8 @@
       {"Background":5},
       {"Thumbnail":6},
       {"SurfacePageLogo":7},
-      {"Category":8}
+      {"Category":8},
+      {"Menu":9}
     ],
     "uint8_t"
   ]
@@ -49256,16 +49282,6 @@
   ]
 },
 {
-  "EBugSpawnerRewardTriggerState": [
-    [
-      {"Opened":1},
-      {"PlayerHasApproached":2},
-      {"AttackedOrOpened":3}
-    ],
-    "uint8_t"
-  ]
-},
-{
   "ECraftingObjectState": [
     [
       {"Invalid":0},
@@ -49339,6 +49355,15 @@
       {"Targeting":1},
       {"HurdleOver":2},
       {"HurdleOn":3}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EBugSpawnerRewardTriggerState": [
+    [
+      {"Found":0},
+      {"NotFound":1}
     ],
     "uint8_t"
   ]
@@ -55099,6 +55124,22 @@
   ]
 },
 {
+  "ELFNAssetCategory": [
+    [
+      {"Building":0},
+      {"Prop":1},
+      {"Vehicle":2},
+      {"Creature":3},
+      {"GameplayDevice":4},
+      {"Relic":5},
+      {"Item":6},
+      {"Emote":7},
+      {"Count":8}
+    ],
+    "uint8_t"
+  ]
+},
+{
   "EGraphElementType": [
     [
       {"Node":0},
@@ -55340,7 +55381,8 @@
       {"Countdown":9},
       {"ObjectiveStarted":10},
       {"ObjectiveCompleted":11},
-      {"SpireDiscovery":12}
+      {"SpireDiscovery":12},
+      {"SproutAchievement":13}
     ],
     "uint8_t"
   ]
@@ -58120,7 +58162,8 @@
       {"PlayerIsUnhabaneroed":2},
       {"PlayerCurrentRankBelowMinimumRequirement":3},
       {"PlayerHighestRankBelowMinimumRequirement":4},
-      {"PlayerCurrentRankAboveMaximumRequirement":5}
+      {"PlayerCurrentRankAboveMaximumRequirement":5},
+      {"PlayerIsIneligible":6}
     ],
     "uint8_t"
   ]
@@ -59382,6 +59425,138 @@
   ]
 },
 {
+  "EDestroyActorsAndComponentsMutator_ComponentNameComparisonType": [
+    [
+      {"NameEquals":0},
+      {"NameStartsWith":1},
+      {"NameContains":2},
+      {"AdditionalStatNameEquals":3},
+      {"AdditionalStatNameStartsWith":4},
+      {"AdditionalStatNameContains":5}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EFakeKillRelevancyPlayerKillStep": [
+    [
+      {"Initiated":0},
+      {"BlueprintNotified":1},
+      {"VisualsPerformed":2}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "ESpecialEventTODMModifyType": [
+    [
+      {"Keep":0},
+      {"Hide":1},
+      {"Show":2},
+      {"Spawn":3},
+      {"Persistent":4},
+      {"Destroy":5},
+      {"DestroyAll":6},
+      {"DestroyAllButGameState":7}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EMutatorMovementMode": [
+    [
+      {"None":0},
+      {"BuffetBubbles":25},
+      {"BuffetBubblesIntro":26},
+      {"BuffetFlying":27},
+      {"BuffetFlyingRicochet":28},
+      {"Rewind":29}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EFortCustomTickComponentCondition": [
+    [
+      {"WasRecentlyRendered":0},
+      {"CameraDistance":1},
+      {"LocalPlayerDistance":2},
+      {"Count":3}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "ESpecialEventBackfillManagerState": [
+    [
+      {"Default":0},
+      {"Enabled":1},
+      {"Disabled":2}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "ESpecialEventGameUserSettingsResult": [
+    [
+      {"Success":0},
+      {"Failure":1}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "ELeaderboardSortStrategy": [
+    [
+      {"HighestFirst":0},
+      {"LowestFirst":1}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "ESpecialEventPhaseState": [
+    [
+      {"Unregistered":0},
+      {"Registered":1},
+      {"Active":2},
+      {"Deactivated":3}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "ESpecialEventPhaseComponentNetModeType": [
+    [
+      {"ClientControlled":0},
+      {"Client":1},
+      {"DedicatedServer":2}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "ESpecialEventMannequinLoadoutType": [
+    [
+      {"None":0},
+      {"Default":1},
+      {"Override":2},
+      {"Pawn":3}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "ESpecialEventRewindComponentState": [
+    [
+      {"Stop":0},
+      {"Record":1},
+      {"Rewind":2}
+    ],
+    "uint8_t"
+  ]
+},
+{
   "EJamDeckProxyControlType": [
     [
       {"Edit":0},
@@ -59696,138 +59871,6 @@
       {"Emote3":2},
       {"RandomEmote":3},
       {"QuickEmotes":4}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EDestroyActorsAndComponentsMutator_ComponentNameComparisonType": [
-    [
-      {"NameEquals":0},
-      {"NameStartsWith":1},
-      {"NameContains":2},
-      {"AdditionalStatNameEquals":3},
-      {"AdditionalStatNameStartsWith":4},
-      {"AdditionalStatNameContains":5}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EFakeKillRelevancyPlayerKillStep": [
-    [
-      {"Initiated":0},
-      {"BlueprintNotified":1},
-      {"VisualsPerformed":2}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "ESpecialEventTODMModifyType": [
-    [
-      {"Keep":0},
-      {"Hide":1},
-      {"Show":2},
-      {"Spawn":3},
-      {"Persistent":4},
-      {"Destroy":5},
-      {"DestroyAll":6},
-      {"DestroyAllButGameState":7}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EMutatorMovementMode": [
-    [
-      {"None":0},
-      {"BuffetBubbles":25},
-      {"BuffetBubblesIntro":26},
-      {"BuffetFlying":27},
-      {"BuffetFlyingRicochet":28},
-      {"Rewind":29}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EFortCustomTickComponentCondition": [
-    [
-      {"WasRecentlyRendered":0},
-      {"CameraDistance":1},
-      {"LocalPlayerDistance":2},
-      {"Count":3}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "ESpecialEventBackfillManagerState": [
-    [
-      {"Default":0},
-      {"Enabled":1},
-      {"Disabled":2}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "ESpecialEventGameUserSettingsResult": [
-    [
-      {"Success":0},
-      {"Failure":1}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "ELeaderboardSortStrategy": [
-    [
-      {"HighestFirst":0},
-      {"LowestFirst":1}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "ESpecialEventPhaseState": [
-    [
-      {"Unregistered":0},
-      {"Registered":1},
-      {"Active":2},
-      {"Deactivated":3}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "ESpecialEventPhaseComponentNetModeType": [
-    [
-      {"ClientControlled":0},
-      {"Client":1},
-      {"DedicatedServer":2}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "ESpecialEventMannequinLoadoutType": [
-    [
-      {"None":0},
-      {"Default":1},
-      {"Override":2},
-      {"Pawn":3}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "ESpecialEventRewindComponentState": [
-    [
-      {"Stop":0},
-      {"Record":1},
-      {"Rewind":2}
     ],
     "uint8_t"
   ]
@@ -60847,285 +60890,6 @@
   ]
 },
 {
-  "ECinematicSequenceVisibility": [
-    [
-      {"InstigatorOnly":0},
-      {"InstigatingTeam":1},
-      {"Everyone":2}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "ECinematicSequenceEnabledOnPhase": [
-    [
-      {"Always":0},
-      {"PreGameOnly":1},
-      {"GameplayOnly":2},
-      {"CreateOnly":3}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "ECreativeVideoPlayerFullscreenEffects": [
-    [
-      {"None":0},
-      {"NoCollisionOnly":1},
-      {"NoDamageOnly":2},
-      {"NoCollisionAndNoDamage":3}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EClassSelectorDisplayMode": [
-    [
-      {"ClassesOnly":0},
-      {"TeamsOnly":1},
-      {"TeamsAndClasses":2}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "ECreativeModalBackActionBoundButtonOption": [
-    [
-      {"None":0},
-      {"LastButton":1},
-      {"Button1":2},
-      {"Button2":3},
-      {"Button3":4},
-      {"Button4":5},
-      {"Button5":6},
-      {"Button6":7},
-      {"Button7":8},
-      {"Button8":9},
-      {"Button9":10},
-      {"Button10":11},
-      {"Button11":12},
-      {"Button12":13}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "ECreativeModalDialogTimerOption": [
-    [
-      {"None":0},
-      {"Countdown":1}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "ECreativeModalDialogAlignmentOption": [
-    [
-      {"TopLeft":0},
-      {"TopCenter":1},
-      {"TopRight":2},
-      {"MiddleLeft":3},
-      {"Centered":4},
-      {"MiddleRight":5},
-      {"BottomLeft":6},
-      {"BottomCenter":7},
-      {"BottomRight":8},
-      {"CenteredFull":9},
-      {"LeftTall":10},
-      {"CenteredTall":11},
-      {"RightTall":12},
-      {"TopWide":13},
-      {"CenteredWide":14},
-      {"BottomWide":15}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "ECreativeModalDialogViewmodelResponse": [
-    [
-      {"None":0},
-      {"Button1":1},
-      {"Button2":2},
-      {"Button3":3},
-      {"Button4":4},
-      {"Button5":5},
-      {"Button6":6},
-      {"Button7":7},
-      {"Button8":8},
-      {"Button9":9},
-      {"Button10":10},
-      {"Button11":11},
-      {"Button12":12}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EDanceBeatSyncMode": [
-    [
-      {"Off":0},
-      {"Tempo":1},
-      {"Music":2}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EDelMarVehicleBoosterFlags": [
-    [
-      {"None":0},
-      {"Side":2},
-      {"Down":4},
-      {"Front":8},
-      {"Back":16},
-      {"Left":32},
-      {"Right":64},
-      {"All":255}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EDelMarWheelMirrorType": [
-    [
-      {"Scale":0},
-      {"Rotate":1},
-      {"None":2}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EDelMarPreviewCameraType": [
-    [
-      {"None":0},
-      {"ZoomIn":1},
-      {"ZoomOut":2}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EDelMarWheelAttachPoint": [
-    [
-      {"Spin":0},
-      {"Pivot":1},
-      {"Contact":2}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EDelMarTouchActionButtonState": [
-    [
-      {"None":0},
-      {"FullyDisabled":1},
-      {"Disabled":2},
-      {"Enabled":3},
-      {"Ready":4},
-      {"Pressed":5},
-      {"Supercharged":6}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EWidgetTransitionerInitialStatus": [
-    [
-      {"Hidden":0},
-      {"Shown":1}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EWidgetTransitionerStatus": [
-    [
-      {"Hidden":0},
-      {"AnimatingIn":1},
-      {"Shown":2},
-      {"AnimatingOut":3}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EDelMarRankedProgressError": [
-    [
-      {"None":0},
-      {"MissingRankedComponent":1},
-      {"RankedComponentSocialUserNotBound":2},
-      {"RankedComponentUnableToQueryProgress":3},
-      {"EmptyRankType":4},
-      {"InitialProgressMapInvalid":5},
-      {"CurrentProgressMapInvalid":6},
-      {"InvalidCurrentTrack":7},
-      {"InitialProgressEntryNotFound":8},
-      {"CurrentProgressEntryNotFound":9},
-      {"GameModeNotFound":10},
-      {"CurrentTierLessThanZero":11},
-      {"NotEnoughTiersForInitialTier":12},
-      {"NotEnoughTiersForCurrentTier":13},
-      {"FailedToFindUnrankedTier":14},
-      {"UnknownError":15}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EDelMarRearAlertVerticalHint": [
-    [
-      {"Level":0},
-      {"Up":1},
-      {"Down":2}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EDelMarInputInjectionState": [
-    [
-      {"FIRST_PRESSED":0},
-      {"PRESSED":1},
-      {"RELEASED":2},
-      {"CANCELLED":3}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EDelMarTouchInputTrackingState": [
-    [
-      {"NOT_TRACKING":0},
-      {"TRACKING_WITH_INJECTION":1},
-      {"TRACKING_WITHOUT_INJECTION":2}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EDelMarDriftSteerState": [
-    [
-      {"None":0},
-      {"Controlled":1},
-      {"DriftBoost":2},
-      {"Uncontrolled":3}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EDelMarSpeedometerState": [
-    [
-      {"Normal":0},
-      {"SlowingDown":1},
-      {"BonusSpeed":2}
-    ],
-    "uint8_t"
-  ]
-},
-{
   "EFabricSongSyncControlTempoState": [
     [
       {"Disabled":0},
@@ -61456,6 +61220,345 @@
   ]
 },
 {
+  "EFabricSongSyncTimingType": [
+    [
+      {"Immediate":0},
+      {"NextBeat":1},
+      {"NextBar":2}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EFabricSongSyncPlaybackType": [
+    [
+      {"ControlsTempo":0},
+      {"FromCurrentTime":1},
+      {"FromStart":2}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EFabricSongSyncClockState": [
+    [
+      {"Playing":0},
+      {"WillRestartInitiator":1},
+      {"WillRestartFollower":2}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EFabricSongSyncSequenceState": [
+    [
+      {"UnInitialized":0},
+      {"NoAssignedSequence":1},
+      {"AssignedSequence":2}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EFabricSongSyncPlayState": [
+    [
+      {"NotPlaying":0},
+      {"Playing":1},
+      {"WaitingForTimestamp":2},
+      {"WaitingForMidiSource":3}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EFabricMidiSourceType": [
+    [
+      {"MidiFile":0},
+      {"JamTrackPlayer":1}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "ECinematicSequenceVisibility": [
+    [
+      {"InstigatorOnly":0},
+      {"InstigatingTeam":1},
+      {"Everyone":2}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "ECinematicSequenceEnabledOnPhase": [
+    [
+      {"Always":0},
+      {"PreGameOnly":1},
+      {"GameplayOnly":2},
+      {"CreateOnly":3}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "ECreativeVideoPlayerFullscreenEffects": [
+    [
+      {"None":0},
+      {"NoCollisionOnly":1},
+      {"NoDamageOnly":2},
+      {"NoCollisionAndNoDamage":3}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EClassSelectorDisplayMode": [
+    [
+      {"ClassesOnly":0},
+      {"TeamsOnly":1},
+      {"TeamsAndClasses":2}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "ECreativeModalBackActionBoundButtonOption": [
+    [
+      {"None":0},
+      {"LastButton":1},
+      {"Button1":2},
+      {"Button2":3},
+      {"Button3":4},
+      {"Button4":5},
+      {"Button5":6},
+      {"Button6":7},
+      {"Button7":8},
+      {"Button8":9},
+      {"Button9":10},
+      {"Button10":11},
+      {"Button11":12},
+      {"Button12":13}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "ECreativeModalDialogTimerOption": [
+    [
+      {"None":0},
+      {"Countdown":1}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "ECreativeModalDialogAlignmentOption": [
+    [
+      {"TopLeft":0},
+      {"TopCenter":1},
+      {"TopRight":2},
+      {"MiddleLeft":3},
+      {"Centered":4},
+      {"MiddleRight":5},
+      {"BottomLeft":6},
+      {"BottomCenter":7},
+      {"BottomRight":8},
+      {"CenteredFull":9},
+      {"LeftTall":10},
+      {"CenteredTall":11},
+      {"RightTall":12},
+      {"TopWide":13},
+      {"CenteredWide":14},
+      {"BottomWide":15}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "ECreativeModalDialogViewmodelResponse": [
+    [
+      {"None":0},
+      {"Button1":1},
+      {"Button2":2},
+      {"Button3":3},
+      {"Button4":4},
+      {"Button5":5},
+      {"Button6":6},
+      {"Button7":7},
+      {"Button8":8},
+      {"Button9":9},
+      {"Button10":10},
+      {"Button11":11},
+      {"Button12":12}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EDanceBeatSyncMode": [
+    [
+      {"Off":0},
+      {"Tempo":1},
+      {"Music":2}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EDelMarVehicleBoosterFlags": [
+    [
+      {"None":0},
+      {"Side":2},
+      {"Down":4},
+      {"Front":8},
+      {"Back":16},
+      {"Left":32},
+      {"Right":64},
+      {"All":255}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EDelMarWheelMirrorType": [
+    [
+      {"Scale":0},
+      {"Rotate":1},
+      {"None":2}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EDelMarPreviewCameraType": [
+    [
+      {"None":0},
+      {"ZoomIn":1},
+      {"ZoomOut":2}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EDelMarWheelAttachPoint": [
+    [
+      {"Spin":0},
+      {"Pivot":1},
+      {"Contact":2}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EDelMarTouchActionButtonState": [
+    [
+      {"None":0},
+      {"FullyDisabled":1},
+      {"Disabled":2},
+      {"Enabled":3},
+      {"Ready":4},
+      {"Pressed":5},
+      {"Supercharged":6}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EWidgetTransitionerInitialStatus": [
+    [
+      {"Hidden":0},
+      {"Shown":1}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EWidgetTransitionerStatus": [
+    [
+      {"Hidden":0},
+      {"AnimatingIn":1},
+      {"Shown":2},
+      {"AnimatingOut":3}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EDelMarRankedProgressError": [
+    [
+      {"None":0},
+      {"MissingRankedComponent":1},
+      {"RankedComponentSocialUserNotBound":2},
+      {"RankedComponentUnableToQueryProgress":3},
+      {"EmptyRankType":4},
+      {"InitialProgressMapInvalid":5},
+      {"CurrentProgressMapInvalid":6},
+      {"InvalidCurrentTrack":7},
+      {"InitialProgressEntryNotFound":8},
+      {"CurrentProgressEntryNotFound":9},
+      {"GameModeNotFound":10},
+      {"CurrentTierLessThanZero":11},
+      {"NotEnoughTiersForInitialTier":12},
+      {"NotEnoughTiersForCurrentTier":13},
+      {"FailedToFindUnrankedTier":14},
+      {"UnknownError":15}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EDelMarRearAlertVerticalHint": [
+    [
+      {"Level":0},
+      {"Up":1},
+      {"Down":2}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EDelMarInputInjectionState": [
+    [
+      {"FIRST_PRESSED":0},
+      {"PRESSED":1},
+      {"RELEASED":2},
+      {"CANCELLED":3}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EDelMarTouchInputTrackingState": [
+    [
+      {"NOT_TRACKING":0},
+      {"TRACKING_WITH_INJECTION":1},
+      {"TRACKING_WITHOUT_INJECTION":2}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EDelMarDriftSteerState": [
+    [
+      {"None":0},
+      {"Controlled":1},
+      {"DriftBoost":2},
+      {"Uncontrolled":3}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EDelMarSpeedometerState": [
+    [
+      {"Normal":0},
+      {"SlowingDown":1},
+      {"BonusSpeed":2}
+    ],
+    "uint8_t"
+  ]
+},
+{
   "EPortSelectStatus": [
     [
       {"Error":0},
@@ -61571,66 +61674,6 @@
       {"Inactive":0},
       {"Pending":1},
       {"Active":2}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EFabricSongSyncTimingType": [
-    [
-      {"Immediate":0},
-      {"NextBeat":1},
-      {"NextBar":2}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EFabricSongSyncPlaybackType": [
-    [
-      {"ControlsTempo":0},
-      {"FromCurrentTime":1},
-      {"FromStart":2}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EFabricSongSyncClockState": [
-    [
-      {"Playing":0},
-      {"WillRestartInitiator":1},
-      {"WillRestartFollower":2}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EFabricSongSyncSequenceState": [
-    [
-      {"UnInitialized":0},
-      {"NoAssignedSequence":1},
-      {"AssignedSequence":2}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EFabricSongSyncPlayState": [
-    [
-      {"NotPlaying":0},
-      {"Playing":1},
-      {"WaitingForTimestamp":2},
-      {"WaitingForMidiSource":3}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EFabricMidiSourceType": [
-    [
-      {"MidiFile":0},
-      {"JamTrackPlayer":1}
     ],
     "uint8_t"
   ]
@@ -62627,262 +62670,6 @@
   ]
 },
 {
-  "EColorPaletteType": [
-    [
-      {"Midi":0},
-      {"Gameplay":1}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "ESparksMidiTextEvents": [
-    [
-      {"None":0},
-      {"MusicStart":1},
-      {"MusicEnd":2},
-      {"Intro":3},
-      {"Verse":4},
-      {"PreChorus":5},
-      {"Chorus":6},
-      {"Bridge":7},
-      {"Breakdown":8},
-      {"Build":9},
-      {"Drop":10},
-      {"Outro":11},
-      {"SoloGuitar":12},
-      {"SoloBass":13},
-      {"SoloVocals":14},
-      {"SoloDrums":15},
-      {"SoloKeys":16}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EFrequencyType": [
-    [
-      {"Seconds":0},
-      {"Beats":1},
-      {"Measures":2}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EShowFXType": [
-    [
-      {"Impulse":0},
-      {"Activate":1},
-      {"Deactivate":2},
-      {"ActivateBeat":3},
-      {"DeactivateBeat":4},
-      {"ColorShift":5},
-      {"CustomMode":6}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EShowFXAnimation": [
-    [
-      {"FireAll":0},
-      {"FireIndices":1},
-      {"Linear":2},
-      {"Alternating":3},
-      {"OutsideIn":4},
-      {"Random":5},
-      {"Prototype":6}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EStageGroupOffset": [
-    [
-      {"AllAtOnce":0},
-      {"Linear":1},
-      {"InsideOut":2}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EStageShowRotationPattern": [
-    [
-      {"None":0},
-      {"Bounce":1},
-      {"Circle":2}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EStageShowRotationMode": [
-    [
-      {"PingPong":0},
-      {"Linear":1}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EAnimToTextureMode": [
-    [
-      {"Vertex":0},
-      {"Bone":1}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EAnimToTexturePrecision": [
-    [
-      {"EightBits":0},
-      {"SixteenBits":1}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EAnimToTextureNumBoneInfluences": [
-    [
-      {"One":0},
-      {"Two":1},
-      {"Four":2}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EValueMode": [
-    [
-      {"Index":0},
-      {"Texture":1}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EFriedRiceDoorwayAccessResult": [
-    [
-      {"Allowed":0},
-      {"DeniedDueToActivity":1},
-      {"DeniedDueToCapacity":2},
-      {"DeniedDueToProximity":3},
-      {"DelayedWaitingForStreaming":4},
-      {"DelayedWaitingForRelevancy":5}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EFriedRiceActivityType": [
-    [
-      {"None":0},
-      {"ChickenFriedRice":1},
-      {"Showcase":2},
-      {"Other":3}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EChickenFriedRicePlayerRole": [
-    [
-      {"Unassigned":0},
-      {"Hunter":1},
-      {"Prey":2}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EFriedRiceQueuePartyType": [
-    [
-      {"Solo":0},
-      {"AvailableParty":1}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EFriedRiceShowcaseStageState": [
-    [
-      {"Initializing":0},
-      {"Idle":1},
-      {"SummoningPerformers":2},
-      {"PreShow":3},
-      {"Show":4},
-      {"PostShow":5},
-      {"Results":6},
-      {"DismissingPerformers":7},
-      {"ShowFinished":8}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EChickenFriedRiceGamePhase": [
-    [
-      {"Invalid":0},
-      {"Registration":1},
-      {"PreGameCountdown":2},
-      {"PreyHeadStart":3},
-      {"GamePlay":4},
-      {"Finale":5},
-      {"Results":6}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EFriedRiceShowcaseStageWarningState": [
-    [
-      {"None":0},
-      {"DisplayingWarning":1},
-      {"ShowResumed":2},
-      {"ShowEnded":3}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EChickenFriedRiceOptOutReason": [
-    [
-      {"Invalid":0},
-      {"ClientRequested":1},
-      {"LeftGame":2},
-      {"AFK":3}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EFriedRiceQueueResult": [
-    [
-      {"Success":0},
-      {"InvalidPlayer":1},
-      {"RequirementsNotMet":2},
-      {"PlayerAlreadyQueued":3},
-      {"PartyMemberAlreadyQueued":4},
-      {"ClientRequestDenied":5}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "EFriedRiceShowcaseStageParticipantType": [
-    [
-      {"None":0},
-      {"Spectator":1},
-      {"UpcomingPerformer":2},
-      {"Performer":3}
-    ],
-    "uint8_t"
-  ]
-},
-{
   "EPilgrimSongPlayMethod": [
     [
       {"Invalid":0},
@@ -63278,6 +63065,121 @@
   ]
 },
 {
+  "EPilgrimTrackSlateTransformMode": [
+    [
+      {"None":0},
+      {"Translation":1},
+      {"Rotation":2},
+      {"RotationTranslation":3},
+      {"Scale":4},
+      {"ScaleTranslation":5},
+      {"ScaleRotation":6},
+      {"ScaleRotationTranslation":7}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EColorPaletteType": [
+    [
+      {"Midi":0},
+      {"Gameplay":1}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "ESparksMidiTextEvents": [
+    [
+      {"None":0},
+      {"MusicStart":1},
+      {"MusicEnd":2},
+      {"Intro":3},
+      {"Verse":4},
+      {"PreChorus":5},
+      {"Chorus":6},
+      {"Bridge":7},
+      {"Breakdown":8},
+      {"Build":9},
+      {"Drop":10},
+      {"Outro":11},
+      {"SoloGuitar":12},
+      {"SoloBass":13},
+      {"SoloVocals":14},
+      {"SoloDrums":15},
+      {"SoloKeys":16}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EFrequencyType": [
+    [
+      {"Seconds":0},
+      {"Beats":1},
+      {"Measures":2}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EShowFXType": [
+    [
+      {"Impulse":0},
+      {"Activate":1},
+      {"Deactivate":2},
+      {"ActivateBeat":3},
+      {"DeactivateBeat":4},
+      {"ColorShift":5},
+      {"CustomMode":6}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EShowFXAnimation": [
+    [
+      {"FireAll":0},
+      {"FireIndices":1},
+      {"Linear":2},
+      {"Alternating":3},
+      {"OutsideIn":4},
+      {"Random":5},
+      {"Prototype":6}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EStageGroupOffset": [
+    [
+      {"AllAtOnce":0},
+      {"Linear":1},
+      {"InsideOut":2}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EStageShowRotationPattern": [
+    [
+      {"None":0},
+      {"Bounce":1},
+      {"Circle":2}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EStageShowRotationMode": [
+    [
+      {"PingPong":0},
+      {"Linear":1}
+    ],
+    "uint8_t"
+  ]
+},
+{
   "EPilgrimPreloaderSongPosition": [
     [
       {"Current":0},
@@ -63299,26 +63201,169 @@
   ]
 },
 {
-  "EMatchPrivacyType": [
+  "EAnimToTextureMode": [
     [
-      {"UNKNOWN":0},
-      {"PUBLIC":1},
-      {"PRIVATE":2}
+      {"Vertex":0},
+      {"Bone":1}
     ],
     "uint8_t"
   ]
 },
 {
-  "EPilgrimTrackSlateTransformMode": [
+  "EAnimToTexturePrecision": [
+    [
+      {"EightBits":0},
+      {"SixteenBits":1}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EAnimToTextureNumBoneInfluences": [
+    [
+      {"One":0},
+      {"Two":1},
+      {"Four":2}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EValueMode": [
+    [
+      {"Index":0},
+      {"Texture":1}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EFriedRiceDoorwayAccessResult": [
+    [
+      {"Allowed":0},
+      {"DeniedDueToActivity":1},
+      {"DeniedDueToCapacity":2},
+      {"DeniedDueToProximity":3},
+      {"DeniedDueToPlayerRole":4},
+      {"DelayedWaitingForStreaming":5},
+      {"DelayedWaitingForRelevancy":6}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EFriedRiceActivityType": [
     [
       {"None":0},
-      {"Translation":1},
-      {"Rotation":2},
-      {"RotationTranslation":3},
-      {"Scale":4},
-      {"ScaleTranslation":5},
-      {"ScaleRotation":6},
-      {"ScaleRotationTranslation":7}
+      {"ChickenFriedRice":1},
+      {"Showcase":2},
+      {"Other":3}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EChickenFriedRicePlayerRole": [
+    [
+      {"Unassigned":0},
+      {"Hunter":1},
+      {"Prey":2}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EFriedRiceQueuePartyType": [
+    [
+      {"Solo":0},
+      {"AvailableParty":1}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EFriedRiceShowcaseStageState": [
+    [
+      {"Initializing":0},
+      {"Idle":1},
+      {"SummoningPerformers":2},
+      {"PreShow":3},
+      {"Show":4},
+      {"PostShow":5},
+      {"Results":6},
+      {"DismissingPerformers":7},
+      {"ShowFinished":8}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EChickenFriedRiceGamePhase": [
+    [
+      {"Invalid":0},
+      {"Registration":1},
+      {"PreGameCountdown":2},
+      {"PreyHeadStart":3},
+      {"GamePlay":4},
+      {"Finale":5},
+      {"Results":6}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EFriedRiceShowcaseStageWarningState": [
+    [
+      {"None":0},
+      {"DisplayingWarning":1},
+      {"ShowResumed":2},
+      {"ShowCancelled":3},
+      {"ShowEnded":4}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EChickenFriedRiceOptOutReason": [
+    [
+      {"Invalid":0},
+      {"ClientRequested":1},
+      {"LeftGame":2},
+      {"AFK":3}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EFriedRiceQueueResult": [
+    [
+      {"Success":0},
+      {"InvalidPlayer":1},
+      {"RequirementsNotMet":2},
+      {"PlayerAlreadyQueued":3},
+      {"PartyMemberAlreadyQueued":4},
+      {"ClientRequestDenied":5}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EFriedRiceShowcaseStageParticipantType": [
+    [
+      {"None":0},
+      {"Spectator":1},
+      {"UpcomingPerformer":2},
+      {"Performer":3}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EMatchPrivacyType": [
+    [
+      {"UNKNOWN":0},
+      {"PUBLIC":1},
+      {"PRIVATE":2}
     ],
     "uint8_t"
   ]
@@ -64647,7 +64692,8 @@
       {"BuildingStage":7},
       {"EnteringVillage":8},
       {"EnteringBiome":9},
-      {"Default":10}
+      {"SproutAchievement":10},
+      {"Default":11}
     ],
     "uint8_t"
   ]
@@ -64851,11 +64897,30 @@
   ]
 },
 {
+  "ESproutCollectionUpdateType": [
+    [
+      {"NewItem":0},
+      {"IncreasedRarity":1},
+      {"Unchanged":2}
+    ],
+    "uint8_t"
+  ]
+},
+{
   "ESproutJobAvailabilityFilters": [
     [
       {"None":0},
       {"Player":1},
       {"NPC":2}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EAMSCopierBehavior": [
+    [
+      {"None":0},
+      {"LocalPrimaryPlayer":1}
     ],
     "uint8_t"
   ]
@@ -64901,15 +64966,6 @@
       {"ContainAll":0},
       {"ContainAny":1},
       {"Count":2}
-    ],
-    "uint8_t"
-  ]
-},
-{
-  "ESproutCollectionUpdateType": [
-    [
-      {"NewItem":0},
-      {"IncreasedRarity":1}
     ],
     "uint8_t"
   ]
@@ -65187,6 +65243,33 @@
       {"None":0},
       {"ReturnToFrontendIfPartyMembersInDifferentRootPlayspace":1},
       {"ReturnToFrontendOnFailure":2}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EHedgeMaltAnimState": [
+    [
+      {"Died":0},
+      {"Idle":1},
+      {"Running":2},
+      {"MeleeAttack":3},
+      {"Dying":4},
+      {"FullBodyHitReact":5},
+      {"AdditiveHitReact":6},
+      {"CombatIdle":7},
+      {"Falling":8},
+      {"Knockback_InAir":9}
+    ],
+    "uint8_t"
+  ]
+},
+{
+  "EJunoResearchEntryState": [
+    [
+      {"Locked":0},
+      {"Unlocked":1},
+      {"Purchased":2}
     ],
     "uint8_t"
   ]
