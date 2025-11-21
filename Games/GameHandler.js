@@ -72,7 +72,7 @@ function getGameInfo(info, reload = true, newWindow = false, push = true) {
 
 //reloads the website with the CName and its type (C,S,F,E)
 //only call if the current type does not match the new type
-function reloadWithNewCName(CName, newType, member, newWindow = false) {
+async function reloadWithNewCName(CName, newType, member, newWindow = false) {
   //params always need hash and current type
   if (Object.keys(UrlParams).length < 2) return;
 
@@ -91,16 +91,34 @@ function reloadWithNewCName(CName, newType, member, newWindow = false) {
 
   if (newType == null) return;
 
+  //remove pointers
+  if (CName.charAt(CName.length - 1) === "*") {
+    CName = CName.slice(0, -1);
+  }
+
+  //before reload/redirect to a new window, fetch the data for the new type and check if the requested CName exists.
+  //if it does not exist we do not redirect and show the toast, keeping the user on the same page instead of redirecting to the first item.
+  let fileName;
+  if (newType === "C") fileName = "ClassesInfo.json.gz";
+  else if (newType === "S") fileName = "StructsInfo.json.gz";
+  else if (newType === "F") fileName = "FunctionsInfo.json.gz";
+  else if (newType === "E") fileName = "EnumsInfo.json.gz";
+  else return;
+
+  const response = await decompressAndCheckCacheByURL(gameDirectory + fileName, uploadTS);
+  const json = JSON.parse(response);
+  const exists = json.data.some(obj => Object.keys(obj)[0] === CName);
+
+  if (!exists) {
+    showToast("Could not find " + CName + "!");
+    return;
+  }
+
   //craft the new valid url
   var newURL = window.location.origin + window.location.pathname + "?";
 
   // no matter what, reset the url params
   newURL += "hash=" + UrlParams["hash"];
-
-  //remove pointers
-  if (CName.charAt(CName.length - 1) === "*") {
-    CName = CName.slice(0, -1);
-  }
 
   if (newType === "C") newURL += "&type=classes";
   else if (newType === "S") newURL += "&type=structs";
