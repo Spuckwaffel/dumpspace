@@ -1911,6 +1911,12 @@ async function getCommits() {
   const perPage = 100;
 
   const historyDiv = document.getElementById("uploadHistoryInnerDiv");
+  const updateSpinner = document.getElementById("uploadHistory-spinner");
+  
+  updateSpinner.classList.remove("hidden");
+
+  historyDiv.classList.add("hidden");
+  historyDiv.innerHTML = "";
 
   function formatDate(dateStr) {
     const date = new Date(dateStr);
