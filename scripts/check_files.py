@@ -120,6 +120,19 @@ def check_for_malicious_code(json_str):
     for code in javascript_code:
       print(code)
     return True, "Potential JavaScript code found."
+  
+  # 3. Check for XSS
+  # Catch HTML tags (eg; <img..., <iframe..., <body..., </div...)
+  # This regex looks for a '<' followed immediately by a letter or a '/'
+  if re.search(r'<[a-zA-Z/]', json_str):
+    print("Potential HTML/XSS content found.")
+    # Find the match to print
+    match = re.search(r'<[a-zA-Z/]', json_str)
+    if match:
+      start = max(0, match.start() - 10)
+      end = min(len(json_str), match.end() + 10)
+      print(f"Context: ...{json_str[start:end]}...")
+    return True, "Potential HTML/XSS code found. HTML tags are not allowed."
   return False, ""
 
 
