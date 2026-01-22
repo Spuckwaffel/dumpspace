@@ -595,6 +595,23 @@ def check_added_files(added_files):
       compressed_data = compress_string(content)
       binary_files_to_commit[file + ".gz"] = compressed_data
 
+  # --- GENERATE PLACEHOLDER DIFFINFO FOR NEW GAME ---
+  import time
+  game_path = f"Games/{game_engine}/{game_loc}"
+  placeholder_diff = {
+      "version": 1,
+      "generated_at": int(time.time() * 1000),
+      "has_previous": False,
+      "classes": {"added": [], "removed": [], "modified": {}},
+      "structs": {"added": [], "removed": [], "modified": {}},
+      "functions": {"added": [], "removed": [], "modified": {}},
+      "enums": {"added": [], "removed": [], "modified": {}}
+  }
+  diff_json = json.dumps(placeholder_diff)
+  compressed_diff = compress_string(diff_json)
+  binary_files_to_commit[f"{game_path}/DiffInfo.json.gz"] = compressed_diff
+  print(f"Created placeholder DiffInfo for new game: {game_path}")
+
   commit_message = f"Add new game: {game_loc}"
   
   if not commit_all_changes_at_once(commit_message, text_files_to_commit, binary_files_to_commit):
