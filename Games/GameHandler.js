@@ -2501,10 +2501,8 @@ if (diffToggle) {
       // Reset the VanillaRecyclerView so it recreates with new diff classes
       formattedArrayDataValid = false;
       formattedArrayData = [];
-      if (dVanillaRecyclerView) {
-        dVanillaRecyclerView.destroy();
-        dVanillaRecyclerView = null;
-      }
+      // Just nullify - the container will be cleared below
+      dVanillaRecyclerView = null;
       // Clear the class list div
       while (classDiv.firstChild) {
         classDiv.removeChild(classDiv.firstChild);
