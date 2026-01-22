@@ -136,6 +136,126 @@ def check_for_malicious_code(json_str):
   return False, ""
 
 
+def get_existing_file_content(game_path, filename):
+    """
+    Fetch current live file from main branch before it gets overwritten.
+    Returns the parsed JSON data, or None if file doesn't exist.
+    """
+    try:
+        file_path = f"{game_path}/{filename}.gz"
+        print(f"Fetching existing file: {file_path}")
+        content = repo.get_contents(file_path, ref=master_branch.commit.sha)
+        # Decompress and return JSON
+        compressed = base64.b64decode(content.content)
+        decompressed = gzip.decompress(compressed)
+        return json.loads(decompressed.decode('utf-8'))
+    except Exception as e:
+        print(f"Could not fetch existing file {filename}: {e}")
+        return None  # File doesn't exist (new game or first upload)
+
+
+def compute_detailed_diff(old_data, new_data, data_type):
+    """
+    Compute detailed differences including member-level changes.
+    
+    Returns: {
+        "added": ["ClassName1", "ClassName2"],
+        "removed": ["OldClassName"],
+        "modified": {
+            "ClassName": {
+                "added_members": ["NewMember1"],
+                "removed_members": ["OldMember"]
+            }
+        }
+    }
+    """
+    if old_data is None:
+        return None  # New game - no diff available
+    
+    old_items = old_data.get("data", {})
+    new_items = new_data.get("data", {})
+    
+    old_keys = set(old_items.keys())
+    new_keys = set(new_items.keys())
+    
+    added = sorted(list(new_keys - old_keys))
+    removed = sorted(list(old_keys - new_keys))
+    
+    # For modified: check member-level changes
+    modified = {}
+    for item_name in old_keys & new_keys:
+        # Handle different possible member key names
+        old_members_list = old_items[item_name].get("m", [])
+        new_members_list = new_items[item_name].get("m", [])
+        
+        # Extract member names - try 'n' first, then 'name', then full object as string
+        def get_member_name(member):
+            if isinstance(member, dict):
+                return member.get("n", member.get("name", str(member)))
+            return str(member)
+        
+        old_members = {get_member_name(m) for m in old_members_list}
+        new_members = {get_member_name(m) for m in new_members_list}
+        
+        added_members = sorted(list(new_members - old_members))
+        removed_members = sorted(list(old_members - new_members))
+        
+        if added_members or removed_members:
+            modified[item_name] = {
+                "added_members": added_members,
+                "removed_members": removed_members
+            }
+    
+    return {"added": added, "removed": removed, "modified": modified}
+
+
+def generate_diff_info(game_path, new_files_data):
+    """
+    Generate DiffInfo.json data by comparing current live files with new files.
+    
+    Args:
+        game_path: Path like "Games/Unity/Test"
+        new_files_data: Dict mapping filename to parsed JSON data
+    
+    Returns:
+        DiffInfo dict or None if no previous version exists
+    """
+    import time
+    
+    diff_types = ['classes', 'structs', 'functions', 'enums']
+    file_mapping = {
+        'classes': 'ClassesInfo.json',
+        'structs': 'StructsInfo.json', 
+        'functions': 'FunctionsInfo.json',
+        'enums': 'EnumsInfo.json'
+    }
+    
+    has_any_previous = False
+    diff_info = {
+        "version": 1,
+        "generated_at": int(time.time() * 1000),
+        "has_previous": False
+    }
+    
+    for diff_type in diff_types:
+        filename = file_mapping[diff_type]
+        old_data = get_existing_file_content(game_path, filename)
+        new_data = new_files_data.get(filename)
+        
+        if old_data is not None:
+            has_any_previous = True
+        
+        diff_result = compute_detailed_diff(old_data, new_data, diff_type)
+        
+        if diff_result is None:
+            diff_info[diff_type] = {"added": [], "removed": [], "modified": {}}
+        else:
+            diff_info[diff_type] = diff_result
+    
+    diff_info["has_previous"] = has_any_previous
+    return diff_info
+
+
 def basic_check(files):
   folder1 = 'Games'
   folder2_options = ['Unity', 'Unreal-Engine-3', 'Unreal-Engine-4', 'Unreal-Engine-5']
@@ -236,7 +356,10 @@ def check_changed_files(changed_files):
     print(st)
     return False, st
   
+  # Collect parsed JSON data for diff generation
+  parsed_files_data = {}
   updated_at = 0
+  
   for file in changed_files:
     f1 = get_content_by_name(file)
     if not is_valid_json(f1):
@@ -252,6 +375,10 @@ def check_changed_files(changed_files):
     print("file looks safe.")
 
     fileData = json.loads(f1) # Load once
+    
+    # Store for diff generation (use base filename)
+    parsed_files_data[os.path.basename(file)] = fileData
+    
     if updated_at == 0:
       updated_at = int(fileData.get('updated_at', 0))
       
@@ -307,6 +434,7 @@ def check_changed_files(changed_files):
        'aurl': json.dumps(pr.user.avatar_url, ensure_ascii=False).replace("\"", "") 
        })
 
+
   # --- PREPARE FOR SINGLE COMMIT ---
   text_files_to_commit = {
       "Games/GameList.json": json.dumps(gameListData),
@@ -319,6 +447,19 @@ def check_changed_files(changed_files):
       content = get_content_by_name(file)
       compressed_data = compress_string(content)
       binary_files_to_commit[file + ".gz"] = compressed_data
+
+  # --- GENERATE DIFF INFO ---
+  game_path = "/".join(changed_files[0].split('/')[:3])  # e.g., "Games/Unity/GameName"
+  print(f"Generating diff for: {game_path}")
+  
+  diff_info = generate_diff_info(game_path, parsed_files_data)
+  if diff_info is not None:
+      diff_json = json.dumps(diff_info)
+      compressed_diff = compress_string(diff_json)
+      binary_files_to_commit[f"{game_path}/DiffInfo.json.gz"] = compressed_diff
+      print(f"Diff generated: {len(diff_info.get('classes', {}).get('added', []))} classes added, "
+            f"{len(diff_info.get('classes', {}).get('removed', []))} removed, "
+            f"{len(diff_info.get('classes', {}).get('modified', {}))} modified")
 
   commit_message = f"Update game files for {changed_files[0].split('/')[2]}"
   

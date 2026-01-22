@@ -227,9 +227,9 @@ async function displayCurrentGame() {
 
   console.log(
     "[displayCurrentGame] Crunching latest data for: " +
-      gameDirectory +
-      " - " +
-      UrlParams["type"]
+    gameDirectory +
+    " - " +
+    UrlParams["type"]
   );
 
   const sha = UrlParams["sha"];
@@ -329,6 +329,9 @@ async function displayCurrentGame() {
   fileVersion = currentInfoJson.version;
 
   console.log("[DisplayCurrentGame] Using version " + fileVersion);
+
+  // Load diff data for highlighting in Overview
+  await loadDiffData();
 
   //custom
   if (currentType === "O") {
@@ -447,6 +450,32 @@ function displayCurrentType(CName, member) {
     }
   }
 
+  // When Show Diff is enabled, also add removed items to the sidebar
+  if (!formattedArrayDataValid && showDiffHighlighting && diffData && diffData.has_previous) {
+    const category = currentType === 'C' ? 'classes' :
+      currentType === 'S' ? 'structs' :
+        currentType === 'F' ? 'functions' :
+          currentType === 'E' ? 'enums' : null;
+
+    if (category && diffData[category] && diffData[category].removed) {
+      // Handle both array format (old) and object format (new with member data)
+      let removedItems = [];
+      if (Array.isArray(diffData[category].removed)) {
+        removedItems = diffData[category].removed;
+      } else if (typeof diffData[category].removed === 'object') {
+        removedItems = Object.keys(diffData[category].removed);
+      }
+      for (const removedItem of removedItems) {
+        // Only add if not already in the list
+        if (!formattedArrayData.includes(removedItem)) {
+          formattedArrayData.push(removedItem);
+        }
+      }
+      // Re-sort alphabetically
+      formattedArrayData.sort((a, b) => a.localeCompare(b));
+    }
+  }
+
   //is the target game class even there?
   if (targetGameClass == null) {
     //just a bandaid fix displaying older toasts lol
@@ -471,10 +500,10 @@ function displayCurrentType(CName, member) {
     } else {
       console.log(
         "[displayCurrentType] Replaced " +
-          oldURL +
-          " with " +
-          currentURL +
-          " in history"
+        oldURL +
+        " with " +
+        currentURL +
+        " in history"
       );
       history.replaceState(null, "", currentURL);
     }
@@ -509,7 +538,31 @@ function displayCurrentType(CName, member) {
           if (targetClassName != null && params.data === targetClassName) {
             this.layout.classList.add("bg-gray-600/10");
           }
+          // Apply diff highlighting to sidebar items
+          const diffStatus = getDiffStatusForItem(params.data);
+          if (diffStatus === 'added') {
+            this.layout.classList.add("diff-added");
+          } else if (diffStatus === 'removed') {
+            this.layout.classList.add("diff-removed");
+          } else if (diffStatus === 'modified') {
+            this.layout.classList.add("diff-modified");
+          }
           this.layout.addEventListener("mouseup", function (event) {
+            // Check if this is a removed item - display its contents from DiffInfo
+            const itemDiffStatus = getDiffStatusForItem(params.data);
+            if (itemDiffStatus === 'removed') {
+              focussedCName = params.data;
+              fixHighlightColor();
+              // Display removed item contents based on type
+              if (currentType === 'C' || currentType === 'S') {
+                displayRemovedClassOrStruct(params.data);
+              } else if (currentType === 'E') {
+                displayRemovedEnum(params.data);
+              } else if (currentType === 'F') {
+                displayRemovedFunction(params.data);
+              }
+              return;
+            }
             if (event.button === 1) {
               event.stopPropagation();
               reloadWithNewCName(params.data, currentType, null, true);
@@ -524,7 +577,7 @@ function displayCurrentType(CName, member) {
         getLayout() {
           return this.layout;
         }
-        onUnmount() {}
+        onUnmount() { }
         onMount() {
           fixHighlightColor();
         }
@@ -598,6 +651,14 @@ function displayOverviewPage(members) {
       "border-gray-200",
       "dark:border-gray-600"
     );
+
+    // Apply diff highlighting to member rows
+    const memberDiffStatus = getDiffStatusForMember(focussedCName, memberName);
+    if (memberDiffStatus === 'added') {
+      overviewMemberDiv.classList.add("diff-added");
+    } else if (memberDiffStatus === 'removed') {
+      overviewMemberDiv.classList.add("diff-removed");
+    }
 
     const memberTypeDiv = document.createElement("div");
     memberTypeDiv.classList.add("col-span-3", "flex");
@@ -802,6 +863,67 @@ function displayOverviewPage(members) {
       memberItemHeight = overviewMemberDiv.getBoundingClientRect().height;
     }
   }
+
+  // Add removed members from DiffInfo when Show Diff is enabled
+  if (showDiffHighlighting && diffData && diffData.has_previous) {
+    const category = currentType === 'C' ? 'classes' :
+      currentType === 'S' ? 'structs' : null;
+
+    if (category && diffData[category] && diffData[category].modified) {
+      const modifiedInfo = diffData[category].modified[focussedCName];
+      if (modifiedInfo && modifiedInfo.removed_members) {
+        for (const removedMemberName of modifiedInfo.removed_members) {
+          const removedMemberDiv = document.createElement("div");
+          removedMemberDiv.classList.add(
+            "max-sm:w-[70vh]",
+            "grid",
+            "grid-cols-8",
+            "text-sm",
+            "px-2",
+            "sm:px-6",
+            "text-slate-700",
+            "dark:text-slate-100",
+            "pt-2",
+            "pb-2",
+            "border-b",
+            "border-gray-200",
+            "dark:border-gray-600",
+            "diff-removed"
+          );
+
+          // Type column (unknown for removed)
+          const typeDiv = document.createElement("div");
+          typeDiv.classList.add("col-span-3", "flex", "italic", "text-slate-500");
+          typeDiv.textContent = "(removed)";
+          removedMemberDiv.appendChild(typeDiv);
+
+          // Member name column
+          const nameDiv = document.createElement("div");
+          nameDiv.classList.add("col-span-3", "flex");
+          const nameP = document.createElement("p");
+          nameP.classList.add("truncate");
+          nameP.textContent = removedMemberName;
+          nameDiv.appendChild(nameP);
+          removedMemberDiv.appendChild(nameDiv);
+
+          // Offset column (unknown)
+          const offsetP = document.createElement("p");
+          offsetP.classList.add("col-span-1", "font-mono", "text-slate-500");
+          offsetP.textContent = "—";
+          removedMemberDiv.appendChild(offsetP);
+
+          // Size column (unknown)
+          const sizeP = document.createElement("p");
+          sizeP.classList.add("col-span-1", "pl-8", "font-mono", "text-slate-500");
+          sizeP.textContent = "—";
+          removedMemberDiv.appendChild(sizeP);
+
+          itemsOverviewDiv.appendChild(removedMemberDiv);
+        }
+      }
+    }
+  }
+
   if (focusFound) {
     const memberList = document.getElementById("member-list");
     const rect = memberList.getBoundingClientRect();
@@ -1020,6 +1142,111 @@ function displayMembers(CName, data) {
   }
 }
 
+// Display removed class or struct content from DiffInfo
+function displayRemovedClassOrStruct(CName) {
+  const category = currentType === 'C' ? 'classes' : 'structs';
+
+  if (!diffData || !diffData[category] || !diffData[category].removed || !diffData[category].removed[CName]) {
+    showToast("No data available for removed item: " + CName, true);
+    return;
+  }
+
+  const removedData = diffData[category].removed[CName];
+  const members = removedData.members || [];
+
+  // Clear and prepare the overview area
+  const itemsOverviewDiv = document.getElementById("overview-items");
+  while (itemsOverviewDiv.firstChild) {
+    itemsOverviewDiv.removeChild(itemsOverviewDiv.firstChild);
+  }
+  for (const child of emtpyOverViewDivChildren) {
+    itemsOverviewDiv.appendChild(child);
+  }
+
+  // Add a header indicating this is a removed item
+  const removedHeader = document.createElement("div");
+  removedHeader.classList.add("px-4", "py-2", "bg-red-500/20", "border-l-4", "border-red-500", "mb-2");
+  const removedText = document.createElement("p");
+  removedText.classList.add("font-semibold");
+  removedText.style.color = "#fbbf24";
+  removedText.textContent = "⚠ This " + (currentType === 'C' ? "class" : "struct") + " was removed in the current version";
+  removedHeader.appendChild(removedText);
+  itemsOverviewDiv.appendChild(removedHeader);
+
+  // Display each member
+  for (const member of members) {
+    const memberName = Object.keys(member)[0];
+    const memberData = member[memberName];
+
+    const overviewMemberDiv = document.createElement("div");
+    overviewMemberDiv.classList.add(
+      "max-sm:w-[70vh]",
+      "grid",
+      "grid-cols-8",
+      "text-sm",
+      "px-2",
+      "sm:px-6",
+      "text-slate-700",
+      "dark:text-slate-100",
+      "pt-2",
+      "pb-2",
+      "border-b",
+      "border-gray-200",
+      "dark:border-gray-600",
+      "diff-removed"
+    );
+
+    // Type column
+    const memberTypeDiv = document.createElement("div");
+    memberTypeDiv.classList.add("col-span-3", "flex");
+    const memberTypeP = document.createElement("p");
+    memberTypeP.classList.add("truncate");
+    memberTypeP.textContent = memberData[0][0]; // Type name
+    memberTypeDiv.appendChild(memberTypeP);
+    overviewMemberDiv.appendChild(memberTypeDiv);
+
+    // Name column
+    const memberNameDiv = document.createElement("div");
+    memberNameDiv.classList.add("flex", "col-span-3", "space-x-3");
+    const memberNameP = document.createElement("p");
+    memberNameP.classList.add("truncate");
+    memberNameP.textContent = memberName;
+    memberNameDiv.appendChild(memberNameP);
+    overviewMemberDiv.appendChild(memberNameDiv);
+
+    // Offset column
+    const memberOffsetP = document.createElement("p");
+    memberOffsetP.classList.add("col-span-1", "font-mono");
+    memberOffsetP.textContent = "0x" + memberData[1].toString(16);
+    overviewMemberDiv.appendChild(memberOffsetP);
+
+    // Size column
+    const memberSizeP = document.createElement("p");
+    memberSizeP.classList.add("col-span-1", "pl-8", "font-mono");
+    memberSizeP.textContent = memberData[2];
+    overviewMemberDiv.appendChild(memberSizeP);
+
+    itemsOverviewDiv.appendChild(overviewMemberDiv);
+  }
+
+  // Update the class name display
+  if (document.getElementById("class-desc-name") !== null)
+    document.getElementById("class-desc-name").textContent = CName;
+
+  if (document.getElementById("class-list-name") != null) {
+    document.getElementById("class-list-name").textContent =
+      currentType === "C" ? "Classes" : "Structs";
+  }
+
+  if (document.getElementById("class-skeleton") != null) {
+    document.getElementById("class-skeleton").remove();
+  }
+
+  if (document.getElementById("overview-items-skeleton") != null) {
+    document.getElementById("overview-items-skeleton").remove();
+  }
+}
+
 function displayEnums(CName, data) {
   //remove all children, in function viewer everything works different
   const itemsOverviewDiv = document.getElementById("overview-items");
@@ -1126,10 +1353,24 @@ function displayEnums(CName, data) {
   enumDiv.appendChild(enumCopyButton);
 
   const enumFooterDiv = document.createElement("div");
-  enumFooterDiv.classList.add("grid", "grid-cols-8", "mx-10");
+  enumFooterDiv.classList.add("mx-10");
   var enuItemCount = 0;
   for (const _enu of enumItems) {
-    const enu = _enu[Object.keys(_enu)];
+    const enuName = Object.keys(_enu)[0];
+    const enuValue = _enu[enuName];
+
+    // Create a row container for this enum item
+    const enuRowDiv = document.createElement("div");
+    enuRowDiv.classList.add("grid", "grid-cols-8");
+
+    // Apply diff highlighting
+    const enumDiffStatus = getDiffStatusForEnumMember(CName, enuName);
+    if (enumDiffStatus === 'added') {
+      enuRowDiv.classList.add("diff-added");
+    } else if (enumDiffStatus === 'removed') {
+      enuRowDiv.classList.add("diff-removed");
+    }
+
     const enuItemNameP = document.createElement("p");
     enuItemNameP.classList.add(
       "col-span-7",
@@ -1137,17 +1378,49 @@ function displayEnums(CName, data) {
       "text-left",
       "truncate"
     );
-    enuItemNameP.textContent = Object.keys(_enu);
-    enumFooterDiv.appendChild(enuItemNameP);
+    enuItemNameP.textContent = enuName;
+    enuRowDiv.appendChild(enuItemNameP);
+
     const enuItemValueP = document.createElement("p");
     enuItemValueP.classList.add("col-span-1", "sm:col-span-2");
 
     if (enuItemCount < enumItems.length - 1)
-      enuItemValueP.textContent = "= " + enu + ",";
-    else enuItemValueP.textContent = "= " + enu;
+      enuItemValueP.textContent = "= " + enuValue + ",";
+    else enuItemValueP.textContent = "= " + enuValue;
 
-    enumFooterDiv.appendChild(enuItemValueP);
+    enuRowDiv.appendChild(enuItemValueP);
+    enumFooterDiv.appendChild(enuRowDiv);
     enuItemCount++;
+  }
+
+  // Add removed enum members when Show Diff is enabled
+  if (showDiffHighlighting && diffData && diffData.has_previous) {
+    if (diffData.enums && diffData.enums.modified && diffData.enums.modified[CName]) {
+      const modifiedInfo = diffData.enums.modified[CName];
+      if (modifiedInfo.removed_members) {
+        for (const removedMemberName of modifiedInfo.removed_members) {
+          const removedRowDiv = document.createElement("div");
+          removedRowDiv.classList.add("grid", "grid-cols-8", "diff-removed");
+
+          const removedNameP = document.createElement("p");
+          removedNameP.classList.add(
+            "col-span-7",
+            "sm:col-span-6",
+            "text-left",
+            "truncate"
+          );
+          removedNameP.textContent = removedMemberName;
+          removedRowDiv.appendChild(removedNameP);
+
+          const removedValueP = document.createElement("p");
+          removedValueP.classList.add("col-span-1", "sm:col-span-2", "text-slate-500");
+          removedValueP.textContent = "(removed)";
+          removedRowDiv.appendChild(removedValueP);
+
+          enumFooterDiv.appendChild(removedRowDiv);
+        }
+      }
+    }
   }
 
   const enumClosureP = document.createElement("p");
@@ -1167,6 +1440,223 @@ function displayEnums(CName, data) {
   }
 
   //theres only one tab available
+  if (document.getElementById("selection-tabs") != null) {
+    document.getElementById("selection-tabs").remove();
+  }
+
+  if (document.getElementById("class-skeleton") != null) {
+    document.getElementById("class-skeleton").remove();
+  }
+
+  if (document.getElementById("overview-items-skeleton") != null) {
+    document.getElementById("overview-items-skeleton").remove();
+  }
+}
+
+// Display removed enum content from DiffInfo
+function displayRemovedEnum(CName) {
+  if (!diffData || !diffData.enums || !diffData.enums.removed || !diffData.enums.removed[CName]) {
+    showToast("No data available for removed enum: " + CName, true);
+    return;
+  }
+
+  const removedData = diffData.enums.removed[CName];
+  const enumItems = removedData.members || [];
+  const enumType = removedData.type || "int";
+
+  // Clear and prepare the overview area
+  const itemsOverviewDiv = document.getElementById("overview-items");
+  while (itemsOverviewDiv.firstChild) {
+    itemsOverviewDiv.removeChild(itemsOverviewDiv.firstChild);
+  }
+
+  // Add a header indicating this is a removed item
+  const removedHeader = document.createElement("div");
+  removedHeader.classList.add("px-4", "py-2", "bg-red-500/20", "border-l-4", "border-red-500", "mb-2");
+  const removedText = document.createElement("p");
+  removedText.classList.add("font-semibold");
+  removedText.style.color = "#fbbf24";
+  removedText.textContent = "⚠ This enum was removed in the current version";
+  removedHeader.appendChild(removedText);
+  itemsOverviewDiv.appendChild(removedHeader);
+
+  const coreDiv = document.createElement("div");
+  coreDiv.classList.add(
+    "py-2",
+    "px-4",
+    "text-slate-700",
+    "dark:text-slate-100",
+    "diff-removed"
+  );
+
+  const enumDiv = document.createElement("div");
+  enumDiv.classList.add("flex", "flex-wrap", "items-center", "justify-between");
+
+  const enumHeaderDiv = document.createElement("div");
+  enumHeaderDiv.classList.add("flex", "space-x-2");
+
+  const enumNameP = document.createElement("p");
+  enumNameP.textContent = "enum class " + CName;
+  enumNameP.classList.add("text-ellipsis", "overflow-hidden", "truncate", "sm:max-w-prose");
+
+  const enumTypeP = document.createElement("p");
+  enumTypeP.textContent = " : " + enumType;
+  enumTypeP.classList.add("text-slate-600", "dark:text-slate-400");
+
+  const enumOpen = document.createElement("p");
+  enumOpen.textContent = "{";
+
+  enumHeaderDiv.appendChild(enumNameP);
+  enumHeaderDiv.appendChild(enumTypeP);
+  enumHeaderDiv.appendChild(enumOpen);
+  enumDiv.appendChild(enumHeaderDiv);
+
+  const enumFooterDiv = document.createElement("div");
+  enumFooterDiv.classList.add("mx-10");
+
+  for (let i = 0; i < enumItems.length; i++) {
+    const enuItem = enumItems[i];
+    const enuName = Object.keys(enuItem)[0];
+    const enuValue = enuItem[enuName];
+
+    const enuRowDiv = document.createElement("div");
+    enuRowDiv.classList.add("grid", "grid-cols-8");
+
+    const enuItemNameP = document.createElement("p");
+    enuItemNameP.classList.add("col-span-7", "sm:col-span-6", "text-left", "truncate");
+    enuItemNameP.textContent = enuName;
+    enuRowDiv.appendChild(enuItemNameP);
+
+    const enuItemValueP = document.createElement("p");
+    enuItemValueP.classList.add("col-span-1", "sm:col-span-2");
+    if (i < enumItems.length - 1)
+      enuItemValueP.textContent = "= " + enuValue + ",";
+    else
+      enuItemValueP.textContent = "= " + enuValue;
+    enuRowDiv.appendChild(enuItemValueP);
+
+    enumFooterDiv.appendChild(enuRowDiv);
+  }
+
+  const enumClosureP = document.createElement("p");
+  enumClosureP.textContent = "};";
+
+  coreDiv.appendChild(enumDiv);
+  coreDiv.appendChild(enumFooterDiv);
+  coreDiv.appendChild(enumClosureP);
+
+  itemsOverviewDiv.appendChild(coreDiv);
+
+  if (document.getElementById("class-desc-name") !== null)
+    document.getElementById("class-desc-name").textContent = CName;
+
+  if (document.getElementById("class-list-name") != null) {
+    document.getElementById("class-list-name").textContent = "Enums";
+  }
+
+  if (document.getElementById("selection-tabs") != null) {
+    document.getElementById("selection-tabs").remove();
+  }
+
+  if (document.getElementById("class-skeleton") != null) {
+    document.getElementById("class-skeleton").remove();
+  }
+
+  if (document.getElementById("overview-items-skeleton") != null) {
+    document.getElementById("overview-items-skeleton").remove();
+  }
+}
+
+// Display removed function content from DiffInfo
+function displayRemovedFunction(CName) {
+  if (!diffData || !diffData.functions || !diffData.functions.removed || !diffData.functions.removed[CName]) {
+    showToast("No data available for removed function: " + CName, true);
+    return;
+  }
+
+  const removedData = diffData.functions.removed[CName];
+
+  // Clear and prepare the overview area
+  const itemsOverviewDiv = document.getElementById("overview-items");
+  while (itemsOverviewDiv.firstChild) {
+    itemsOverviewDiv.removeChild(itemsOverviewDiv.firstChild);
+  }
+
+  // Add a header indicating this is a removed item
+  const removedHeader = document.createElement("div");
+  removedHeader.classList.add("px-4", "py-2", "bg-red-500/20", "border-l-4", "border-red-500", "mb-2");
+  const removedText = document.createElement("p");
+  removedText.classList.add("font-semibold");
+  removedText.style.color = "#fbbf24";
+  removedText.textContent = "⚠ This function was removed in the current version";
+  removedHeader.appendChild(removedText);
+  itemsOverviewDiv.appendChild(removedHeader);
+
+  const funcDiv = document.createElement("div");
+  funcDiv.classList.add(
+    "py-4",
+    "px-6",
+    "text-slate-700",
+    "dark:text-slate-100",
+    "diff-removed"
+  );
+
+  // Function signature
+  const signatureDiv = document.createElement("div");
+  signatureDiv.classList.add("mb-4");
+  const signatureLabel = document.createElement("p");
+  signatureLabel.classList.add("text-sm", "text-slate-500", "mb-1");
+  signatureLabel.textContent = "Signature:";
+  const signatureText = document.createElement("p");
+  signatureText.classList.add("font-mono", "text-lg");
+  signatureText.textContent = removedData.signature || CName + "()";
+  signatureDiv.appendChild(signatureLabel);
+  signatureDiv.appendChild(signatureText);
+  funcDiv.appendChild(signatureDiv);
+
+  // Return type
+  if (removedData.return_type) {
+    const returnDiv = document.createElement("div");
+    returnDiv.classList.add("mb-4");
+    const returnLabel = document.createElement("p");
+    returnLabel.classList.add("text-sm", "text-slate-500", "mb-1");
+    returnLabel.textContent = "Return Type:";
+    const returnText = document.createElement("p");
+    returnText.classList.add("font-mono");
+    returnText.textContent = removedData.return_type[0][0];
+    returnDiv.appendChild(returnLabel);
+    returnDiv.appendChild(returnText);
+    funcDiv.appendChild(returnDiv);
+  }
+
+  // Parameters
+  if (removedData.params && removedData.params.length > 0) {
+    const paramsDiv = document.createElement("div");
+    const paramsLabel = document.createElement("p");
+    paramsLabel.classList.add("text-sm", "text-slate-500", "mb-1");
+    paramsLabel.textContent = "Parameters:";
+    paramsDiv.appendChild(paramsLabel);
+
+    for (const param of removedData.params) {
+      const paramName = Object.keys(param)[0];
+      const paramData = param[paramName];
+      const paramText = document.createElement("p");
+      paramText.classList.add("font-mono", "ml-4");
+      paramText.textContent = paramData[0][0] + " " + paramName;
+      paramsDiv.appendChild(paramText);
+    }
+    funcDiv.appendChild(paramsDiv);
+  }
+
+  itemsOverviewDiv.appendChild(funcDiv);
+
+  if (document.getElementById("class-desc-name") !== null)
+    document.getElementById("class-desc-name").textContent = CName;
+
+  if (document.getElementById("class-list-name") != null) {
+    document.getElementById("class-list-name").textContent = "Functions";
+  }
+
   if (document.getElementById("selection-tabs") != null) {
     document.getElementById("selection-tabs").remove();
   }
@@ -1253,8 +1743,8 @@ function displayFunctions(CName, data) {
       }.bind(
         null,
         window.location.href.split("&member")[0] +
-          "&member=" +
-          funcName.replace(/ /g, "%20")
+        "&member=" +
+        funcName.replace(/ /g, "%20")
       )
     );
     var linkSVG = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -1702,6 +2192,330 @@ function showOffsets(credit, dataJSON) {
   }
 }
 
+// ==================== DIFF VIEW FUNCTIONALITY ====================
+// Global diff state
+var diffData = null;
+var showDiffHighlighting = localStorage.getItem("showDiffHighlighting") === "true";
+
+// Get diff status for an item (class, struct, function, enum name)
+function getDiffStatusForItem(itemName) {
+  if (!diffData || !showDiffHighlighting || !diffData.has_previous) return null;
+
+  const category = currentType === 'C' ? 'classes' :
+    currentType === 'S' ? 'structs' :
+      currentType === 'F' ? 'functions' :
+        currentType === 'E' ? 'enums' : null;
+
+  if (!category || !diffData[category]) return null;
+
+  if (diffData[category].added && diffData[category].added.includes(itemName)) return 'added';
+  // Handle both array format (old) and object format (new with member data)
+  if (diffData[category].removed) {
+    if (Array.isArray(diffData[category].removed) && diffData[category].removed.includes(itemName)) return 'removed';
+    if (typeof diffData[category].removed === 'object' && diffData[category].removed[itemName]) return 'removed';
+  }
+  if (diffData[category].modified && diffData[category].modified[itemName]) return 'modified';
+  return null;
+}
+
+// Get diff status for a member within a class/struct
+function getDiffStatusForMember(className, memberName) {
+  if (!diffData || !showDiffHighlighting || !diffData.has_previous) return null;
+
+  const category = currentType === 'C' ? 'classes' :
+    currentType === 'S' ? 'structs' : null;
+
+  if (!category || !diffData[category] || !diffData[category].modified) return null;
+
+  const modifiedInfo = diffData[category].modified[className];
+  if (!modifiedInfo) return null;
+
+  if (modifiedInfo.added_members && modifiedInfo.added_members.includes(memberName)) return 'added';
+  if (modifiedInfo.removed_members && modifiedInfo.removed_members.includes(memberName)) return 'removed';
+  return null;
+}
+
+// Get diff status for an enum member
+function getDiffStatusForEnumMember(enumName, memberName) {
+  if (!diffData || !showDiffHighlighting || !diffData.has_previous) return null;
+
+  if (!diffData.enums || !diffData.enums.modified) return null;
+
+  const modifiedInfo = diffData.enums.modified[enumName];
+  if (!modifiedInfo) return null;
+
+  if (modifiedInfo.added_members && modifiedInfo.added_members.includes(memberName)) return 'added';
+  if (modifiedInfo.removed_members && modifiedInfo.removed_members.includes(memberName)) return 'removed';
+  return null;
+}
+
+// Load diff data when game loads
+async function loadDiffData() {
+  const diffPathGz = gameDirectory + "DiffInfo.json.gz";
+  const diffPathJson = gameDirectory + "DiffInfo.json";
+
+  // Try compressed first
+  try {
+    const response = await fetch(diffPathGz);
+    if (response.ok) {
+      const compressed = await response.arrayBuffer();
+      const decompressed = pako.ungzip(new Uint8Array(compressed), { to: 'string' });
+      diffData = JSON.parse(decompressed);
+      console.log("Diff data loaded (compressed):", diffData.has_previous ? "has previous version" : "no previous version");
+      return;
+    }
+  } catch (e) {
+    console.log("Could not load compressed diff data:", e);
+  }
+
+  // Fallback to uncompressed
+  try {
+    const response = await fetch(diffPathJson);
+    if (response.ok) {
+      diffData = await response.json();
+      console.log("Diff data loaded (uncompressed):", diffData.has_previous ? "has previous version" : "no previous version");
+      return;
+    }
+  } catch (e) {
+    console.log("Could not load uncompressed diff data:", e);
+  }
+
+  diffData = null;
+}
+
+// Load and show the diff summary view (Diff tab)
+async function loadAndShowDiff() {
+  if (diffData === null) {
+    await loadDiffData();
+  }
+  showDiff();
+}
+
+// Show the diff summary view
+function showDiff() {
+  document.title = "Dumpspace - " + gameName;
+  document.getElementById("dumpspace-text").textContent = document.title;
+
+  const viewer = document.getElementById("full-viewer");
+  while (viewer.firstChild) {
+    viewer.removeChild(viewer.firstChild);
+  }
+  viewer.classList.remove(
+    "xl:grid",
+    "xl:grid-cols-4",
+    "xl:gap-4",
+    "xl:px-32",
+    "px-4",
+    "top-10"
+  );
+  viewer.classList.add("xl:px-64", "md:px-32", "px-8");
+
+  const fullDiffDiv = document.createElement("div");
+  fullDiffDiv.classList.add(
+    "border",
+    "py-4",
+    "my-16",
+    "px-4",
+    "rounded-lg",
+    "border-gray-200",
+    "dark:border-gray-600",
+    "text-slate-700",
+    "dark:text-slate-100"
+  );
+
+  // Check if diff data exists
+  if (!diffData || !diffData.has_previous) {
+    const noDiffP = document.createElement("p");
+    noDiffP.classList.add("text-lg", "text-center", "py-8");
+    noDiffP.textContent = "No previous version available for comparison.";
+    fullDiffDiv.appendChild(noDiffP);
+    viewer.appendChild(fullDiffDiv);
+    return;
+  }
+
+  // Header
+  const headerDiv = document.createElement("div");
+  headerDiv.classList.add("border-b", "border-gray-200", "dark:border-gray-600", "pb-4", "mb-4");
+  const headerTitle = document.createElement("h2");
+  headerTitle.classList.add("text-xl", "font-bold");
+  headerTitle.textContent = "Changes from Previous Version";
+  headerDiv.appendChild(headerTitle);
+
+  if (diffData.generated_at) {
+    const dateP = document.createElement("p");
+    dateP.classList.add("text-sm", "text-slate-500");
+    const date = new Date(diffData.generated_at);
+    dateP.textContent = "Generated: " + date.toLocaleDateString() + " " + date.toLocaleTimeString();
+    headerDiv.appendChild(dateP);
+  }
+  fullDiffDiv.appendChild(headerDiv);
+
+  // Sections: Classes, Structs, Functions, Enums
+  const sections = [
+    { key: 'classes', title: 'Classes', buttonId: 'ClassesButton' },
+    { key: 'structs', title: 'Structs', buttonId: 'StructsButton' },
+    { key: 'functions', title: 'Functions', buttonId: 'FunctionsButton' },
+    { key: 'enums', title: 'Enums', buttonId: 'EnumsButton' }
+  ];
+
+  for (const section of sections) {
+    const data = diffData[section.key];
+    if (!data) continue;
+
+    const addedCount = data.added ? data.added.length : 0;
+    const removedCount = data.removed ? data.removed.length : 0;
+    const modifiedCount = data.modified ? Object.keys(data.modified).length : 0;
+    const totalChanges = addedCount + removedCount + modifiedCount;
+
+    // Section header
+    const sectionDiv = document.createElement("div");
+    sectionDiv.classList.add("mb-6");
+
+    const sectionHeader = document.createElement("div");
+    sectionHeader.classList.add("flex", "items-center", "justify-between", "mb-2");
+
+    const sectionTitle = document.createElement("h3");
+    sectionTitle.classList.add("text-lg", "font-semibold");
+    sectionTitle.textContent = section.title;
+    sectionHeader.appendChild(sectionTitle);
+
+    const countBadge = document.createElement("span");
+    countBadge.classList.add("text-sm", "px-2", "py-1", "rounded", "bg-slate-200", "dark:bg-slate-700");
+    if (totalChanges === 0) {
+      countBadge.textContent = "No changes";
+    } else {
+      const parts = [];
+      if (addedCount > 0) parts.push("+" + addedCount);
+      if (removedCount > 0) parts.push("-" + removedCount);
+      if (modifiedCount > 0) parts.push("~" + modifiedCount);
+      countBadge.textContent = parts.join(" ");
+    }
+    sectionHeader.appendChild(countBadge);
+    sectionDiv.appendChild(sectionHeader);
+
+    // Items container
+    const itemsDiv = document.createElement("div");
+    itemsDiv.classList.add("ml-4");
+
+    // Added items
+    if (data.added) {
+      for (const item of data.added) {
+        const itemDiv = document.createElement("div");
+        itemDiv.classList.add("flex", "items-center", "py-1", "px-2", "diff-tab-added");
+        const plusSpan = document.createElement("span");
+        plusSpan.classList.add("text-green-600", "font-mono", "mr-2");
+        plusSpan.textContent = "+";
+        itemDiv.appendChild(plusSpan);
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = item;
+        itemDiv.appendChild(nameSpan);
+        itemsDiv.appendChild(itemDiv);
+      }
+    }
+
+    // Removed items
+    if (data.removed) {
+      // Handle both array format (old) and object format (new with member data)
+      let removedItems = [];
+      if (Array.isArray(data.removed)) {
+        removedItems = data.removed;
+      } else if (typeof data.removed === 'object') {
+        removedItems = Object.keys(data.removed);
+      }
+      for (const item of removedItems) {
+        const itemDiv = document.createElement("div");
+        itemDiv.classList.add("flex", "items-center", "py-1", "px-2", "diff-tab-removed");
+        const minusSpan = document.createElement("span");
+        minusSpan.classList.add("text-red-600", "font-mono", "mr-2");
+        minusSpan.textContent = "-";
+        itemDiv.appendChild(minusSpan);
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = item;
+        itemDiv.appendChild(nameSpan);
+        itemsDiv.appendChild(itemDiv);
+      }
+    }
+
+    // Modified items
+    if (data.modified) {
+      for (const [itemName, changes] of Object.entries(data.modified)) {
+        const itemDiv = document.createElement("div");
+        itemDiv.classList.add("py-1", "px-2", "diff-tab-modified");
+
+        const headerRow = document.createElement("div");
+        headerRow.classList.add("flex", "items-center");
+        const tildeSpan = document.createElement("span");
+        tildeSpan.classList.add("text-yellow-600", "font-mono", "mr-2");
+        tildeSpan.textContent = "~";
+        headerRow.appendChild(tildeSpan);
+        const nameSpan = document.createElement("span");
+        nameSpan.classList.add("font-semibold");
+        nameSpan.textContent = itemName;
+        headerRow.appendChild(nameSpan);
+        itemDiv.appendChild(headerRow);
+
+        // Member changes detail
+        const detailDiv = document.createElement("div");
+        detailDiv.classList.add("ml-6", "text-sm", "text-slate-600", "dark:text-slate-400");
+
+        if (changes.added_members && changes.added_members.length > 0) {
+          const addedP = document.createElement("p");
+          addedP.innerHTML = '<span class="text-green-600">+' + changes.added_members.length + ' members:</span> ' +
+            changes.added_members.slice(0, 5).join(", ") + (changes.added_members.length > 5 ? "..." : "");
+          detailDiv.appendChild(addedP);
+        }
+        if (changes.removed_members && changes.removed_members.length > 0) {
+          const removedP = document.createElement("p");
+          removedP.innerHTML = '<span class="text-red-600">-' + changes.removed_members.length + ' members:</span> ' +
+            changes.removed_members.slice(0, 5).join(", ") + (changes.removed_members.length > 5 ? "..." : "");
+          detailDiv.appendChild(removedP);
+        }
+        itemDiv.appendChild(detailDiv);
+        itemsDiv.appendChild(itemDiv);
+      }
+    }
+
+    if (totalChanges === 0) {
+      const noChangesP = document.createElement("p");
+      noChangesP.classList.add("text-slate-500", "italic");
+      noChangesP.textContent = "No changes";
+      itemsDiv.appendChild(noChangesP);
+    }
+
+    sectionDiv.appendChild(itemsDiv);
+    fullDiffDiv.appendChild(sectionDiv);
+  }
+
+  viewer.appendChild(fullDiffDiv);
+}
+
+// Initialize diff toggle
+const diffToggle = document.getElementById("showDiffToggle");
+if (diffToggle) {
+  diffToggle.checked = showDiffHighlighting;
+  diffToggle.addEventListener("change", function () {
+    showDiffHighlighting = this.checked;
+    localStorage.setItem("showDiffHighlighting", this.checked);
+    // Reset and refresh current view to apply/remove highlighting
+    if (focussedCName && currentType && currentType !== 'O') {
+      // Reset the VanillaRecyclerView so it recreates with new diff classes
+      formattedArrayDataValid = false;
+      formattedArrayData = [];
+      if (dVanillaRecyclerView) {
+        dVanillaRecyclerView.destroy();
+        dVanillaRecyclerView = null;
+      }
+      // Clear the class list div
+      while (classDiv.firstChild) {
+        classDiv.removeChild(classDiv.firstChild);
+      }
+      displayCurrentType(focussedCName);
+    }
+  });
+}
+
+// NOTE: Diff data is now loaded in displayCurrentGame() after gameDirectory is set
+
 if (
   Object.keys(UrlParams).length === 0 ||
   Object.keys(UrlParams)[0] !== "hash" ||
@@ -1721,9 +2535,9 @@ window.addEventListener("popstate", function () {
   var newParams = getUrlParams();
   console.log(
     "viewer changed from type " +
-      oldParams[Object.keys(oldParams)[1]] +
-      " -> " +
-      newParams[Object.keys(newParams)[1]]
+    oldParams[Object.keys(oldParams)[1]] +
+    " -> " +
+    newParams[Object.keys(newParams)[1]]
   );
   if (
     newParams == null ||
@@ -1731,9 +2545,9 @@ window.addEventListener("popstate", function () {
     Object.keys(newParams)[0] != "hash" ||
     Object.keys(newParams)[1] != "type" ||
     oldParams[Object.keys(oldParams)[0]] !==
-      newParams[Object.keys(newParams)[0]] ||
+    newParams[Object.keys(newParams)[0]] ||
     oldParams[Object.keys(oldParams)[1]] !==
-      newParams[Object.keys(newParams)[1]] ||
+    newParams[Object.keys(newParams)[1]] ||
     newParams[Object.keys(newParams)[2]] == null
   ) {
     location.reload();
@@ -1833,6 +2647,11 @@ document
   .addEventListener("mouseup", function (event) {
     getGameInfo("offsets", true, event.button === 1);
   });
+document
+  .getElementById("DiffButton")
+  .addEventListener("mouseup", function (event) {
+    loadAndShowDiff();
+  });
 
 document.body.onmousedown = function (e) {
   if (e.button === 1) return false;
@@ -1912,7 +2731,7 @@ async function getCommits() {
 
   const historyDiv = document.getElementById("uploadHistoryInnerDiv");
   const updateSpinner = document.getElementById("uploadHistory-spinner");
-  
+
   updateSpinner.classList.remove("hidden");
 
   historyDiv.classList.add("hidden");
