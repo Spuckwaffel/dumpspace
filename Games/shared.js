@@ -45,30 +45,17 @@ function formatElapsedTime(currentTime, givenTime, elem) {
   return elem;
 }
 
-async function decompressJSONByURL(URL, ignored) {
-  const readableStream = await fetch(URL).then((response) => response.body);
+async function decompressJSONByURL(url) {
+  const response = await fetch(url);
 
-  const decompressionStream = new DecompressionStream("gzip");
+  // 1. Pipe the body through the decompression stream
+  const decompressedStream = response.body.pipeThrough(
+    new DecompressionStream("gzip")
+  );
 
-  // Pipe the response stream through the decompression stream
-  const decompressedStream = readableStream.pipeThrough(decompressionStream);
-
-  // Create a text decoder to decode the decompressed data
-  const textDecoder = new TextDecoder();
-
-  // Read and decode the data as it becomes available
-  const reader = decompressedStream.getReader();
-  let decompressedText = "";
-
-  while (true) {
-    const { value, done } = await reader.read();
-    if (done) {
-      break;
-    }
-    decompressedText += textDecoder.decode(value);
-  }
-
-  return decompressedText;
+  // 2. Wrap the resulting stream in a new Response and call .text()
+  // This offloads the decoding and concatenation to the browser's internal C++ code
+  return new Response(decompressedStream).text();
 }
 
 function fetchAndConvertToBase64(url) {
@@ -89,6 +76,7 @@ function fetchAndConvertToBase64(url) {
 }
 
 async function decompressAndCheckCacheByURL(URL, updateTS) {
+  /*
   var cache = localStorage.getItem("cGame" + URL);
 
   if (cache) {
@@ -124,6 +112,7 @@ async function decompressAndCheckCacheByURL(URL, updateTS) {
       .replace(/^data:application\/octet-stream;base64,/, "")
   );
 
+  */
   return decompressJSONByURL(URL);
 }
 

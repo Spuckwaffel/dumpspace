@@ -105,9 +105,12 @@ async function reloadWithNewCName(CName, newType, member, newWindow = false) {
   else if (newType === "E") fileName = "EnumsInfo.json.gz";
   else return;
 
-  const response = await decompressAndCheckCacheByURL(gameDirectory + fileName, uploadTS);
+  const response = await decompressAndCheckCacheByURL(
+    gameDirectory + fileName,
+    uploadTS
+  );
   const json = JSON.parse(response);
-  const exists = json.data.some(obj => Object.keys(obj)[0] === CName);
+  const exists = json.data.some((obj) => Object.keys(obj)[0] === CName);
 
   if (!exists) {
     showToast("Could not find " + CName + "!");
@@ -223,7 +226,12 @@ async function displayCurrentGame() {
   uploadTS = gameInfoJson.uploaded;
 
   //directory is always engine path + location
-  gameDirectory = gameInfoJson.engine + "/" + gameInfoJson.location + "/";
+  gameDirectory =
+    "https://raw.githubusercontent.com/Spuckwaffel/dumpspace/refs/heads/main/Games/" +
+    gameInfoJson.engine +
+    "/" +
+    gameInfoJson.location +
+    "/";
 
   console.log(
     "[displayCurrentGame] Crunching latest data for: " +
@@ -1912,7 +1920,7 @@ async function getCommits() {
 
   const historyDiv = document.getElementById("uploadHistoryInnerDiv");
   const updateSpinner = document.getElementById("uploadHistory-spinner");
-  
+
   updateSpinner.classList.remove("hidden");
 
   historyDiv.classList.add("hidden");
