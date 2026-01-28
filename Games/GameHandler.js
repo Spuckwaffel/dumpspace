@@ -194,6 +194,7 @@ var currentType = null;
 var gameName = "";
 
 var gameDirectory = "";
+var rawDirectory = "";
 
 var fileVersion = 0;
 
@@ -234,6 +235,8 @@ async function displayCurrentGame() {
     "/" +
     gameInfoJson.location +
     "/";
+
+  rawDirectory = gameInfoJson.engine + "/" + gameInfoJson.location + "/";
 
   console.log(
     "[displayCurrentGame] Crunching latest data for: " +
@@ -1917,7 +1920,7 @@ mermaid.initialize({
 async function getCommits() {
   const owner = "Spuckwaffel";
   const repo = "dumpspace";
-  const filePath = `Games/${gameDirectory}`;
+  const filePath = `Games/${rawDirectory}`;
   const perPage = 100;
 
   const historyDiv = document.getElementById("uploadHistoryInnerDiv");
