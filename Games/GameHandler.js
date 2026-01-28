@@ -178,7 +178,9 @@ var GameListJson = null;
 //gets the current game json info by the given hash
 async function getGameInfoJsonByHash(hash) {
   if (GameListJson === null) {
-    const response = await fetch("GameList.json");
+    const response = await fetch(
+      "https://raw.githubusercontent.com/Spuckwaffel/dumpspace/refs/heads/main/Games/GameList.json"
+    );
     GameListJson = await response.json();
   }
   return GameListJson.games.find((game) => game.hash == hash);
