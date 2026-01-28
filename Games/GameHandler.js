@@ -292,31 +292,31 @@ async function displayCurrentGame() {
     //get the data for the current type and check cache persistance
     if (UrlParams["type"] === "classes") {
       const response = await decompressJSONByURL(
-        `https://raw.githubusercontent.com/Spuckwaffel/dumpspace/${sha}/Games/${gameDirectory}ClassesInfo.json.gz`
+        `https://raw.githubusercontent.com/Spuckwaffel/dumpspace/${sha}/Games/${rawDirectory}ClassesInfo.json.gz`
       );
       currentInfoJson = JSON.parse(response);
       currentType = "C";
     } else if (UrlParams["type"] === "structs") {
       const response = await decompressJSONByURL(
-        `https://raw.githubusercontent.com/Spuckwaffel/dumpspace/${sha}/Games/${gameDirectory}StructsInfo.json.gz`
+        `https://raw.githubusercontent.com/Spuckwaffel/dumpspace/${sha}/Games/${rawDirectory}StructsInfo.json.gz`
       );
       currentInfoJson = JSON.parse(response);
       currentType = "S";
     } else if (UrlParams["type"] === "functions") {
       const response = await decompressJSONByURL(
-        `https://raw.githubusercontent.com/Spuckwaffel/dumpspace/${sha}/Games/${gameDirectory}FunctionsInfo.json.gz`
+        `https://raw.githubusercontent.com/Spuckwaffel/dumpspace/${sha}/Games/${rawDirectory}FunctionsInfo.json.gz`
       );
       currentInfoJson = JSON.parse(response);
       currentType = "F";
     } else if (UrlParams["type"] === "enums") {
       const response = await decompressJSONByURL(
-        `https://raw.githubusercontent.com/Spuckwaffel/dumpspace/${sha}/Games/${gameDirectory}EnumsInfo.json.gz`
+        `https://raw.githubusercontent.com/Spuckwaffel/dumpspace/${sha}/Games/${rawDirectory}EnumsInfo.json.gz`
       );
       currentInfoJson = JSON.parse(response);
       currentType = "E";
     } else if (UrlParams["type"] === "offsets") {
       const response = await decompressJSONByURL(
-        `https://raw.githubusercontent.com/Spuckwaffel/dumpspace/${sha}/Games/${gameDirectory}OffsetsInfo.json.gz`
+        `https://raw.githubusercontent.com/Spuckwaffel/dumpspace/${sha}/Games/${rawDirectory}OffsetsInfo.json.gz`
       );
       currentInfoJson = JSON.parse(response);
       currentType = "O";
