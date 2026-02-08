@@ -1,5 +1,11 @@
 {
   "updated_at": "1762111779488",
   "version": 10202,
-  "data": []
+  "data": [
+    ["OFFSET_GOBJECTS", 393879192],
+    ["OFFSET_GWORLD", 394312312],
+    ["OFFSET_PROCESSEVENT", 164842],
+    ["INDEX_PROCESSEVENT", 592],
+    ["UWORLD_DECRYPT", "v9 = ~__ROL8__(qword_1780BA78 ^ 0x913F0DAFLL, 51);"]
+  ]
 }
