@@ -57,7 +57,7 @@ function getGameInfo(info, reload = true, newWindow = false, push = true) {
       history.pushState(null, null, newURL);
     } else {
       console.log(
-        "[getGameInfo] replacing state " + currentURL + " with " + newURL
+        "[getGameInfo] replacing state " + currentURL + " with " + newURL,
       );
       history.replaceState(null, null, newURL);
     }
@@ -107,7 +107,7 @@ async function reloadWithNewCName(CName, newType, member, newWindow = false) {
 
   const response = await decompressAndCheckCacheByURL(
     gameDirectory + fileName,
-    uploadTS
+    uploadTS,
   );
   const json = JSON.parse(response);
   const exists = json.data.some((obj) => Object.keys(obj)[0] === CName);
@@ -179,7 +179,7 @@ var GameListJson = null;
 async function getGameInfoJsonByHash(hash) {
   if (GameListJson === null) {
     const response = await fetch(
-      "https://raw.githubusercontent.com/Spuckwaffel/dumpspace/refs/heads/main/Games/GameList.json"
+      "https://raw.githubusercontent.com/Spuckwaffel/dumpspace/refs/heads/main/Games/GameList.json",
     );
     GameListJson = await response.json();
   }
@@ -242,7 +242,7 @@ async function displayCurrentGame() {
     "[displayCurrentGame] Crunching latest data for: " +
       gameDirectory +
       " - " +
-      UrlParams["type"]
+      UrlParams["type"],
   );
 
   const sha = UrlParams["sha"];
@@ -254,35 +254,35 @@ async function displayCurrentGame() {
     if (UrlParams["type"] === "classes") {
       const response = await decompressAndCheckCacheByURL(
         gameDirectory + "ClassesInfo.json.gz",
-        uploadTS
+        uploadTS,
       );
       currentInfoJson = JSON.parse(response);
       currentType = "C";
     } else if (UrlParams["type"] === "structs") {
       const response = await decompressAndCheckCacheByURL(
         gameDirectory + "StructsInfo.json.gz",
-        uploadTS
+        uploadTS,
       );
       currentInfoJson = JSON.parse(response);
       currentType = "S";
     } else if (UrlParams["type"] === "functions") {
       const response = await decompressAndCheckCacheByURL(
         gameDirectory + "FunctionsInfo.json.gz",
-        uploadTS
+        uploadTS,
       );
       currentInfoJson = JSON.parse(response);
       currentType = "F";
     } else if (UrlParams["type"] === "enums") {
       const response = await decompressAndCheckCacheByURL(
         gameDirectory + "EnumsInfo.json.gz",
-        uploadTS
+        uploadTS,
       );
       currentInfoJson = JSON.parse(response);
       currentType = "E";
     } else if (UrlParams["type"] === "offsets") {
       const response = await decompressAndCheckCacheByURL(
         gameDirectory + "OffsetsInfo.json.gz",
-        uploadTS
+        uploadTS,
       );
       currentInfoJson = JSON.parse(response);
       currentType = "O";
@@ -292,31 +292,31 @@ async function displayCurrentGame() {
     //get the data for the current type and check cache persistance
     if (UrlParams["type"] === "classes") {
       const response = await decompressJSONByURL(
-        `https://raw.githubusercontent.com/Spuckwaffel/dumpspace/${sha}/Games/${rawDirectory}ClassesInfo.json.gz`
+        `https://raw.githubusercontent.com/Spuckwaffel/dumpspace/${sha}/Games/${rawDirectory}ClassesInfo.json.gz`,
       );
       currentInfoJson = JSON.parse(response);
       currentType = "C";
     } else if (UrlParams["type"] === "structs") {
       const response = await decompressJSONByURL(
-        `https://raw.githubusercontent.com/Spuckwaffel/dumpspace/${sha}/Games/${rawDirectory}StructsInfo.json.gz`
+        `https://raw.githubusercontent.com/Spuckwaffel/dumpspace/${sha}/Games/${rawDirectory}StructsInfo.json.gz`,
       );
       currentInfoJson = JSON.parse(response);
       currentType = "S";
     } else if (UrlParams["type"] === "functions") {
       const response = await decompressJSONByURL(
-        `https://raw.githubusercontent.com/Spuckwaffel/dumpspace/${sha}/Games/${rawDirectory}FunctionsInfo.json.gz`
+        `https://raw.githubusercontent.com/Spuckwaffel/dumpspace/${sha}/Games/${rawDirectory}FunctionsInfo.json.gz`,
       );
       currentInfoJson = JSON.parse(response);
       currentType = "F";
     } else if (UrlParams["type"] === "enums") {
       const response = await decompressJSONByURL(
-        `https://raw.githubusercontent.com/Spuckwaffel/dumpspace/${sha}/Games/${rawDirectory}EnumsInfo.json.gz`
+        `https://raw.githubusercontent.com/Spuckwaffel/dumpspace/${sha}/Games/${rawDirectory}EnumsInfo.json.gz`,
       );
       currentInfoJson = JSON.parse(response);
       currentType = "E";
     } else if (UrlParams["type"] === "offsets") {
       const response = await decompressJSONByURL(
-        `https://raw.githubusercontent.com/Spuckwaffel/dumpspace/${sha}/Games/${rawDirectory}OffsetsInfo.json.gz`
+        `https://raw.githubusercontent.com/Spuckwaffel/dumpspace/${sha}/Games/${rawDirectory}OffsetsInfo.json.gz`,
       );
       currentInfoJson = JSON.parse(response);
       currentType = "O";
@@ -359,7 +359,7 @@ async function displayCurrentGame() {
   } else returnHome();
 
   console.log(
-    "[displayCurrentGame] Chose name " + targetClassName + " for displaying..."
+    "[displayCurrentGame] Chose name " + targetClassName + " for displaying...",
   );
 
   var member = null;
@@ -487,7 +487,7 @@ function displayCurrentType(CName, member) {
           oldURL +
           " with " +
           currentURL +
-          " in history"
+          " in history",
       );
       history.replaceState(null, "", currentURL);
     }
@@ -517,7 +517,7 @@ function displayCurrentType(CName, member) {
             "duration-200",
             "ease-in-out",
             "hover:text-blue-500",
-            "truncate"
+            "truncate",
           );
           if (targetClassName != null && params.data === targetClassName) {
             this.layout.classList.add("bg-gray-600/10");
@@ -575,7 +575,7 @@ function displayCurrentType(CName, member) {
 
 //save them, used by displayOverviewPage to restore the sticky bar
 const emtpyOverViewDivChildren = Array.from(
-  document.getElementById("overview-items").children
+  document.getElementById("overview-items").children,
 );
 
 function displayOverviewPage(members) {
@@ -609,7 +609,7 @@ function displayOverviewPage(members) {
       "pb-2",
       "border-b",
       "border-gray-200",
-      "dark:border-gray-600"
+      "dark:border-gray-600",
     );
 
     const memberTypeDiv = document.createElement("div");
@@ -632,7 +632,7 @@ function displayOverviewPage(members) {
                 reloadWithNewCName(cname, memberType);
               } else displayCurrentType(cname);
             }
-          }.bind(null, currentType, typeArr[1], typeArr[0])
+          }.bind(null, currentType, typeArr[1], typeArr[0]),
         );
       } else memberTypeButton.classList.add("cursor-default");
       memberTypeDiv.appendChild(memberTypeButton);
@@ -676,7 +676,7 @@ function displayOverviewPage(members) {
           if (currentType != memberType) {
             reloadWithNewCName(memberNameButton.textContent, memberType);
           } else displayCurrentType(memberNameButton.textContent);
-        }.bind(null, currentType, memberType)
+        }.bind(null, currentType, memberType),
       );
     } else memberNameButton.classList.add("cursor-default");
 
@@ -716,7 +716,7 @@ function displayOverviewPage(members) {
       "dark:text-gray-400",
       "hover:text-blue-500",
       "dark:hover:text-blue-500",
-      "hidden"
+      "hidden",
     );
 
     function updateMemberParam(memberName) {
@@ -739,7 +739,7 @@ function displayOverviewPage(members) {
       function (bakedString) {
         navigator.clipboard.writeText(bakedString);
         showToast("Copied link to clipboard!", false);
-      }.bind(null, updateMemberParam(memberName))
+      }.bind(null, updateMemberParam(memberName)),
     );
     var linkSVG = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     linkSVG.setAttribute("width", "20");
@@ -751,7 +751,7 @@ function displayOverviewPage(members) {
     var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
     path.setAttribute(
       "d",
-      "M14 7H16C18.7614 7 21 9.23858 21 12C21 14.7614 18.7614 17 16 17H14M10 7H8C5.23858 7 3 9.23858 3 12C3 14.7614 5.23858 17 8 17H10M8 12H16"
+      "M14 7H16C18.7614 7 21 9.23858 21 12C21 14.7614 18.7614 17 16 17H14M10 7H8C5.23858 7 3 9.23858 3 12C3 14.7614 5.23858 17 8 17H10M8 12H16",
     );
     path.setAttribute("stroke", "currentColor");
     path.setAttribute("stroke-width", "2");
@@ -799,14 +799,14 @@ function displayOverviewPage(members) {
       "mouseover",
       function (button) {
         memberLinkButton.classList.remove("hidden");
-      }.bind(null, memberLinkButton)
+      }.bind(null, memberLinkButton),
     );
 
     overviewMemberDiv.addEventListener(
       "mouseout",
       function (button) {
         memberLinkButton.classList.add("hidden");
-      }.bind(null, memberLinkButton)
+      }.bind(null, memberLinkButton),
     );
 
     itemsOverviewDiv.appendChild(overviewMemberDiv);
@@ -995,13 +995,13 @@ function displayMembers(CName, data) {
           "click",
           function (superClass) {
             displayCurrentType(superClass);
-          }.bind(null, superClass)
+          }.bind(null, superClass),
         );
         superButton.classList.add(
           "transition",
           "duration-200",
           "ease-in-out",
-          "hover:text-blue-500"
+          "hover:text-blue-500",
         );
         superButton.textContent = superClass;
 
@@ -1052,7 +1052,7 @@ function displayEnums(CName, data) {
     "py-2",
     "px-4",
     "text-slate-700",
-    "dark:text-slate-100"
+    "dark:text-slate-100",
   );
 
   const enumDiv = document.createElement("div");
@@ -1067,7 +1067,7 @@ function displayEnums(CName, data) {
     "text-ellipsis",
     "overflow-hidden",
     "truncate",
-    "sm:max-w-prose"
+    "sm:max-w-prose",
   );
 
   const enumTypeP = document.createElement("p");
@@ -1091,12 +1091,12 @@ function displayEnums(CName, data) {
     "py-2",
     "px-4",
     "rounded-md",
-    "text-white"
+    "text-white",
   );
 
   const svgCopyButton = document.createElementNS(
     "http://www.w3.org/2000/svg",
-    "svg"
+    "svg",
   );
   svgCopyButton.setAttribute("width", "20");
   svgCopyButton.setAttribute("height", "20");
@@ -1106,11 +1106,11 @@ function displayEnums(CName, data) {
 
   const pathCopyButton = document.createElementNS(
     "http://www.w3.org/2000/svg",
-    "path"
+    "path",
   );
   pathCopyButton.setAttribute(
     "d",
-    "M17.5 14H19C20.1046 14 21 13.1046 21 12V5C21 3.89543 20.1046 3 19 3H12C10.8954 3 10 3.89543 10 5V6.5M5 10H12C13.1046 10 14 10.8954 14 12V19C14 20.1046 13.1046 21 12 21H5C3.89543 21 3 20.1046 3 19V12C3 10.8954 3.89543 10 5 10Z"
+    "M17.5 14H19C20.1046 14 21 13.1046 21 12V5C21 3.89543 20.1046 3 19 3H12C10.8954 3 10 3.89543 10 5V6.5M5 10H12C13.1046 10 14 10.8954 14 12V19C14 20.1046 13.1046 21 12 21H5C3.89543 21 3 20.1046 3 19V12C3 10.8954 3.89543 10 5 10Z",
   );
   pathCopyButton.setAttribute("stroke-width", "1.5");
   pathCopyButton.setAttribute("stroke-linecap", "round");
@@ -1131,7 +1131,7 @@ function displayEnums(CName, data) {
     function (bakedString) {
       navigator.clipboard.writeText(bakedString);
       showToast("Copied enum to clipboard!", false);
-    }.bind(null, bakedString)
+    }.bind(null, bakedString),
   );
 
   enumDiv.appendChild(enumHeaderDiv);
@@ -1148,7 +1148,7 @@ function displayEnums(CName, data) {
       "col-span-7",
       "sm:col-span-6",
       "text-left",
-      "truncate"
+      "truncate",
     );
     enuItemNameP.textContent = Object.keys(_enu);
     enumFooterDiv.appendChild(enuItemNameP);
@@ -1214,7 +1214,7 @@ function displayFunctions(CName, data) {
       "py-2",
       "px-4",
       "text-slate-700",
-      "dark:text-slate-100"
+      "dark:text-slate-100",
     );
 
     const offsetDiv = document.createElement("div");
@@ -1227,7 +1227,7 @@ function displayFunctions(CName, data) {
       "transition",
       "duration-200",
       "ease-in-out",
-      "hover:text-blue-500"
+      "hover:text-blue-500",
     );
     offsetButton.textContent = "0x" + func[funcName][2].toString(16);
     offsetButton.addEventListener(
@@ -1235,14 +1235,14 @@ function displayFunctions(CName, data) {
       function (textContent) {
         navigator.clipboard.writeText(textContent);
         showToast("Copied offset to clipboard!", false);
-      }.bind(null, offsetButton.textContent)
+      }.bind(null, offsetButton.textContent),
     );
     const functionFlags = document.createElement("p");
     functionFlags.classList.add(
       "text-slate-600",
       "dark:text-slate-400",
       "pl-4",
-      "truncate"
+      "truncate",
     );
     functionFlags.textContent = func[funcName][3];
 
@@ -1256,7 +1256,7 @@ function displayFunctions(CName, data) {
       "dark:text-gray-400",
       "hover:text-blue-500",
       "dark:hover:text-blue-500",
-      "hidden"
+      "hidden",
     );
     functionLinkButton.addEventListener(
       "click",
@@ -1267,8 +1267,8 @@ function displayFunctions(CName, data) {
         null,
         window.location.href.split("&member")[0] +
           "&member=" +
-          funcName.replace(/ /g, "%20")
-      )
+          funcName.replace(/ /g, "%20"),
+      ),
     );
     var linkSVG = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     linkSVG.setAttribute("width", "20");
@@ -1280,7 +1280,7 @@ function displayFunctions(CName, data) {
     var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
     path.setAttribute(
       "d",
-      "M14 7H16C18.7614 7 21 9.23858 21 12C21 14.7614 18.7614 17 16 17H14M10 7H8C5.23858 7 3 9.23858 3 12C3 14.7614 5.23858 17 8 17H10M8 12H16"
+      "M14 7H16C18.7614 7 21 9.23858 21 12C21 14.7614 18.7614 17 16 17H14M10 7H8C5.23858 7 3 9.23858 3 12C3 14.7614 5.23858 17 8 17H10M8 12H16",
     );
     path.setAttribute("stroke", "currentColor");
     path.setAttribute("stroke-width", "2");
@@ -1299,14 +1299,14 @@ function displayFunctions(CName, data) {
       "mouseover",
       function (button) {
         button.classList.remove("hidden");
-      }.bind(null, functionLinkButton)
+      }.bind(null, functionLinkButton),
     );
 
     coreDiv.addEventListener(
       "mouseout",
       function (button) {
         button.classList.add("hidden");
-      }.bind(null, functionLinkButton)
+      }.bind(null, functionLinkButton),
     );
 
     const functionDiv = document.createElement("div");
@@ -1314,7 +1314,7 @@ function displayFunctions(CName, data) {
       "flex",
       "items-center",
       "justify-between",
-      "mr-4"
+      "mr-4",
     );
     const functionHeaderDiv = document.createElement("div");
     functionHeaderDiv.classList.add("flex", "truncate");
@@ -1331,7 +1331,7 @@ function displayFunctions(CName, data) {
             if (currentType != memberType) {
               reloadWithNewCName(cname, memberType);
             } else displayCurrentType(cname);
-          }.bind(null, currentType, typeArr[1], typeArr[0])
+          }.bind(null, currentType, typeArr[1], typeArr[0]),
         );
       } else memberTypeButton.classList.add("cursor-default");
       div.appendChild(memberTypeButton);
@@ -1381,12 +1381,12 @@ function displayFunctions(CName, data) {
       "py-2",
       "px-4",
       "rounded-md",
-      "text-white"
+      "text-white",
     );
 
     const svgCopyButton = document.createElementNS(
       "http://www.w3.org/2000/svg",
-      "svg"
+      "svg",
     );
     svgCopyButton.setAttribute("width", "20");
     svgCopyButton.setAttribute("height", "20");
@@ -1396,11 +1396,11 @@ function displayFunctions(CName, data) {
 
     const pathCopyButton = document.createElementNS(
       "http://www.w3.org/2000/svg",
-      "path"
+      "path",
     );
     pathCopyButton.setAttribute(
       "d",
-      "M17.5 14H19C20.1046 14 21 13.1046 21 12V5C21 3.89543 20.1046 3 19 3H12C10.8954 3 10 3.89543 10 5V6.5M5 10H12C13.1046 10 14 10.8954 14 12V19C14 20.1046 13.1046 21 12 21H5C3.89543 21 3 20.1046 3 19V12C3 10.8954 3.89543 10 5 10Z"
+      "M17.5 14H19C20.1046 14 21 13.1046 21 12V5C21 3.89543 20.1046 3 19 3H12C10.8954 3 10 3.89543 10 5V6.5M5 10H12C13.1046 10 14 10.8954 14 12V19C14 20.1046 13.1046 21 12 21H5C3.89543 21 3 20.1046 3 19V12C3 10.8954 3.89543 10 5 10Z",
     );
     pathCopyButton.setAttribute("stroke-width", "1.5");
     pathCopyButton.setAttribute("stroke-linecap", "round");
@@ -1442,7 +1442,7 @@ function displayFunctions(CName, data) {
       function (bakedString) {
         navigator.clipboard.writeText(bakedString);
         showToast("Copied function to clipboard!", false);
-      }.bind(null, bakedString)
+      }.bind(null, bakedString),
     );
 
     functionDiv.appendChild(functionCopyButton);
@@ -1594,7 +1594,7 @@ function showOffsets(credit, dataJSON) {
     "xl:gap-4",
     "xl:px-32",
     "px-4",
-    "top-10"
+    "top-10",
   );
   viewer.classList.add("xl:px-64", "md:px-32", "px-8");
   const fullOffsetDiv = document.createElement("div");
@@ -1607,7 +1607,7 @@ function showOffsets(credit, dataJSON) {
     "border-gray-200",
     "dark:border-gray-600",
     "text-slate-700",
-    "dark:text-slate-100"
+    "dark:text-slate-100",
   );
   for (const offset of dataJSON) {
     const offsetDiv = document.createElement("div");
@@ -1617,7 +1617,7 @@ function showOffsets(credit, dataJSON) {
       "dark:border-gray-600",
       "flex",
       "justify-between",
-      "py-3"
+      "py-3",
     );
     const offsetNameP = document.createElement("p");
     offsetNameP.classList.add("self-center", "font-semibold");
@@ -1625,7 +1625,11 @@ function showOffsets(credit, dataJSON) {
 
     const offsetNumP = document.createElement("p");
     offsetNumP.classList.add("self-center", "pr-4");
-    offsetNumP.textContent = "0x" + offset[1].toString(16);
+    if (typeof offset[1] === "number" && !Number.isNaN(offset[1])) {
+      offsetNumP.textContent = "0x" + offset[1].toString(16);
+    } else {
+      offsetNumP.textContent = offset[1];
+    }
 
     const rightSideDiv = document.createElement("div");
     rightSideDiv.classList.add("flex");
@@ -1639,12 +1643,12 @@ function showOffsets(credit, dataJSON) {
       "py-2",
       "px-4",
       "rounded-md",
-      "text-white"
+      "text-white",
     );
 
     const svgCopyButton = document.createElementNS(
       "http://www.w3.org/2000/svg",
-      "svg"
+      "svg",
     );
     svgCopyButton.setAttribute("width", "20");
     svgCopyButton.setAttribute("height", "20");
@@ -1654,11 +1658,11 @@ function showOffsets(credit, dataJSON) {
 
     const pathCopyButton = document.createElementNS(
       "http://www.w3.org/2000/svg",
-      "path"
+      "path",
     );
     pathCopyButton.setAttribute(
       "d",
-      "M17.5 14H19C20.1046 14 21 13.1046 21 12V5C21 3.89543 20.1046 3 19 3H12C10.8954 3 10 3.89543 10 5V6.5M5 10H12C13.1046 10 14 10.8954 14 12V19C14 20.1046 13.1046 21 12 21H5C3.89543 21 3 20.1046 3 19V12C3 10.8954 3.89543 10 5 10Z"
+      "M17.5 14H19C20.1046 14 21 13.1046 21 12V5C21 3.89543 20.1046 3 19 3H12C10.8954 3 10 3.89543 10 5V6.5M5 10H12C13.1046 10 14 10.8954 14 12V19C14 20.1046 13.1046 21 12 21H5C3.89543 21 3 20.1046 3 19V12C3 10.8954 3.89543 10 5 10Z",
     );
     pathCopyButton.setAttribute("stroke-width", "1.5");
     pathCopyButton.setAttribute("stroke-linecap", "round");
@@ -1671,8 +1675,9 @@ function showOffsets(credit, dataJSON) {
       "constexpr auto " +
       offset[0] +
       " = " +
-      "0x" +
-      offset[1].toString(16) +
+      (typeof offset[1] === "number" && !Number.isNaN(offset[1])
+        ? "0x" + offset[1].toString(16)
+        : offset[1]) +
       ";";
 
     offsetCopyButton.addEventListener(
@@ -1680,7 +1685,7 @@ function showOffsets(credit, dataJSON) {
       function (bakedString) {
         navigator.clipboard.writeText(bakedString);
         showToast("Copied offset to clipboard!", false);
-      }.bind(null, bakedString)
+      }.bind(null, bakedString),
     );
 
     offsetDiv.appendChild(offsetNameP);
@@ -1705,7 +1710,7 @@ function showOffsets(credit, dataJSON) {
       "transition",
       "duration-200",
       "ease-in-out",
-      "hover:text-blue-500"
+      "hover:text-blue-500",
     );
     const creditA = document.createElement("a");
     creditA.textContent = "Created By " + credit.dumper_used;
@@ -1736,7 +1741,7 @@ window.addEventListener("popstate", function () {
     "viewer changed from type " +
       oldParams[Object.keys(oldParams)[1]] +
       " -> " +
-      newParams[Object.keys(newParams)[1]]
+      newParams[Object.keys(newParams)[1]],
   );
   if (
     newParams == null ||
@@ -1875,10 +1880,10 @@ function handleInheritanceView() {
   innerIdleDiv.classList.remove("hidden");
 
   const selectedRadio = document.querySelector(
-    'input[name="inherit-depth-radio"]:checked'
+    'input[name="inherit-depth-radio"]:checked',
   );
   const selectedValue = Number(
-    document.querySelector(`label[for="${selectedRadio.id}"]`).textContent || 0
+    document.querySelector(`label[for="${selectedRadio.id}"]`).textContent || 0,
   );
   console.log(`select: ${selectedValue}`);
 
@@ -1948,7 +1953,7 @@ async function getCommits() {
 
   while (hasMoreCommits) {
     const url = `https://api.github.com/repos/${owner}/${repo}/commits?path=${encodeURIComponent(
-      filePath
+      filePath,
     )}&per_page=${perPage}&sha=${nextSha}`;
 
     const response = await fetch(url);
@@ -1996,7 +2001,7 @@ async function getCommits() {
       formatElapsedTime(
         Date.now(),
         new Date(commit.commit.author.date),
-        timeAgoP
+        timeAgoP,
       );
       innerDiv.appendChild(timeAgoP);
 
