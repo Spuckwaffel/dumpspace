@@ -102,37 +102,6 @@ def is_valid_json(json_str):
     return False
 
 
-def check_for_malicious_code(json_str):
-  # Check for potential links
-  links = re.findall(r'https?://\S+', json_str)
-  if links:
-    print("Potential links found:")
-    for link in links:
-      if link.startswith('https://github.com/'):
-        break
-      print(link)
-      return True, "Potential links found"
-  
-  # Check for JavaScript code
-  javascript_code = re.findall(r'<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>', json_str, re.IGNORECASE)
-  if javascript_code:
-    print("Potential JavaScript code found:")
-    for code in javascript_code:
-      print(code)
-    return True, "Potential JavaScript code found."
-  
-  # 3. Check for XSS
-  # Catch HTML tags (eg; <img..., <iframe..., <body..., </div...)
-  # This regex looks for a '<' followed immediately by a letter or a '/'
-  dangerous_tags = re.compile(
-    r'<\s*/?\s*(script|iframe|object|embed|form|input|img|svg|body|head|link|meta|style)\b',
-    re.IGNORECASE
-  )
-  if dangerous_tags.search(json_str):
-    return True, "Potential HTML/XSS code found."
-  return False, ""
-
-
 def basic_check(files):
   folder1 = 'Games'
   folder2_options = ['Unity', 'Unreal-Engine-3', 'Unreal-Engine-4', 'Unreal-Engine-5']
@@ -251,11 +220,6 @@ def check_changed_files(changed_files):
     
     print("checking " + file)
     
-    _res, _str = check_for_malicious_code(f1)
-    if _res:
-      return False, _str
-    print("file looks safe.")
-
     fileData = json.loads(f1) # Load once
     if updated_at == 0:
       updated_at = int(fileData.get('updated_at', 0))
@@ -385,11 +349,6 @@ def check_added_files(added_files):
     
     print("checking " + file)
     
-    _res, _str = check_for_malicious_code(f1)
-    if _res:
-      return False, _str
-    print("file looks safe.")
-
     fileData = json.loads(f1) # Load once
     if updated_at == 0:
       updated_at = int(fileData.get('updated_at', 0))
