@@ -9,7 +9,8 @@ const allGamesOpener = document.getElementById("allGamesOpener");
 const allGamesDiv = document.getElementById("allGamesDiv");
 const sortButton = document.getElementById("sortButton");
 
-const currentPath = "Games/";
+const currentPath =
+  "https://raw.githubusercontent.com/Spuckwaffel/dumpspace/refs/heads/main/Games/";
 
 var gameArray = [];
 
@@ -152,7 +153,7 @@ async function createCardsX(type) {
     gameArray.push(game);
 
     const dataPath = currentPath + game.engine + "/" + game.location;
-    box.href = currentPath + "?hash=" + game.hash;
+    box.href = "Games/" + "?hash=" + game.hash;
     const img = document.createElement("img");
     img.classList.add("md:h-48", "w-full", "sm:h-40", "xl:h-60");
     img.src = dataPath + "/image.jpg";
@@ -248,7 +249,7 @@ function createAndPushGameToList(game) {
     "grid",
     "grid-cols-5"
   );
-  gameListA.href = currentPath + "?hash=" + game.hash;
+  gameListA.href = "Games/" + "?hash=" + game.hash;
 
   const gameListTitle = document.createElement("p");
   gameListTitle.classList.add("pr-2", "text-lg", "font-semibold", "col-span-2");

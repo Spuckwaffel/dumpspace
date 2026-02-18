@@ -120,6 +120,16 @@ def check_for_malicious_code(json_str):
     for code in javascript_code:
       print(code)
     return True, "Potential JavaScript code found."
+  
+  # 3. Check for XSS
+  # Catch HTML tags (eg; <img..., <iframe..., <body..., </div...)
+  # This regex looks for a '<' followed immediately by a letter or a '/'
+  dangerous_tags = re.compile(
+    r'<\s*/?\s*(script|iframe|object|embed|form|input|img|svg|body|head|link|meta|style)\b',
+    re.IGNORECASE
+  )
+  if dangerous_tags.search(json_str):
+    return True, "Potential HTML/XSS code found."
   return False, ""
 
 
@@ -193,10 +203,12 @@ def commit_all_changes_at_once(commit_message, text_files, binary_files):
 
 
 def check_changed_files(changed_files):
-  folder3_options = ['ClassesInfo.json', 'EnumsInfo.json', 'FunctionsInfo.json', 'OffsetsInfo.json', 'StructsInfo.json']
+  required_files = ['ClassesInfo.json', 'EnumsInfo.json', 'OffsetsInfo.json', 'StructsInfo.json']
+  optional_files = ['FunctionsInfo.json']
+  all_allowed_files = required_files + optional_files
 
-  if len(changed_files) != len(folder3_options):
-    st = "The amount of changed files must be 5 per commit and must have exactly these names: " + ', '.join(folder3_options) + "."
+  if len(changed_files) < len(required_files) or len(changed_files) > len(all_allowed_files):
+    st = "The amount of changed files must be 4 or 5 per commit. Required: " + ', '.join(required_files) + ". Optional: " + ', '.join(optional_files) + "."
     print(st)
     return False, st
 
@@ -218,8 +230,14 @@ def check_changed_files(changed_files):
   
   files_no_path = [os.path.basename(file) for file in changed_files]
 
-  if set(files_no_path) != set(folder3_options):
-    st = "The files changed must have exactly these names:" + ', '.join(folder3_options) + "."
+  # All required files must be present, and any extra files must be from the optional list
+  if not set(required_files).issubset(set(files_no_path)):
+    st = "Missing required files. Required: " + ', '.join(required_files) + "."
+    print(st)
+    return False, st
+  
+  if not set(files_no_path).issubset(set(all_allowed_files)):
+    st = "Unknown files found. Allowed files: " + ', '.join(all_allowed_files) + "."
     print(st)
     return False, st
   

@@ -1,1 +1,5 @@
+<<<<<<< HEAD
 {"credit":{"dumper_link":"https://github.com/Encryqed/Dumper-7","dumper_used":"Dumper-7"},"data":[["OFFSET_GOBJECTS",214192352],["OFFSET_APPENDSTRING",20007488],["OFFSET_GNAMES",213259648],["OFFSET_GWORLD",215790704],["OFFSET_PROCESSEVENT",23046048],["INDEX_PROCESSEVENT",79]],"updated_at":"1771374018608","version":10202}
+=======
+{"credit":{"dumper_link":"https://github.com/Encryqed/Dumper-7","dumper_used":"Dumper-7"},"data":[["Dumper",7],["OFFSET_GOBJECTS",210450784],["OFFSET_APPENDSTRING",19974896],["OFFSET_GNAMES",209152632],["OFFSET_GWORLD",212061544],["OFFSET_PROCESSEVENT",23013104],["INDEX_PROCESSEVENT",79]],"updated_at":"1769095968622","version":10202}
+>>>>>>> da96d5e8f1bead627601de9861263519903f39eb
