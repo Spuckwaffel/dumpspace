@@ -1,1 +1,1 @@
-{"updated_at":"1786649647027","version":10201,"data":[["GObjects",163225968],["GNames",162294208]],"credit":{"dumper_used":"UEDumper","dumper_link":"https://github.com/Spuckwaffel/UEDumper"}}
+{"credit":{"dumper_link":"https://github.com/Encryqed/Dumper-7","dumper_used":"Dumper-7"},"data":[["Dumper",7],["OFFSET_GOBJECTS",163225968],["OFFSET_APPENDSTRING",19402288],["OFFSET_GNAMES",162065160],["OFFSET_FNAMEPOOL",162065160],["OFFSET_GWORLD",164782984],["OFFSET_PROCESSEVENT",21678064],["INDEX_PROCESSEVENT",79]],"updated_at":"1786726740160","version":10202}
