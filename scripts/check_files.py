@@ -2,6 +2,7 @@ import sys
 import os
 import json
 import re
+import secrets
 from github import Github, Auth, InputGitTreeElement
 import base64
 import hashlib
@@ -83,9 +84,14 @@ def get_content_by_name(filename):
 
 
 def write_to_env(var, value):
+  delimiter = "EOF_" + secrets.token_hex(16)
+
   with open(os.getenv('GITHUB_ENV'), "a") as myfile:
-    print(var + "=" + value, file=myfile)
-    print(var + "=" + value)
+    print(var + "<<" + delimiter, file=myfile)
+    print(value, file=myfile)
+    print(delimiter, file=myfile)
+
+  print(var + "=" + value)
 
 
 def env_comment(type, msg):
