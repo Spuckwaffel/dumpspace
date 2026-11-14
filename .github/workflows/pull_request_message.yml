@@ -15,6 +15,10 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
+          sparse-checkout: |
+            /ban_list.json
+            /scripts/
+          sparse-checkout-cone-mode: false
       - name: Greet Pull Request
         uses: actions/github-script@v8
         with:
