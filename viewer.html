@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://avatars.githubusercontent.com https://raw.githubusercontent.com; connect-src 'self' https://api.github.com https://raw.githubusercontent.com; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<script src="theme.js"></script>
+<title>Dumpspace</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Dumpspace provides game dumps for multiple games and game engines, created by the community for the community">
+<meta name="theme-color" content="#0b0b0c">
+<meta property="og:locale" content="en_US">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Dumpspace">
+<meta property="og:title" content="Dumpspace Game Dump Viewer">
+<meta property="og:description" content="Get the latest dumps of any supported game.">
+<meta property="og:url" content="https://dumpspace.spuckwaffel.com/">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="data.js" defer></script>
+<script src="shared.js" defer></script>
+<script src="diff.js" defer></script>
+<script src="property-dump.js" defer></script>
+<script src="viewer.js" defer></script>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Dumpspace</a>
+    <span class="faint" aria-hidden="true">/</span>
+    <div class="crumb" id="crumb"></div>
+
+    <button class="button palette-trigger" type="button" id="open-palette" aria-label="Go to symbol">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+      <span class="button-label">Go to symbol</span>
+      <span class="kbd" id="palette-shortcut">Ctrl K</span>
+    </button>
+
+    <button class="button" type="button" id="open-search" aria-label="Search members" title="Search members (Ctrl Shift F)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h10M4 12h6M4 18h6"></path><circle cx="16" cy="15" r="3.5"></circle><path d="M21 20l-2.5-2.5"></path></svg>
+      <span class="button-label">Search members</span>
+    </button>
+
+    <button class="button" type="button" id="open-history" aria-label="Update history">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg>
+      <span class="button-label">History</span>
+    </button>
+
+    <button class="button" type="button" id="open-dump" aria-label="Download property dump" title="Download property dump (.txt)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="M7 10l5 5 5-5"></path><path d="M5 21h14"></path></svg>
+      <span class="button-label">Dump</span>
+    </button>
+
+    <button class="icon-button theme-toggle" type="button" data-theme-toggle aria-label="Switch to light mode" title="Switch to light mode">
+      <svg class="icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+      <svg class="icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg>
+    </button>
+
+    <button class="icon-button" type="button" id="copy-link" aria-label="Copy link to this view">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"></path><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"></path></svg>
+    </button>
+  </header>
+
+  <div class="viewer">
+    <nav class="type-tabs" id="type-tabs" role="tablist" aria-label="Dump sections"></nav>
+
+    <div id="version-bar"></div>
+
+    <div class="panes">
+      <section class="pane symbols-pane" aria-label="Symbols">
+        <div class="pane-head">
+          <input class="field-input" id="symbol-filter" type="search" placeholder="Filter" autocomplete="off" spellcheck="false" aria-label="Filter symbols">
+          <div class="meta num" id="symbol-meta"></div>
+        </div>
+        <div class="symbol-list" id="symbol-list" role="listbox" tabindex="0" aria-label="Symbols">
+          <div class="symbol-rows" id="symbol-rows"></div>
+        </div>
+      </section>
+
+      <main class="pane main" id="main">
+        <div class="empty">Loading game data…</div>
+      </main>
+
+      <aside class="pane inspector-pane" aria-label="Inspector">
+        <button class="icon-button inspector-close" type="button" id="close-inspector" aria-label="Close inspector">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+        </button>
+        <div class="inspector" id="inspector"></div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<div class="palette-backdrop" id="palette" hidden>
+  <div class="palette" role="dialog" aria-label="Go to symbol">
+    <input id="palette-input" type="text" placeholder="Go to a class, struct or enum…" autocomplete="off" spellcheck="false" aria-label="Symbol name">
+    <div class="palette-results" id="palette-results" role="listbox"></div>
+    <div class="palette-footer">
+      <span><span class="kbd">↑</span> <span class="kbd">↓</span> navigate</span>
+      <span><span class="kbd">↵</span> open</span>
+      <span><span class="kbd">esc</span> close</span>
+    </div>
+  </div>
+</div>
+
+<div class="palette-backdrop" id="global-search" hidden>
+  <div class="palette search-panel" role="dialog" aria-label="Search members">
+    <input id="global-search-input" type="text" placeholder="Search fields, functions and enum values…" autocomplete="off" spellcheck="false" aria-label="Search members">
+    <div class="search-options">
+      <div class="segmented" role="group" aria-label="Match on">
+        <button type="button" data-search-mode="name" aria-pressed="true">Name</button>
+        <button type="button" data-search-mode="type" aria-pressed="false">Type</button>
+      </div>
+      <label class="check"><input type="checkbox" data-search-section="classes" checked> Classes</label>
+      <label class="check"><input type="checkbox" data-search-section="structs" checked> Structs</label>
+      <label class="check"><input type="checkbox" data-search-section="functions"> Functions</label>
+      <label class="check"><input type="checkbox" data-search-section="enums" checked> Enums</label>
+      <label class="check"><input type="checkbox" id="search-parameters" disabled> Function parameters</label>
+    </div>
+    <div class="palette-results search-results" id="global-search-results" role="listbox"></div>
+    <div class="palette-footer">
+      <span><span class="kbd">↑</span> <span class="kbd">↓</span> navigate</span>
+      <span><span class="kbd">↵</span> open</span>
+      <span><span class="kbd">esc</span> close</span>
+      <span id="global-search-status" class="search-status"></span>
+    </div>
+  </div>
+</div>
+
+<div class="drawer-backdrop" id="history" hidden>
+  <aside class="drawer" role="dialog" aria-labelledby="history-title">
+    <div class="drawer-head">
+      <div>
+        <h2 id="history-title">Update history</h2>
+        <p class="faint" id="history-subtitle"></p>
+      </div>
+      <button class="icon-button" type="button" id="close-history" aria-label="Close">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+      </button>
+    </div>
+    <div class="drawer-body" id="history-list"></div>
+  </aside>
+</div>
+
+<div class="drawer-backdrop" id="dump-drawer" hidden>
+  <aside class="drawer" role="dialog" aria-labelledby="dump-title">
+    <div class="drawer-head">
+      <div>
+        <h2 id="dump-title">Property dump</h2>
+        <p class="faint" id="dump-subtitle"></p>
+      </div>
+      <button class="icon-button" type="button" id="close-dump" aria-label="Close">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+      </button>
+    </div>
+    <div class="drawer-body" id="dump-body"></div>
+  </aside>
+</div>
+</body>
+</html>
